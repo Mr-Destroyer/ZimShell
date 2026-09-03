@@ -1,0 +1,151 @@
+{
+  "category": "kinetic-type",
+  "duration_s": 6,
+  "fps": 30,
+  "canvas": { "w": 1920, "h": 1080, "aspect": "16:9" },
+  "style": "Dark terminal HUD — near-black void, phosphor-green typed text, faint horizontal scanlines, blinking block cursor. CLI boot-up energy: lines appear as if typed into a root shell. Premium and legible, not chaotic. The cursor and green glow carry the hacker mood; the typography carries the brand.",
+  "palette": ["#0a0a0a", "#00ff88", "#00cc6a", "#ff2244", "#1a1a1a"],
+  "font": "JetBrains Mono",
+  "beats": [42, 90, 150],
+  "export": "mp4",
+  "asset_needs": [],
+
+  "block": "code-typing",
+  "customize": {
+    "lines": ["> zim@zimshell:~$ ./intro", "> initializing secure channel..."],
+    "theme": {
+      "bg": "#0a0a0a",
+      "text": "#00ff88",
+      "accent": "#00cc6a",
+      "error": "#ff2244",
+      "font": "JetBrains Mono",
+      "fontSize": "48px",
+      "glow": "0 0 12px #00ff88, 0 0 4px #00cc6a"
+    },
+    "cursor": {
+      "color": "#00ff88",
+      "style": "block",
+      "blink": "0.5s"
+    },
+    "scanlines": {
+      "opacity": 0.06,
+      "gap": "4px",
+      "color": "#00ff88"
+    }
+  },
+
+  "hand_author": [
+    "data-stream scene (progress bar wipe + red flash + micro-shake — no catalog block covers block-character progress bars with mid-bar colour flash)",
+    "HUD polish overlays (grain-overlay component, vignette component — add as composition layers; referenced from catalog but not assigned to a scene block)"
+  ],
+
+  "content": {
+    "scenes": [
+      {
+        "id": "boot-prompt",
+        "block": "code-typing",
+        "start": 0,
+        "end": 1.8,
+        "text": "> zim@zimshell:~$ ./intro",
+        "emphasis_words": ["zim@zimshell"],
+        "emotion": "cold, precise, anticipatory",
+        "motion": "Token-streamed typing reveal via code-typing block: characters appear one-by-one at ~40ms intervals; green block caret tracks the frontier; faint green text-shadow glow on each char as it lands. Position: centered vertically, left-third horizontal. Scale: 48px, JetBrains Mono.",
+        "beats": [],
+        "customize": {
+          "line": "> zim@zimshell:~$ ./intro",
+          "typingSpeed_ms": 40,
+          "caretStyle": "block",
+          "glow": "0 0 12px #00ff88",
+          "position": { "x": "left-third", "y": "center" }
+        }
+      },
+      {
+        "id": "init-status",
+        "block": "code-typing",
+        "start": 1.8,
+        "end": 3.3,
+        "text": "> initializing secure channel...",
+        "emphasis_words": ["secure channel"],
+        "emotion": "building tension, something is loading",
+        "motion": "Typewriter continues via code-typing block; trailing ellipsis pulses (opacity 1 to 0.3 to 1, 0.4s cycle) suggesting active process. Text sits one line below boot-prompt, slightly smaller (40px) to read as sub-output. Ellipsis pulse: CSS opacity keyframes, not GSAP — seek-safe.",
+        "beats": [],
+        "customize": {
+          "line": "> initializing secure channel...",
+          "typingSpeed_ms": 40,
+          "fontSize": "40px",
+          "offset": { "x": 0, "y": 60 },
+          "ellipsisPulse": {
+            "duration": "0.4s",
+            "minOpacity": 0.3
+          },
+          "glow": "0 0 12px #00ff88"
+        }
+      },
+      {
+        "id": "data-stream",
+        "block": null,
+        "hand_author": true,
+        "hand_author_reason": "No catalog block covers a block-character progress bar with mid-bar colour flash and micro-shake. Build as a custom .clip scene: bar composed of span characters, GSAP clip-path or width tween left-to-right, red (#ff2244) flash on percentage at beat 42, micro-shake keyframes on 100% snap.",
+        "start": 3.3,
+        "end": 4.2,
+        "text": "████████████████████░░░░  78%",
+        "emphasis_words": [],
+        "emotion": "urgency, data rushing across the screen",
+        "motion": "Rapid horizontal wipe left-to-right revealing a block-character progress bar (span-per-character, width tween or clip-path from 0 to 100%). Bar fills to 78% smoothly over 0.5s, then snaps to 100% with a micro-shake (GSAP keyframes: x: -9, 9, 0). Red (#ff2244) flash on the percentage number at beat frame 42. Characters: █ U+2588, ░ U+2591. Font: JetBrains Mono 42px.",
+        "beats": [42],
+        "customize": {
+          "fullChar": "█",
+          "emptyChar": "░",
+          "totalBlocks": 24,
+          "fillTo": 0.78,
+          "fillDuration_s": 0.5,
+          "snapDuration_s": 0.1,
+          "flashColor": "#ff2244",
+          "flashTarget": "percentage",
+          "shakeKeyframes": [{ "x": -9 }, { "x": 9 }, { "x": 0 }],
+          "position": { "x": "center", "y": "center" },
+          "fontSize": "42px",
+          "textColor": "#00ff88",
+          "bg": "#0a0a0a"
+        }
+      },
+      {
+        "id": "hero-lock",
+        "block": "caption-glitch-rgb",
+        "start": 4.2,
+        "end": 6.0,
+        "text": "ZIM SHELL",
+        "emphasis_words": ["ZIM", "SHELL"],
+        "emotion": "arrival, authority, brand reveal",
+        "motion": "RGB-split glitch-in via caption-glitch-rgb block: text flickers through offset red/green/blue channel layers with CRT scanline overlay, resolving into clean white-on-green after ~0.4s. The two words slam in from above (GSAP from y:-300, power4.out) with a subtle screen shake on land. Holds center-frame with a slow green glow pulse on text-shadow (GSAP to textShadow 0 0 46px #00ff88, yoyo, repeat 1, sine.inOut) for the remaining duration. Block cursor blinks steadily right of the lockup.",
+        "beats": [150],
+        "customize": {
+          "text": "ZIM SHELL",
+          "fontSize": "120px",
+          "fontWeight": 900,
+          "fontFamily": "JetBrains Mono",
+          "glitchDuration_s": 0.4,
+          "rgbOffset_px": 6,
+          "scanlineOpacity": 0.08,
+          "resolvesTo": {
+            "color": "#00ff88",
+            "textShadow": "0 0 46px #00ff88, 0 0 12px #00cc6a"
+          },
+          "entrance": {
+            "from": { "y": -300, "opacity": 0 },
+            "ease": "power4.out",
+            "onLand": "micro-shake"
+          },
+          "glowPulse": {
+            "textShadow": "0 0 46px #00ff88",
+            "yoyo": true,
+            "repeat": 1,
+            "ease": "sine.inOut",
+            "startFrame": 150
+          },
+          "position": { "x": "center", "y": "center" }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>ZIM SHELL Intro</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@master/fonts/webfonts/JetBrainsMono-Regular.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@master/fonts/webfonts/JetBrainsMono-Bold.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "JetBrains Mono";
+        src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@master/fonts/webfonts/JetBrainsMono-ExtraBold.woff2") format("woff2");
+        font-weight: 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* ---- palette (single source, no inline hex on elements) ---- */
+      :root {
+        --bg: #0a0a0a;
+        --phosphor: #00ff88;
+        --muted: #00cc6a;
+        --red: #ff2244;
+        --panel: #1a1a1a;
+        --font: "JetBrains Mono", monospace;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--bg); }
+
+      /* ---- root stage (sized — required) ---- */
+      #stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        font-family: var(--font);
+        background: var(--bg);
+      }
+
+      /* ---- shared clip ---- */
+      .clip {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+      }
+
+      /* ================================================================
+         SCENE 1+2: BOOT PROMPT + INIT STATUS (code-typing reuse)
+         ================================================================ */
+      #boot-prompt {
+        z-index: 1;
+        background: var(--bg);
+      }
+      #boot-prompt .scanlines {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 3px,
+          rgba(0, 255, 136, 0.06) 3px,
+          rgba(0, 255, 136, 0.06) 4px
+        );
+        pointer-events: none;
+        z-index: 5;
+      }
+      #boot-prompt .terminal-lines {
+        position: absolute;
+        left: 240px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+      }
+      .terminal-line {
+        display: flex;
+        align-items: center;
+        min-height: 52px;
+        white-space: nowrap;
+      }
+      .terminal-line .char {
+        display: inline-block;
+        opacity: 0;
+        color: var(--phosphor);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.35), 0 0 2px rgba(0, 204, 106, 0.4);
+      }
+      .terminal-line .char.em {
+        font-weight: 700;
+      }
+      .block-cursor {
+        display: inline-block;
+        width: 14px;
+        height: 28px;
+        background: var(--phosphor);
+        box-shadow: 0 0 8px var(--phosphor);
+        margin-left: 2px;
+        vertical-align: middle;
+      }
+      /* ellipsis pulse — CSS keyframes (drives off system clock within render) */
+      @keyframes ellipsisPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+      .ellipsis-pulse {
+        animation: ellipsisPulse 0.4s ease-in-out infinite;
+      }
+
+      /* ================================================================
+         SCENE 3: DATA STREAM — progress bar (hand-authored)
+         ================================================================ */
+      #data-stream {
+        z-index: 2;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #data-stream .bar-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      .bar-text {
+        display: flex;
+        letter-spacing: 2px;
+        font-size: 42px;
+        color: var(--phosphor);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.35), 0 0 2px rgba(0, 204, 106, 0.4);
+      }
+      .bar-text .filled {
+        color: var(--phosphor);
+      }
+      .bar-text .empty {
+        color: rgba(0, 255, 136, 0.18);
+      }
+      .bar-pct {
+        font-size: 42px;
+        font-weight: 700;
+        color: var(--phosphor);
+        text-shadow: 0 0 8px rgba(0, 255, 136, 0.35), 0 0 2px rgba(0, 204, 106, 0.4);
+        min-width: 72px;
+        text-align: right;
+        opacity: 0;
+      }
+
+      /* ================================================================
+         SCENE 4: HERO LOCK — caption-glitch-rgb reuse (hand-authored)
+         ================================================================ */
+      #hero-lock {
+        z-index: 3;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #hero-lock .hero-scanlines {
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          transparent 0px,
+          transparent 3px,
+          rgba(0, 255, 136, 0.08) 3px,
+          rgba(0, 255, 136, 0.08) 4px
+        );
+        pointer-events: none;
+        z-index: 5;
+        opacity: 0.55;
+      }
+      #hero-lock .hero-group {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 0;
+      }
+      .hero-word {
+        font-family: var(--font);
+        font-weight: 900;
+        font-size: 120px;
+        color: var(--phosphor);
+        letter-spacing: 0.05em;
+        line-height: 1;
+        text-shadow: 0 5px 30px rgba(0,0,0,0.5);
+        white-space: nowrap;
+        position: relative;
+        will-change: transform, text-shadow, opacity;
+      }
+      .hero-word.r {
+        color: var(--red);
+        mix-blend-mode: screen;
+        position: absolute;
+        inset: 0;
+      }
+      .hero-word.g {
+        color: var(--phosphor);
+        mix-blend-mode: screen;
+        position: absolute;
+        inset: 0;
+      }
+      .hero-word.b {
+        color: #3388ff;
+        mix-blend-mode: screen;
+        position: absolute;
+        inset: 0;
+      }
+      .hero-word.rgb-base {
+        position: relative;
+        color: var(--phosphor);
+        mix-blend-mode: normal;
+      }
+      .hero-cursor {
+        display: inline-block;
+        width: 8px;
+        height: 90px;
+        background: var(--phosphor);
+        box-shadow: 0 0 10px var(--phosphor);
+        margin-left: 16px;
+        vertical-align: middle;
+        opacity: 0;
+      }
+      @keyframes cursorBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+      }
+      .hero-cursor.blinking {
+        animation: cursorBlink 0.53s step-end infinite;
+        opacity: 1;
+      }
+
+      /* ================================================================
+         OVERLAYS: grain + vignette (full-composition polish layers)
+         ================================================================ */
+      #grain-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        pointer-events: none;
+        opacity: 0.055;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+        background-size: 200px 200px;
+      }
+      #vignette {
+        position: absolute;
+        inset: 0;
+        z-index: 101;
+        pointer-events: none;
+        background: radial-gradient(
+          ellipse at center,
+          transparent 55%,
+          rgba(0,0,0,0.7) 100%
+        );
+      }
+    </style>
+  </head>
+  <body>
+    <div id="stage"
+         data-composition-id="zimshell-intro"
+         data-start="0"
+         data-duration="6"
+         data-fps="30"
+         data-width="1920"
+         data-height="1080">
+
+      <!-- SCENE 1+2: boot-prompt + init-status (code-typing block reuse) -->
+      <div id="boot-prompt" class="clip"
+           data-start="0" data-duration="3.3" data-track-index="0">
+        <div class="scanlines"></div>
+        <div class="terminal-lines" data-layout-allow-occlusion>
+          <div class="terminal-line" id="line1"></div>
+          <div class="terminal-line" id="line2" style="margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <!-- SCENE 3: data-stream (hand-authored — no catalog block covers this) -->
+      <div id="data-stream" class="clip"
+           data-start="3.3" data-duration="0.9" data-track-index="1">
+        <div class="bar-wrapper" id="bar-wrapper" data-layout-allow-occlusion>
+          <div class="bar-text" id="bar-text"></div>
+          <div class="bar-pct" id="bar-pct">0%</div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: hero-lock (caption-glitch-rgb block reuse) -->
+      <div id="hero-lock" class="clip"
+           data-start="4.2" data-duration="1.8" data-track-index="2">
+        <div class="hero-scanlines"></div>
+        <div class="hero-group" id="hero-group" data-layout-allow-occlusion>
+          <span class="hero-word rgb-base" id="hero-text">ZIM SHELL</span>
+          <span class="hero-word r" id="hero-r" data-layout-allow-overlap aria-hidden="true">ZIM SHELL</span>
+          <span class="hero-word g" id="hero-g" data-layout-allow-overlap aria-hidden="true">ZIM SHELL</span>
+          <span class="hero-word b" id="hero-b" data-layout-allow-overlap aria-hidden="true">ZIM SHELL</span>
+          <span class="hero-cursor" id="hero-cursor"></span>
+        </div>
+      </div>
+
+      <!-- OVERLAYS (hand-authored — catalog grain-overlay / vignette concept) -->
+      <div id="grain-overlay" data-layout-allow-occlusion></div>
+      <div id="vignette" data-layout-allow-occlusion></div>
+    </div>
+
+    <script>
+    (function () {
+      "use strict";
+
+      /* ================================================================
+         TIMELINE — ONE paused GSAP timeline, deterministic, seek(0)
+         ================================================================ */
+      window.__timelines = window.__timelines || {};
+      var tl = gsap.timeline({ paused: true });
+
+      /* ---- DOM refs ---- */
+      var line1      = document.getElementById("line1");
+      var line2      = document.getElementById("line2");
+      var heroGroup  = document.getElementById("hero-group");
+      var heroBase   = document.getElementById("hero-text");
+      var heroR      = document.getElementById("hero-r");
+      var heroG      = document.getElementById("hero-g");
+      var heroB      = document.getElementById("hero-b");
+      var heroCur    = document.getElementById("hero-cursor");
+      var barWrapper = document.getElementById("bar-wrapper");
+      var barTextEl  = document.getElementById("bar-text");
+      var barPctEl   = document.getElementById("bar-pct");
+      var RGB_OFFSET = 6;
+
+      /* ================================================================
+         FRAME-0 INITIAL STATES (gsap.set — immediate, outside timeline)
+         ================================================================ */
+      gsap.set(line1,     { opacity: 0 });
+      gsap.set(line2,     { opacity: 0 });
+      gsap.set(barWrapper, { opacity: 0 });
+      gsap.set(barPctEl,   { opacity: 0 });
+      gsap.set(heroGroup,  { opacity: 0, visibility: "hidden" });
+      gsap.set(heroR, { x:  RGB_OFFSET, y: -2, opacity: 0.7 });
+      gsap.set(heroG, { x: -RGB_OFFSET, y:  2, opacity: 0.7 });
+      gsap.set(heroB, { x: 0,           y:  RGB_OFFSET, opacity: 0.7 });
+
+      /* ---- helper: per-char span builder ---- */
+      function buildChars(container, text, emphasisWords) {
+        var chars = [];
+        for (var i = 0; i < text.length; i++) {
+          var span = document.createElement("span");
+          span.className = "char";
+          span.textContent = text[i];
+          if (emphasisWords) {
+            for (var e = 0; e < emphasisWords.length; e++) {
+              var idx = text.indexOf(emphasisWords[e]);
+              if (idx !== -1 && i >= idx && i < idx + emphasisWords[e].length) {
+                span.classList.add("em");
+              }
+            }
+          }
+          container.appendChild(span);
+          chars.push(span);
+        }
+        return chars;
+      }
+
+      /* ================================================================
+         SCENE 1+2: BOOT PROMPT + INIT STATUS
+         Combined clip [0, 3.3], two lines typed sequentially at 40ms/char
+         ================================================================ */
+      var line1Text = "> zim@zimshell:~$ ./intro";
+      var line2Text = "> initializing secure channel...";
+      var chars1 = buildChars(line1, line1Text, ["zim@zimshell"]);
+      var chars2 = buildChars(line2, line2Text, ["secure channel"]);
+
+      // cursor1 (line1 block caret)
+      var cursor1 = document.createElement("span");
+      cursor1.className = "block-cursor";
+      line1.appendChild(cursor1);
+
+      // cursor2 (line2 block caret)
+      var cursor2 = document.createElement("span");
+      cursor2.className = "block-cursor";
+      gsap.set(cursor2, { opacity: 0 });
+      line2.appendChild(cursor2);
+
+      var CHAR_MS     = 0.04;          // 40 ms per character
+      var LINE1_T0    = 0.15;          // line1 types from t=0.15s
+      var LINE2_START = 1.8;
+      var LINE2_T0    = LINE2_START + 0.05;
+
+      // line1 fade in
+      tl.to(line1, { opacity: 1, duration: 0.12, ease: "power1.out" }, 0);
+
+      // type line1 chars
+      for (var i = 0; i < line1Text.length; i++) {
+        (function(span, t) {
+          tl.to(span, { opacity: 1, duration: 0.08, ease: "none" }, t);
+        })(chars1[i], LINE1_T0 + i * CHAR_MS);
+      }
+
+      // cursor1: visible throughout line1, hidden at line2 start
+      tl.set(cursor1, { opacity: 0 }, LINE2_START);
+
+      // line2 fade in + cursor2 show
+      tl.to(line2,   { opacity: 1, duration: 0.08, ease: "none" }, LINE2_START);
+      tl.to(cursor2, { opacity: 1, duration: 0.08, ease: "none" }, LINE2_START);
+
+      // type line2 chars
+      for (var j = 0; j < line2Text.length; j++) {
+        (function(span, t) {
+          tl.to(span, { opacity: 1, duration: 0.08, ease: "none" }, t);
+        })(chars2[j], LINE2_T0 + j * CHAR_MS);
+      }
+
+      /* ================================================================
+         SCENE 3: DATA STREAM — hand-authored progress bar
+         Clip [3.3, 4.2]; timeline positions are GLOBAL (3.3 + scene-local)
+         24 block-chars, fill to 78% in 0.5s, snap to 100% + micro-shake,
+         red flash on percentage at local 0.7s (global 4.0s)
+         ================================================================ */
+      var DATA_OFFSET = 3.3;
+      var TOTAL_BLOCKS = 24;
+      var FILL_TARGET  = 0.78;
+      var FILL_BLOCKS  = Math.round(TOTAL_BLOCKS * FILL_TARGET); // 19
+      var FILL_DUR     = 0.5;
+      var SNAP_DUR     = 0.1;
+      var SHAKE_AT     = FILL_DUR + SNAP_DUR;
+      var FLASH_AT     = 0.7;  // scene-local red-flash time
+
+      // build bar chars
+      for (var k = 0; k < TOTAL_BLOCKS; k++) {
+        var barSpan = document.createElement("span");
+        barSpan.className = k < FILL_BLOCKS ? "filled" : "empty";
+        barSpan.textContent = k < FILL_BLOCKS ? "█" : "░"; // █ / ░
+        barTextEl.appendChild(barSpan);
+      }
+
+      // show wrapper + pct
+      tl.to(barWrapper, { opacity: 1, duration: 0.08, ease: "none" }, DATA_OFFSET);
+      tl.to(barPctEl,   { opacity: 1, duration: 0.08, ease: "none" }, DATA_OFFSET);
+
+      // clip-path wipe: 0 → 78%
+      tl.set(barTextEl, { clipPath: "inset(0 100% 0 0)" }, DATA_OFFSET);
+      tl.to(barTextEl, {
+        clipPath: "inset(0 22% 0 0)",     // 100% - 78% = 22% inset
+        duration: FILL_DUR,
+        ease: "power2.inOut"
+      }, DATA_OFFSET);
+
+      // snap to 100%
+      tl.to(barTextEl, {
+        clipPath: "inset(0 0% 0 0)",
+        duration: SNAP_DUR,
+        ease: "none"
+      }, DATA_OFFSET + FILL_DUR);
+
+      // micro-shake on 100% snap
+      tl.to(barTextEl, {
+        keyframes: [{ x: -9 }, { x: 9 }, { x: 0 }],
+        duration: 0.18,
+        ease: "none"
+      }, DATA_OFFSET + SHAKE_AT - 0.05);
+
+      // percentage count-up (proxy → seek-safe via onUpdate)
+      var pctProxy = { val: 0 };
+      tl.to(pctProxy, {
+        val: 78,
+        duration: FILL_DUR + SNAP_DUR,
+        ease: "power2.out",
+        onUpdate: function () {
+          barPctEl.textContent = Math.round(pctProxy.val) + "%";
+        }
+      }, DATA_OFFSET);
+
+      // snap pct to 100
+      tl.to(pctProxy, {
+        val: 100,
+        duration: 0.05,
+        ease: "none",
+        onUpdate: function () {
+          barPctEl.textContent = Math.round(pctProxy.val) + "%";
+        }
+      }, DATA_OFFSET + FILL_DUR + SNAP_DUR);
+
+      // red flash on pct at local 0.7s (global 4.0s)
+      tl.to(barPctEl, {
+        color: "var(--red)",
+        textShadow: "0 0 16px var(--red), 0 0 4px var(--red)",
+        duration: 0.12,
+        ease: "power2.in"
+      }, DATA_OFFSET + FLASH_AT);
+      tl.to(barPctEl, {
+        color: "var(--phosphor)",
+        textShadow: "0 0 12px var(--phosphor)",
+        duration: 0.2,
+        ease: "power2.out"
+      }, DATA_OFFSET + FLASH_AT + 0.12);
+
+      /* ================================================================
+         SCENE 4: HERO LOCK — caption-glitch-rgb reuse
+         Clip [4.2, 6.0]; timeline positions are GLOBAL (4.2 + scene-local)
+         Slam entrance + RGB glitch resolve + green glow pulse
+         ================================================================ */
+      var HERO_OFFSET = 4.2;
+
+      // entrance: slam from y:-300 (includes visibility + opacity — no overlap)
+      tl.fromTo(heroGroup,
+        { y: -300, opacity: 0, visibility: "hidden" },
+        { y: 0, opacity: 1, visibility: "visible", duration: 0.25, ease: "power4.out" },
+        HERO_OFFSET
+      );
+
+      // micro-shake on land
+      tl.to(heroGroup, {
+        keyframes: [{ x: -6 }, { x: 6 }, { x: 0 }],
+        duration: 0.14,
+        ease: "none"
+      }, HERO_OFFSET + 0.25);
+
+      // RGB resolve (channels drift to origin + fade out over 0.4s)
+      tl.to(heroR, { x: 0, y: 0, opacity: 0, duration: 0.4, ease: "power2.out" }, HERO_OFFSET);
+      tl.to(heroG, { x: 0, y: 0, opacity: 0, duration: 0.4, ease: "power2.out" }, HERO_OFFSET);
+      tl.to(heroB, { x: 0, y: 0, opacity: 0, duration: 0.4, ease: "power2.out" }, HERO_OFFSET);
+
+      // RGB after-flickers (non-overlapping, after resolve at local 0.4s)
+      tl.to(heroR, { x: 4, opacity: 0.4, duration: 0.03, ease: "none" }, HERO_OFFSET + 0.42);
+      tl.to(heroR, { x: 0, opacity: 0,   duration: 0.05, ease: "power2.out" }, HERO_OFFSET + 0.45);
+      tl.to(heroR, { x: -3, opacity: 0.3, duration: 0.03, ease: "none" }, HERO_OFFSET + 0.52);
+      tl.to(heroR, { x: 0, opacity: 0,   duration: 0.05, ease: "power2.out" }, HERO_OFFSET + 0.55);
+
+      // green glow pulse (from beat 150 = 5.0s comp = 0.8s local)
+      tl.to(heroBase, {
+        textShadow: "0 0 20px rgba(0, 255, 136, 0.5), 0 0 6px rgba(0, 204, 106, 0.5)",
+        duration: 0.5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: 1
+      }, HERO_OFFSET + 0.8);
+
+      // hero cursor: show after entrance, start blink
+      tl.to(heroCur, {
+        opacity: 1,
+        duration: 0.08,
+        ease: "none",
+        onComplete: function () {
+          heroCur.classList.add("blinking");
+        }
+      }, HERO_OFFSET + 0.35);
+
+      /* ---- pad timeline to full 6s ---- */
+      tl.to({}, { duration: 6 }, 0);
+
+      /* ---- seek(0) per HF contract ---- */
+      tl.seek(0);
+
+      /* ---- register ---- */
+      window.__timelines["zimshell-intro"] = tl;
+    })();
+    </script>
+  </body>
+</html>

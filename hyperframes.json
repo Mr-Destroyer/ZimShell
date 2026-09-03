@@ -1,0 +1,24 @@
+{
+  "$schema": "https://hyperframes.heygen.com/schema/hyperframes.json",
+  "registry": "https://raw.githubusercontent.com/heygen-com/hyperframes/main/registry",
+  "paths": {
+    "blocks": "compositions",
+    "components": "compositions/components",
+    "assets": "assets"
+  },
+  "media": {
+    "autoProxy": true
+  },
+  "registryItems": [
+    {
+      "name": "code-typing",
+      "type": "hyperframes:block",
+      "target": "compositions/code-typing.html"
+    },
+    {
+      "name": "caption-glitch-rgb",
+      "type": "hyperframes:component",
+      "target": "compositions/components/caption-glitch-rgb.html"
+    }
+  ]
+}
