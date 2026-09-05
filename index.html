@@ -347,9 +347,154 @@ footer .flinks a:hover{color:var(--gold);}
   .ticker-track{animation:none;}
   .rv{opacity:1;}
 }
+/* ============================================================
+   SENTRY HERO STATION · v2 (PoC)
+   layered parallax · kinetic type · live terminal · spotlight
+   ============================================================ */
+
+/* ---- cinema overlays (grain / scanlines / vignette) ---- */
+.cinema{position:fixed;inset:0;pointer-events:none;z-index:900;}
+.cinema.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;}
+.cinema.vig{background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(2,4,10,.6) 100%);}
+.cinema.tone{box-shadow:inset 0 0 22vmin rgba(59,130,246,.05);}
+
+/* ---- hero station layout ---- */
+.hero{isolation:isolate;}
+.hero-inner{position:relative;z-index:4;display:grid;grid-template-columns:1.06fr .94fr;gap:52px;align-items:center;text-align:left;width:100%;}
+.hero-left{position:relative;z-index:3;min-width:0;}
+.hero-right{position:relative;z-index:3;min-width:0;display:flex;align-items:center;justify-content:flex-end;}
+.hero .scroll-cue{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;margin-top:0;}
+
+/* ---- cursor spotlight ---- */
+.hero-spot{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(640px circle at var(--mx,50%) var(--my,40%),rgba(255,201,60,.12),rgba(59,130,246,.05) 42%,transparent 66%);}
+
+/* ---- HUD corner brackets ---- */
+.hero-corner{position:absolute;width:46px;height:46px;z-index:2;pointer-events:none;opacity:.65;}
+.hero-corner.hl{top:118px;left:16px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);}
+
+/* ---- holographic data floor ---- */
+.data-floor{position:absolute;left:-35%;right:-35%;bottom:-10%;height:54%;z-index:1;pointer-events:none;
+  transform:perspective(620px) rotateX(60deg);transform-origin:center bottom;
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(255,201,60,.16),transparent 62%),
+    repeating-linear-gradient(90deg,rgba(59,130,246,.10) 0 1px,transparent 1px 72px),
+    repeating-linear-gradient(0deg,rgba(59,130,246,.07) 0 1px,transparent 1px 72px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 22%);
+   mask-image:linear-gradient(180deg,transparent,#000 22%);}
+.data-floor::after{content:"";position:absolute;left:0;right:0;top:-120px;height:140px;
+  background:linear-gradient(180deg,transparent,rgba(255,201,60,.15),transparent);
+  animation:floorsweep 5.5s linear infinite;}
+@keyframes floorsweep{0%{transform:translateY(0);}100%{transform:translateY(130vh);}}
+
+/* ---- mission stamp ---- */
+.stamp{display:inline-flex;gap:8px;align-items:center;margin:0 0 14px;padding:5px 12px;
+  border:1px dashed rgba(255,201,60,.35);border-radius:4px;font-family:var(--mono);
+  font-size:10px;letter-spacing:2.5px;color:var(--muted);background:rgba(4,6,13,.45);}
+.stamp::before{content:"◈";color:var(--gold);}
+
+/* ---- kinetic title ---- */
+.hero-left .eyebrow{margin-bottom:16px;}
+.kinetic-title{position:relative;display:inline-block;letter-spacing:calc(3px + var(--sv,0px));transition:letter-spacing .2s;}
+.kinetic-title .kt-letter{display:inline-block;will-change:transform,opacity;}
+.kinetic-title::before,.kinetic-title::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;}
+.kinetic-title::before{color:#FF3B5C;transform:translate(3px,1px);}
+.kinetic-title::after{color:var(--cape);transform:translate(-3px,-1px);}
+.kinetic-title:hover::before,.kinetic-title:hover::after{opacity:.45;}
+.kinetic-title:active::before,.kinetic-title:active::after{opacity:.85;}
+@media(hover:none){.kinetic-title::before,.kinetic-title::after{display:none;}}
+
+/* ---- role / lead alignment ---- */
+.hero-left .role{letter-spacing:4px;}
+.hero-left p.lead{margin-left:0;}
+.hero-left .role .handle{color:var(--gold);letter-spacing:2px;}
+
+/* ---- magnetic buttons ---- */
+.btn.magnetic{transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .25s,border-color .25s;}
+.btn.magnetic i{font-style:normal;font-size:13px;transition:transform .22s;}
+.btn.magnetic:hover i{transform:translateX(3px);}
+
+/* ============ LIVE TERMINAL ============ */
+.term{position:relative;width:min(100%,560px);background:linear-gradient(180deg,rgba(11,18,38,.92),rgba(4,6,13,.97));
+  border:1px solid rgba(255,201,60,.28);border-radius:14px;
+  box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 46px rgba(255,201,60,.07),inset 0 1px 0 rgba(255,255,255,.05);
+  overflow:hidden;transition:border-color .3s,box-shadow .3s;}
+.term:hover{border-color:rgba(255,201,60,.55);box-shadow:0 34px 100px rgba(0,0,0,.6),0 0 70px rgba(255,201,60,.16);}
+.term::after{content:"";position:absolute;left:0;right:0;height:90px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(59,130,246,.05),transparent);
+  animation:termscan 4.5s linear infinite;}
+@keyframes termscan{0%{top:-20%;}100%{top:110%;}}
+.term-head{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-bottom:1px solid rgba(255,201,60,.14);background:rgba(4,6,13,.66);}
+.term-lights{display:flex;gap:7px;}
+.term-lights i{width:11px;height:11px;border-radius:50%;display:block;}
+.term-lights i:nth-child(1){background:#FF5F57;}
+.term-lights i:nth-child(2){background:#FEBC2E;}
+.term-lights i:nth-child(3){background:#28C840;}
+.term-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.term-ctrl{margin-left:auto;display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.term-tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);
+  border:1px solid rgba(255,201,60,.35);padding:2px 9px;border-radius:999px;animation:tpulse 2.2s ease-in-out infinite;}
+@keyframes tpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,201,60,.35);}50%{box-shadow:0 0 12px 2px rgba(255,201,60,.14);}}
+.term-sfx{background:transparent;border:1px solid rgba(245,241,230,.18);color:var(--muted);font-family:var(--mono);
+  font-size:8px;font-weight:600;letter-spacing:1.5px;padding:2px 8px;border-radius:999px;cursor:pointer;transition:all .2s;}
+.term-sfx:hover{color:var(--gold);border-color:var(--gold);}
+.term-sfx.on{color:#6EE7A0;border-color:rgba(110,231,160,.5);}
+.term-screen{padding:14px 16px 12px;min-height:300px;max-height:430px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;position:relative;}
+.term-body{font-family:var(--mono);font-size:12.5px;line-height:1.7;overflow-y:auto;overflow-x:hidden;max-height:340px;scrollbar-width:thin;}
+.term-body::-webkit-scrollbar{width:5px;}
+.term-body::-webkit-scrollbar-thumb{background:rgba(255,201,60,.3);border-radius:3px;}
+.tline{white-space:pre-wrap;word-break:break-word;}
+.tline.tc{margin-top:6px;}
+.t-ok{color:#6EE7A0;}
+.t-warn{color:var(--gold);}
+.t-err{color:#FF5F57;}
+.t-info{color:#8FB3FF;}
+.t-dim{color:var(--muted);}
+.t-gold{color:var(--gold-soft);}
+.t-out{color:#C9CFD9;}
+.t-head{color:var(--gold);font-weight:700;letter-spacing:1px;}
+.term-inputline{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--mono);font-size:12.5px;}
+.term-prompt{color:var(--gold);white-space:nowrap;}
+#termInput{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-family:var(--mono);font-size:12.5px;min-width:0;padding:2px 0;caret-color:var(--gold);}
+#termInput::placeholder{color:rgba(154,163,178,.45);}
+.term-cursor{display:none;width:7px;height:14px;background:var(--gold);flex-shrink:0;animation:termblink 1.06s step-end infinite;}
+.term.ready .term-cursor{display:inline-block;}
+@keyframes termblink{50%{opacity:0;}}
+.term-foot{padding:8px 14px;border-top:1px solid rgba(255,201,60,.1);background:rgba(4,6,13,.6);position:relative;z-index:2;}
+.term-hint{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.term-hint b{color:var(--gold);font-weight:500;}
+.term-glow{position:absolute;inset:-4px;z-index:-1;pointer-events:none;
+  background:radial-gradient(60% 80% at 70% 40%,rgba(59,130,246,.22),transparent 60%);filter:blur(20px);}
+
+/* system mem bar */
+.mem{display:flex;justify-content:space-between;gap:14px;margin-top:18px;padding:8px 12px;border:1px solid rgba(255,201,60,.14);
+  border-radius:8px;background:rgba(4,6,13,.5);font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;color:var(--muted);}
+.mem b{color:var(--gold);font-weight:600;}
+
+/* ---- hero station responsive ---- */
+@media(max-width:1000px){
+  .hero-inner{grid-template-columns:1fr;gap:38px;}
+  .hero-right{justify-content:stretch;}
+  .term{width:100%;}
+  .hero .scroll-cue{display:none;}
+  .hero{padding:150px 0 90px;}
+}
+@media(hover:none){.hero-spot{display:none;}}
+
+/* ---- hero station reduced-motion ---- */
+@media(prefers-reduced-motion:reduce){
+  .cinema,.hero-spot,.hero-corner,.data-floor,.data-floor::after,.term::after,.term-glow,.term-tag,.hero-spot{display:none!important;}
+  .kinetic-title::before,.kinetic-title::after{display:none;}
+  .kinetic-title{letter-spacing:3px;transition:none;}
+  .term{width:min(100%,560px);}
+  .term-screen{min-height:260px;}
+}
 </style>
 </head>
 <body>
+<div class="cinema scan" aria-hidden="true"></div>
+<div class="cinema vig tone" aria-hidden="true"></div>
 <a class="skip" href="#origin">Skip to content</a>
 
 <div id="loader" role="status" aria-label="Loading">
@@ -380,24 +525,52 @@ footer .flinks a:hover{color:var(--gold);}
 <header class="hero" id="top">
   <div class="hero-bg" id="heroBg"><img src="wp2041119.jpg" alt="Sentry meditating above Earth, wreathed in golden energy" fetchpriority="high"></div>
   <div class="hero-shade"></div>
+  <div class="data-floor" aria-hidden="true"></div>
   <canvas id="embers" aria-hidden="true"></canvas>
+  <div class="hero-spot" aria-hidden="true"></div>
+  <div class="hero-corner hl" aria-hidden="true"></div>
   <div class="container hero-inner">
-    <span class="eyebrow"><i></i>OFFENSIVE SECURITY ENGINEER</span>
-    <h1>MOHAMMAD ZIM</h1>
-    <div class="role">a.k.a Mr-Destroyer <em>·</em> Builder of Security Tools</div>
-    <p class="lead">I turn curiosity about how systems break into <strong style="color:var(--gold-soft)">fast, reliable, open-source hacking tools</strong> — and I teach everything I learn on <strong style="color:var(--gold-soft)">ZimShell</strong>.</p>
-    <div class="hero-cta">
-      <a href="#missions" class="btn btn-gold">Explore My Work</a>
-      <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener" class="btn btn-ghost">Watch ZimShell</a>
+    <div class="hero-left">
+      <span class="eyebrow"><i></i>OFFENSIVE SECURITY ENGINEER</span>
+      <span class="stamp">MISSION FILE #SENTRY-01 · CLEARANCE: DOJO</span>
+      <h1 class="kinetic-title" data-text="MOHAMMAD ZIM">MOHAMMAD ZIM</h1>
+      <div class="role">a.k.a <strong class="handle">Mr-Destroyer</strong> <em>·</em> Builder of Security Tools</div>
+      <p class="lead">I turn curiosity about how systems break into <strong style="color:var(--gold-soft)">fast, reliable, open-source hacking tools</strong> — and I teach everything I learn on <strong style="color:var(--gold-soft)">ZimShell</strong>.</p>
+      <div class="hero-cta">
+        <a href="#missions" class="btn btn-gold magnetic"><span>Explore My Work</span><i>▸</i></a>
+        <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener" class="btn btn-ghost magnetic"><span>Watch ZimShell</span><i>▶</i></a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b><span data-count="19">0</span>+</b><span>Security Tools</span></div>
+        <div class="hstat"><b><span data-count="48">0</span></b><span>Public Repos</span></div>
+        <div class="hstat"><b><span data-count="10">0</span></b><span>Languages</span></div>
+        <div class="hstat"><b><span data-count="2500">0</span>+</b><span>Learners</span></div>
+      </div>
     </div>
-    <div class="hero-stats">
-      <div class="hstat"><b><span data-count="19">0</span>+</b><span>Security Tools</span></div>
-      <div class="hstat"><b><span data-count="48">0</span></b><span>Public Repos</span></div>
-      <div class="hstat"><b><span data-count="10">0</span></b><span>Languages</span></div>
-      <div class="hstat"><b><span data-count="2500">0</span>+</b><span>Learners</span></div>
+    <div class="hero-right">
+      <div class="term" id="term" role="region" aria-label="Interactive terminal. Type help to see available commands." aria-keyshortcuts="Enter ArrowUp ArrowDown Tab">
+        <div class="term-head">
+          <span class="term-lights"><i></i><i></i><i></i></span>
+          <span class="term-title">sentry@zim — live uplink</span>
+          <span class="term-ctrl">
+            <button class="term-sfx" id="termSfx" type="button" aria-pressed="false">SFX:OFF</button>
+            <span class="term-tag">LIVE</span>
+          </span>
+        </div>
+        <div class="term-screen">
+          <div class="term-body" id="termBody" aria-live="polite"></div>
+          <div class="term-inputline">
+            <span class="term-prompt" id="termPrompt">zim@sentry:~$</span>
+            <input id="termInput" type="text" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Terminal input. Type help for commands." placeholder="type 'help'">
+            <span class="term-cursor" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="term-foot"><span class="term-hint">try <b>help</b> · <b>projects</b> · <b>recon</b> · <b>sudo hire-me</b></span></div>
+      </div>
+      <div class="term-glow" aria-hidden="true"></div>
     </div>
-    <div class="scroll-cue">SCROLL TO BEGIN ↓</div>
   </div>
+  <div class="scroll-cue">SCROLL TO BEGIN ↓</div>
 </header>
 
 <div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker">PYTHON · WEB SECURITY · LINUX · BUG BOUNTY · OSINT · RECON · CVE RESEARCH · BASH · NETWORKING · DOCKER ·&nbsp;</div></div>
@@ -730,6 +903,387 @@ $("#copyEmail2").onclick=()=>copyTxt("istudy204@gmail.com","Email copied");
 
 addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
 addEventListener("load",()=>ScrollTrigger.refresh());
+</script>
+<script>
+/* ============================================================
+   SENTRY HERO STATION ENGINE · v2 (PoC)
+   kinetic type · scroll-velocity typography · spotlight ·
+   magnetic buttons · live interactive terminal
+   ============================================================ */
+(function () {
+  "use strict";
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fine = !reduced;
+  function $(s) { return document.querySelector(s); }
+  function $$(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+  function dly(ms) { return fine ? ms : 0; }
+
+  /* ---------- 1 · kinetic title decrypt ---------- */
+  var title = $(".kinetic-title");
+  if (title && window.gsap) {
+    var original = "MOHAMMAD ZIM";
+    title.setAttribute("aria-label", original);
+    var holder = document.createElement("span");
+    holder.setAttribute("aria-hidden", "true");
+    var letters = [];
+    for (var i = 0; i < original.length; i++) {
+      var s = document.createElement("span");
+      s.className = "kt-letter";
+      var ch = original.charAt(i);
+      s.textContent = ch === " " ? "\u00A0" : ch;
+      s.setAttribute("data-ch", ch);
+      letters.push(s);
+      holder.appendChild(s);
+    }
+    title.textContent = "";
+    title.appendChild(holder);
+    if (fine) {
+      var glyphs = "ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789#_$@%";
+      letters.forEach(function (l, idx) {
+        gsap.set(l, { opacity: 0, y: 20, rotateX: -22 });
+        var start = 450 + idx * 90;
+        var sc = setInterval(function () {
+          l.textContent = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
+        }, 46);
+        setTimeout(function () {
+          clearInterval(sc);
+          gsap.to(l, { opacity: 1, y: 0, rotateX: 0, duration: 0.55, ease: "power3.out" });
+          l.textContent = l.getAttribute("data-ch");
+        }, start + 420);
+      });
+    }
+  }
+
+  /* ---------- 2 · scroll velocity -> typography weight ---------- */
+  if (fine) {
+    var root = document.documentElement, lastY = window.scrollY, lastT = performance.now();
+    window.addEventListener("scroll", function () {
+      var y = window.scrollY, t = performance.now();
+      var vel = Math.abs(y - lastY) / Math.max(16, t - lastT) * 10;
+      lastY = y; lastT = t;
+      vel = Math.min(4, vel || 0);
+      root.style.setProperty("--sv", (vel * 1.2).toFixed(2) + "px");
+      clearTimeout(root._svt);
+      root._svt = setTimeout(function () { root.style.setProperty("--sv", "0px"); }, 220);
+    }, { passive: true });
+  }
+
+  /* ---------- 3 · cursor spotlight ---------- */
+  var spot = $(".hero-spot");
+  if (spot && fine && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+    window.addEventListener("mousemove", function (e) {
+      var r = spot.getBoundingClientRect();
+      spot.style.setProperty("--mx", (e.clientX - r.left) + "px");
+      spot.style.setProperty("--my", (e.clientY - r.top) + "px");
+    }, { passive: true });
+  }
+
+  /* ---------- 4 · magnetic buttons ---------- */
+  if (fine && window.matchMedia("(hover: hover)").matches) {
+    $$(".magnetic").forEach(function (b) {
+      b.addEventListener("mousemove", function (e) {
+        var r = b.getBoundingClientRect();
+        var dx = e.clientX - (r.left + r.width / 2);
+        var dy = e.clientY - (r.top + r.height / 2);
+        var m = Math.sqrt(dx * dx + dy * dy) || 1;
+        var lim = 10;
+        dx = dx / m * Math.min(lim, m * 0.16);
+        dy = dy / m * Math.min(lim, m * 0.16);
+        b.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) translateY(-3px)";
+      });
+      b.addEventListener("mouseleave", function () { b.style.transform = ""; });
+    });
+  }
+/* ---------- 5 · live terminal ---------- */
+  var tbody = $("#termBody"), input = $("#termInput"), term = $("#term"), sfxBtn = $("#termSfx");
+  if (!tbody || !input || !term) return;
+  var promptTxt = "zim@sentry:~$";
+  var history = [], hIdx = -1, busy = false, inputEnabled = false;
+  var sfxOn = false, actx = null;
+
+  function esc(s) {
+    return String(s).replace(/[&<>]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+    });
+  }
+  function say(h, c) {
+    var d = document.createElement("div");
+    d.className = "tline" + (c ? " " + c : "");
+    d.innerHTML = h;
+    tbody.appendChild(d);
+    tbody.scrollTop = tbody.scrollHeight;
+    return d;
+  }
+  function blip(freq, dur, type, gain) {
+    if (!sfxOn) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") { actx.resume(); }
+      var o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || "triangle";
+      o.frequency.value = freq;
+      g.gain.value = gain || 0.04;
+      o.connect(g); g.connect(actx.destination);
+      o.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + (dur || 0.08));
+      o.stop(actx.currentTime + (dur || 0.1));
+    } catch (e) { /* audio blocked */ }
+  }
+  function printOut(outs, cb) {
+    var i = 0;
+    (function next() {
+      if (i >= outs.length) { if (cb) { cb(); } return; }
+      say(outs[i].h, outs[i].c);
+      i++;
+      setTimeout(next, dly(60));
+    })();
+  }
+  function typeCmd(txt, done) {
+    if (!fine) {
+      say(esc(promptTxt + " " + txt), "t-dim");
+      if (done) { done(); }
+      return;
+    }
+    busy = true;
+    var i = 0;
+    var d = say("");
+    var dt = txt.length > 42 ? 6 : 18;
+    (function tick() {
+      if (i <= txt.length) {
+        d.innerHTML = esc(promptTxt + " " + txt.slice(0, i)) + '<span class="t-ok">\u258B</span>';
+        i++;
+        setTimeout(tick, dt);
+      } else {
+        d.innerHTML = esc(promptTxt + " " + txt) + '<span class="t-gold"> \u2588</span>';
+        busy = false;
+        if (done) { done(); }
+      }
+    })();
+  }
+  function echoL(h, c) {
+    say(h, c);
+    if (fine) blip(440, 0.07, "triangle", 0.03);
+  }
+
+  var HELP = [
+    { h: "<span class='t-head'>AVAILABLE COMMANDS</span>" },
+    { h: "help .......... list commands", c: "t-out" },
+    { h: "whoami ........ identify the operator", c: "t-out" },
+    { h: "projects ...... flagship arsenal", c: "t-out" },
+    { h: "status ........ uplinks + live stats", c: "t-out" },
+    { h: "recon ......... run a port sweep", c: "t-out" },
+    { h: "bio ........... read profile.txt", c: "t-out" },
+    { h: "contact ....... open every channel", c: "t-out" },
+    { h: "ls ............ list sentry files", c: "t-out" },
+    { h: "ping .......... ping the dojo", c: "t-out" },
+    { h: "sudo hire-me .. apply for a contract", c: "t-warn" }
+  ];
+  var NMAP = [
+    { h: "Starting Nmap 8.10 ( https://nmap.org )", c: "t-dim" },
+    { h: "zimshell.local — authorized port sweep", c: "t-dim" },
+    { h: "PORT      STATE  SERVICE", c: "t-head" },
+    { h: "22/tcp    open   ssh", c: "t-ok" },
+    { h: "80/tcp    open   http (zimshell web)", c: "t-ok" },
+    { h: "443/tcp   open   https (tls 1.3)", c: "t-ok" },
+    { h: "1337/tcp  open   zero-day forge [REDACTED]", c: "t-warn" },
+    { h: "9000/tcp  open   spiderman", c: "t-ok" },
+    { h: "Nmap done — 5 ports swept, nothing exposed.", c: "t-dim" }
+  ];
+  var PROJECTS = [
+    { h: "<span class='t-head'>FLAGSHIP ARSENAL (★ = stars)</span>" },
+    { h: "endpointhunter ... ★ 11 .... JS & endpoint harvesting", c: "t-out" },
+    { h: "villain .......... ★ 12 .... undetectable payload gen", c: "t-out" },
+    { h: "CredStalker ...... ★ 10 .... exposed credential hunter", c: "t-out" },
+    { h: "vulnx ............ ★ 9 ..... auto vulnerability finder", c: "t-out" },
+    { h: "Fucker ........... ★ 6 ..... web app vulnerability scanner", c: "t-out" },
+    { h: "WPGhost .......... ★ 3 ..... wordpress CVE-2024-10924", c: "t-out" },
+    { h: "CVE-2025-55182 ... ★ 0 ..... react RCE research", c: "t-out" },
+    { h: "+ 12 more in the Arsenal → scroll to #missions", c: "t-dim" }
+  ];
+  var PROFILE = [
+    { h: "<span class='t-head'>MISSION PROFILE — sentry://zim</span>" },
+    { h: "name ...... MOHAMMAD ZIM · handle: MR_DESTROYER", c: "t-out" },
+    { h: "role ...... OFFENSIVE_SECURITY_ENGINEER", c: "t-out" },
+    { h: "zone ...... PYTHON · WEB_SECURITY · LINUX · OSINT", c: "t-out" },
+    { h: "bio ....... security tools should be fast, reliable", c: "t-out" },
+    { h: "           and built for real workflows. i ship", c: "t-out" },
+    { h: "           them free + open-source, then teach", c: "t-out" },
+    { h: "           every byte on ZIMSHELL.", c: "t-out" },
+    { h: "motto ..... \"hack the planet — then teach it.\"", c: "t-warn" }
+  ];
+  var WHOAMI_OUT = [
+    { h: "name ......... MOHAMMAD ZIM", c: "t-out" },
+    { h: "handle ....... MR_DESTROYER", c: "t-out" },
+    { h: "role ......... OFFENSIVE_SECURITY_ENGINEER", c: "t-out" },
+    { h: "base ......... PYTHON · WEB_SECURITY · LINUX", c: "t-out" },
+    { h: "clearance .... TOP_SECRET//DOJO", c: "t-warn" },
+    { h: "alias ........ ZERO_DAY_ARCHITECT", c: "t-out" }
+  ];
+  var STATUS_OUT = [
+    { h: "tools shipped .. 19+", c: "t-ok" },
+    { h: "public repos ... 48", c: "t-ok" },
+    { h: "languages ...... 10", c: "t-ok" },
+    { h: "learners ....... 2500+", c: "t-ok" },
+    { h: "uplinks ........ github ✓ · youtube ✓ · tryhackme ✓", c: "t-dim" }
+  ];
+  var CONTACT_OUT = [
+    { h: "email ..... istudy204@gmail.com", c: "t-out" },
+    { h: "github .... github.com/Mr-Destroyer", c: "t-out" },
+    { h: "youtube ... youtube.com/@Study_Hard69 (ZimShell)", c: "t-out" },
+    { h: "tryhackme . tryhackme.com/p/MohammadZim", c: "t-out" },
+    { h: "status .... all channels open.", c: "t-dim" }
+  ];
+  var LS_OUT = [
+    { h: "bio.txt    profile/   projects/", c: "t-ok" },
+    { h: "zimsignal/ cve-pocs/  patents/", c: "t-ok" },
+    { h: "status.log .hidden_dojo/   ← permission denied", c: "t-dim" }
+  ];
+  var HIRE_OUT = [
+    { h: "[sudo] password for zim: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588", c: "t-dim" },
+    { h: "authenticating against star-volt ledger ...", c: "t-dim" },
+    { h: "access granted.", c: "t-ok" },
+    { h: "→ opening secure channel: istudy204@gmail.com", c: "t-gold" },
+    { h: "→ write \"HIRE-ZIM\" in the subject line.", c: "t-gold" }
+  ];
+  var PING_OUT = [
+    { h: "PING sentry (127.0.0.1) 56(84) bytes of data.", c: "t-dim" },
+    { h: "64 bytes: icmp_seq=1 ttl=64 time=0.432 ms", c: "t-ok" },
+    { h: "reply from zim: reliability 100% — operator online.", c: "t-warn" }
+  ];
+  var COMMANDS = {
+    help: function () { printOut(HELP); },
+    whoami: function () { printOut(WHOAMI_OUT); },
+    projects: function () { printOut(PROJECTS); },
+    status: function () { printOut(STATUS_OUT); },
+    recon: function () { printOut(NMAP); },
+    bio: function () { printOut(PROFILE); },
+    profile: function () { printOut(PROFILE); },
+    contact: function () { printOut(CONTACT_OUT); },
+    ls: function () { printOut(LS_OUT); },
+    ping: function () { printOut(PING_OUT); },
+    clear: function () { return "CLEAR"; },
+    hire: function () { printOut(HIRE_OUT); }
+  };
+
+  function resolve(raw) {
+    var parts = raw.trim().replace(/\s+/g, " ").split(" ");
+    var c = (parts[0] || "").toLowerCase();
+    var rest = parts.slice(1).join(" ");
+    if (c === "sudo") {
+      if (/hire/.test(rest)) { return { fn: COMMANDS.hire }; }
+      return { fn: COMMANDS.whoami };
+    }
+    if (c === "cat") { return { fn: /bio|profile/i.test(rest) ? COMMANDS.bio : COMMANDS.ls }; }
+    if (c === "nmap") { return { fn: COMMANDS.recon }; }
+    if (c === "echo") {
+      return { fn: function () { say(esc(rest || ""), "t-out"); } };
+    }
+    if (c === "curl" || c === "wget") {
+      return { fn: function () { printOut([{ h: "blocked: external requests disabled. try 'recon'.", c: "t-err" }]); } };
+    }
+    return { fn: COMMANDS[c] || null };
+  }
+
+  function exec(raw) {
+    if (busy || !inputEnabled) return;
+    if (!raw || !raw.trim()) { say(promptTxt, "t-dim"); input.value = ""; return; }
+    say(esc(promptTxt + " " + raw), "t-dim");
+    var res = resolve(raw);
+    if (res && res.fn) {
+      if (fine) blip(524, 0.06, "triangle", 0.035);
+      var out = res.fn();
+      if (out === "CLEAR") { tbody.innerHTML = ""; }
+    } else {
+      say("zsh: command not found: " + esc(raw.split(/\s+/)[0]), "t-err");
+      say("type 'help' for the command list.", "t-dim");
+      if (fine) blip(190, 0.09, "sawtooth", 0.04);
+    }
+    history.push(raw);
+    hIdx = history.length;
+    input.value = "";
+    input.focus();
+  }
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      if (busy || !inputEnabled) return;
+      e.preventDefault();
+      exec(input.value);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (hIdx > 0) { hIdx--; input.value = history[hIdx]; }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (hIdx < history.length - 1) { hIdx++; input.value = history[hIdx]; }
+      else { hIdx = history.length; input.value = ""; }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      var cur = input.value.trim();
+      var names = ["help", "whoami", "projects", "status", "recon", "bio", "contact", "ls", "ping", "cat bio.txt", "sudo hire-me", "clear", "echo"];
+      for (var k = 0; k < names.length; k++) {
+        if (cur && names[k].indexOf(cur) === 0) { input.value = names[k]; break; }
+      }
+    }
+  });
+
+  term.addEventListener("click", function (e) {
+    if (e.target === sfxBtn) return;
+    input.focus();
+  });
+
+  if (sfxBtn) {
+    sfxBtn.addEventListener("click", function () {
+      sfxOn = !sfxOn;
+      sfxBtn.classList.toggle("on", sfxOn);
+      sfxBtn.textContent = sfxOn ? "SFX:ON" : "SFX:OFF";
+      sfxBtn.setAttribute("aria-pressed", sfxOn ? "true" : "false");
+      if (sfxOn) blip(660, 0.09, "triangle", 0.03);
+    });
+  }
+
+  var BOOT = [
+    { h: "<span class='t-head'>SENTRY OS v4.2.0 — SECURE BOOT</span>", d: 200 },
+    { h: "[ OK ] loading operator profile ......... zim", c: "t-ok", d: 130 },
+    { h: "[ OK ] mounting /tool.arsenal ......... 48 weapons", c: "t-ok", d: 130 },
+    { h: "[ OK ] github uplink ................. 48 repos · 19 tools", c: "t-ok", d: 130 },
+    { h: "[ OK ] zimshell signal ............... LIVE", c: "t-ok", d: 130 },
+    { h: "[ OK ] tracers armed · clearing throttle", c: "t-dim", d: 170 }
+  ];
+
+  function boot() {
+    busy = true;
+    var i = 0;
+    (function nxt() {
+      if (i >= BOOT.length) { setTimeout(runIntro, dly(140)); return; }
+      echoL(BOOT[i].h, BOOT[i].c);
+      i++;
+      setTimeout(nxt, dly(BOOT[i - 1].d));
+    })();
+  }
+  function runIntro() {
+    typeCmd("whoami", function () {
+      printOut(WHOAMI_OUT, function () {
+        typeCmd("nmap -sS -T4 zimshell.local", function () {
+          printOut(NMAP, function () {
+            typeCmd("cat bio.txt", function () {
+              printOut(PROFILE, function () { ready(); });
+            });
+          });
+        });
+      });
+    });
+  }
+  function ready() {
+    busy = false;
+    inputEnabled = true;
+    term.classList.add("ready");
+    input.placeholder = "";
+    echoL("<span class='t-head'>[ SYSTEM ONLINE ] type 'help' to begin.</span>", "t-ok");
+    if (window.matchMedia("(hover: none)").matches === false) { input.focus(); }
+  }
+
+  setTimeout(boot, dly(1100));
+})();
 </script>
 </body>
 </html>
