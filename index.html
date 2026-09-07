@@ -3,1287 +3,368 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mohammad Zim — Offensive Security Engineer | Mr-Destroyer</title>
-<meta name="description" content="Mohammad Zim (Mr-Destroyer) — offensive security engineer building open-source security tools in Python. Web security, Linux, recon & OSINT. Watch the journey on ZimShell.">
+<title>ZimShell — Hacker of the next gen & Security Researcher</title>
+<meta name="description" content="Mohammad Zim (Mr-Destroyer) — ethical hacker, security researcher, and cybersecurity engineer. Authorized penetration testing, vulnerability research, OSINT, and defensive engineering.">
 <meta name="author" content="Mohammad Zim">
-<meta name="theme-color" content="#04060D">
+<meta name="theme-color" content="#070709">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Mohammad Zim — Offensive Security Engineer">
-<meta property="og:description" content="19+ open-source security tools. Python, Web Security, Linux, OSINT. Power of a million lines of Python.">
-<meta property="og:image" content="wp2041119.jpg">
+<meta property="og:title" content="Mohammad Zim — Ethical Hacker & Security Researcher">
+<meta property="og:description" content="I find weaknesses before they become disasters. Ethical security research, authorized testing, and defensive engineering.">
+<meta property="og:image" content="assets/elias-poster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2304060D' stroke='%23FFC93C' stroke-width='3'/%3E%3Ctext x='32' y='44' font-family='Arial Black' font-size='32' font-weight='900' fill='%23FFC93C' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='26' fill='%239D1838'/%3E%3Ccircle cx='44' cy='24' r='22' fill='%23070709'/%3E%3C/svg%3E">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Mohammad Zim","alternateName":"Mr-Destroyer","jobTitle":"Offensive Security Engineer","sameAs":["https://github.com/Mr-Destroyer","https://youtube.com/@Study_Hard69","https://tryhackme.com/p/MohammadZim"],"knowsAbout":["Python","Web Application Security","Linux","Network Security","OSINT","Penetration Testing"]}
+{"@context":"https://schema.org","@type":"Person","name":"Mohammad Zim","alternateName":"Mr-Destroyer","jobTitle":"Ethical Hacker & Security Researcher","sameAs":["https://github.com/Mr-Destroyer","https://youtube.com/@Study_Hard69","https://tryhackme.com/p/MohammadZim"],"knowsAbout":["Web Application Security","Penetration Testing","OSINT","Threat Modeling","Defensive Engineering"]}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ============ SENTRY THEME ============
-   Gold of a million suns + deep-space navy + cape blue.
-   Artwork: local wp2041118 / 1119 / 1124. */
-:root{
-  --space:#04060D;
-  --navy:#0A1122;
-  --navy2:#0D1528;
-  --gold:#FFC93C;
-  --gold-deep:#E8930C;
-  --gold-soft:#FFE89A;
-  --cape:#3B82F6;
-  --cape-deep:#1D4ED8;
-  --ink:#F5F1E6;
-  --muted:#9AA3B2;
-  --card:rgba(13,21,40,.72);
-  --line:rgba(255,201,60,.16);
-  --line-soft:rgba(245,241,230,.09);
-  --disp:'Oswald',sans-serif;
-  --body:'Inter',sans-serif;
-  --mono:'Fira Code',monospace;
-  --r:16px;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--gold) var(--space);}
-body{background:var(--space);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.7;overflow-x:hidden;}
-::-webkit-scrollbar{width:10px;}::-webkit-scrollbar-track{background:var(--space);}
-::-webkit-scrollbar-thumb{background:linear-gradient(var(--gold),var(--gold-deep));border-radius:6px;border:2px solid var(--space);}
-::selection{background:var(--gold);color:#000;}
-img{max-width:100%;display:block;}
-a{color:var(--gold);text-decoration:none;}
-a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--cape);outline-offset:3px;border-radius:4px;}
-.skip{position:fixed;top:-60px;left:12px;z-index:2000;background:var(--gold);color:#000;padding:8px 16px;font-weight:700;border-radius:8px;transition:top .2s;}
-.skip:focus{top:12px;}
-.container{max-width:1180px;margin:0 auto;padding:0 24px;}
-section.block{padding:110px 0;position:relative;}
-
-/* ---------- preloader ---------- */
-#loader{position:fixed;inset:0;z-index:1500;background:radial-gradient(ellipse at 50% 40%,#0B1226,#04060D 70%);display:flex;flex-direction:column;gap:22px;align-items:center;justify-content:center;transition:opacity .6s,visibility .6s;}
-#loader.done{opacity:0;visibility:hidden;pointer-events:none;}
-.sigil{width:92px;height:92px;border-radius:50%;border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:46px;color:var(--gold);box-shadow:0 0 40px rgba(255,201,60,.45),inset 0 0 24px rgba(255,201,60,.15);animation:pulse 1.6s ease-in-out infinite;}
-@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 30px rgba(255,201,60,.35);}50%{transform:scale(1.06);box-shadow:0 0 70px rgba(255,201,60,.65);}}
-.load-bar{width:220px;height:4px;background:rgba(255,201,60,.15);border-radius:4px;overflow:hidden;}
-#loadFill{height:100%;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold),var(--gold-soft));}
-#loadTxt{font-size:12px;letter-spacing:4px;color:var(--muted);}
-
-/* ---------- progress / cursor / toast ---------- */
-#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--gold-deep),var(--gold),var(--gold-soft));z-index:1200;box-shadow:0 0 14px rgba(255,201,60,.7);}
-.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;border-radius:50%;pointer-events:none;z-index:1300;transform:translate(-50%,-50%);}
-.cursor-dot{width:7px;height:7px;background:var(--gold);box-shadow:0 0 10px var(--gold);}
-.cursor-ring{width:32px;height:32px;border:1px solid rgba(255,201,60,.55);transition:width .25s,height .25s,background .25s;}
-.cursor-ring.big{width:54px;height:54px;background:rgba(255,201,60,.07);}
-#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);z-index:1400;background:#0B1226;border:1px solid var(--gold);color:var(--gold-soft);padding:12px 24px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:all .3s;max-width:90vw;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.5);}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* ---------- nav ---------- */
-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(4,6,13,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line-soft);}
-.nav-inner{max-width:1180px;margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
-.brand{display:flex;align-items:center;gap:12px;color:var(--ink);font-family:var(--disp);letter-spacing:2px;font-weight:600;}
-.brand-mark{width:38px;height:38px;border-radius:50%;border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);font-size:20px;box-shadow:0 0 16px rgba(255,201,60,.35);flex-shrink:0;}
-.brand small{display:block;font-family:var(--body);font-weight:500;font-size:10px;letter-spacing:3px;color:var(--muted);}
-.nav-links{display:flex;gap:4px;list-style:none;}
-.nav-links a{padding:8px 14px;color:var(--muted);font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;border-radius:8px;transition:all .2s;}
-.nav-links a:hover{color:var(--gold);background:rgba(255,201,60,.07);}
-.nav-links a.active{color:var(--gold);}
-.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;}
-.burger span{width:24px;height:2px;background:var(--gold);transition:all .3s;}
-.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg);}
-.burger.open span:nth-child(2){opacity:0;}
-.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
-
-/* ---------- hero ---------- */
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;padding:130px 0 70px;}
-.hero-bg{position:absolute;inset:-8%;z-index:0;will-change:transform;}
-.hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center;}
-.hero-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(4,6,13,.62) 0%,rgba(4,6,13,.45) 40%,rgba(4,6,13,.92) 100%),radial-gradient(ellipse at 30% 60%,transparent 30%,rgba(4,6,13,.55) 100%);}
-#embers{position:absolute;inset:0;z-index:2;pointer-events:none;}
-.hero-inner{position:relative;z-index:3;text-align:center;width:100%;}
-.eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:12px;font-weight:700;letter-spacing:5px;color:var(--gold);border:1px solid var(--line);border-radius:100px;padding:9px 22px;background:rgba(255,201,60,.06);margin-bottom:28px;}
-.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px var(--gold);animation:blink 2s infinite;font-style:normal;}
-@keyframes blink{50%{opacity:.35;}}
-.hero h1{font-family:var(--disp);font-weight:700;font-size:clamp(3rem,9vw,6.8rem);line-height:1;letter-spacing:3px;background:linear-gradient(180deg,#FFFDF5 20%,var(--gold-soft) 45%,var(--gold) 65%,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 30px rgba(255,201,60,.25));}
-.hero .role{font-family:var(--disp);font-size:clamp(1rem,2.4vw,1.5rem);letter-spacing:6px;color:var(--ink);margin-top:14px;text-transform:uppercase;}
-.hero .role em{color:var(--cape);font-style:normal;}
-.hero p.lead{max-width:640px;margin:22px auto 0;color:#C9CFD9;font-size:clamp(1rem,1.6vw,1.15rem);}
-.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px;}
-.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:2px;text-transform:uppercase;padding:16px 34px;border-radius:12px;border:1px solid transparent;transition:all .25s;cursor:pointer;}
-.btn-gold{background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:#1A1200;box-shadow:0 8px 30px rgba(255,201,60,.35);}
-.btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 44px rgba(255,201,60,.5);}
-.btn-ghost{border-color:rgba(245,241,230,.25);color:var(--ink);background:rgba(255,255,255,.03);}
-.btn-ghost:hover{border-color:var(--cape);color:#fff;transform:translateY(-3px);box-shadow:0 12px 30px rgba(59,130,246,.3);}
-.hero-stats{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:48px;}
-.hstat{min-width:150px;background:rgba(10,17,34,.66);border:1px solid var(--line-soft);border-radius:14px;padding:18px 22px;backdrop-filter:blur(10px);}
-.hstat b{display:block;font-family:var(--disp);font-size:2rem;color:var(--gold);line-height:1;}
-.hstat span{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.scroll-cue{margin-top:46px;color:var(--muted);font-size:11px;letter-spacing:4px;animation:blink 2.2s infinite;}
-
-/* ---------- ticker ---------- */
-.ticker{background:linear-gradient(90deg,var(--gold-deep),var(--gold) 30%,var(--gold-soft) 50%,var(--gold) 70%,var(--gold-deep));overflow:hidden;white-space:nowrap;padding:13px 0;position:relative;z-index:5;}
-.ticker-track{display:inline-block;animation:tick 26s linear infinite;color:#1A1200;font-family:var(--disp);font-weight:600;font-size:15px;letter-spacing:3px;}
-.ticker-track span{margin:0 26px;}
-@keyframes tick{to{transform:translateX(-50%);}}
-
-/* ---------- section headers (aligned system) ---------- */
-.sec-head{display:flex;align-items:flex-end;gap:20px;margin-bottom:18px;}
-.sec-num{font-family:var(--disp);font-size:15px;font-weight:600;letter-spacing:3px;color:var(--gold);border:1px solid var(--line);border-radius:10px;padding:8px 14px;white-space:nowrap;background:rgba(255,201,60,.05);}
-.sec-head h2{font-family:var(--disp);font-weight:600;font-size:clamp(1.9rem,4.5vw,3rem);letter-spacing:2px;text-transform:uppercase;line-height:1.1;}
-.sec-head h2 span{color:var(--gold);}
-.sec-rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent);margin-bottom:14px;min-width:40px;}
-.sec-sub{color:var(--muted);max-width:660px;margin-bottom:48px;font-size:1.02rem;}
-
-/* ---------- origin ---------- */
-#origin{background:linear-gradient(180deg,var(--space),var(--navy) 120%);}
-.origin-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start;}
-.portrait{position:relative;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.5);}
-.portrait img{width:100%;height:100%;object-fit:cover;aspect-ratio:4/4.4;filter:saturate(1.05);}
-.portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(4,6,13,.85));}
-.portrait-badge{position:absolute;left:18px;bottom:18px;z-index:2;background:rgba(4,6,13,.8);border:1px solid var(--line);border-radius:12px;padding:12px 18px;backdrop-filter:blur(8px);}
-.portrait-badge b{font-family:var(--disp);color:var(--gold);letter-spacing:2px;font-size:15px;}
-.portrait-badge span{display:block;font-size:12px;color:var(--muted);letter-spacing:1px;}
-.float-tag{position:absolute;top:18px;right:18px;z-index:2;background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:#1A1200;font-weight:700;font-size:12px;letter-spacing:2px;border-radius:100px;padding:8px 18px;animation:float 4s ease-in-out infinite;box-shadow:0 8px 26px rgba(255,201,60,.4);}
-@keyframes float{50%{transform:translateY(-8px);}}
-.bio p{margin-bottom:16px;color:#C9CFD9;}
-.bio p strong{color:var(--gold-soft);font-weight:600;}
-.values{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;}
-.value{background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:20px 18px;transition:all .3s;}
-.value:hover{transform:translateY(-5px);border-color:var(--line);box-shadow:0 16px 40px rgba(255,201,60,.1);}
-.value .ic{font-size:26px;}
-.value b{display:block;font-family:var(--disp);letter-spacing:1px;margin:8px 0 4px;color:var(--gold-soft);font-size:15px;}
-.value span{font-size:13.5px;color:var(--muted);}
-.journey{margin-top:44px;border-top:1px solid var(--line-soft);padding-top:30px;}
-.journey h3{font-family:var(--disp);letter-spacing:2px;font-size:1.05rem;color:var(--ink);margin-bottom:20px;text-transform:uppercase;}
-.j-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
-.j-step{background:rgba(255,255,255,.02);border:1px solid var(--line-soft);border-radius:12px;padding:14px;text-align:center;transition:all .3s;}
-.j-step:hover{border-color:var(--gold);transform:translateY(-4px);}
-.j-step b{font-family:var(--disp);color:var(--gold);font-size:14px;letter-spacing:1px;display:block;}
-.j-step span{font-size:12px;color:var(--muted);}
-
-/* ---------- powers / skill widgets ---------- */
-#powers{background:var(--navy);}
-.power-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
-.power{background:linear-gradient(180deg,rgba(20,30,55,.9),rgba(10,17,34,.9));border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;transition:transform .3s,border-color .3s,box-shadow .3s;position:relative;}
-.power::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:transform .4s;}
-.power:hover{transform:translateY(-7px);border-color:rgba(255,201,60,.4);box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(255,201,60,.12);}
-.power:hover::before{transform:scaleX(1);}
-.p-visual{height:150px;position:relative;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,rgba(255,201,60,.12),transparent 70%);overflow:hidden;border-bottom:1px solid var(--line-soft);}
-.p-body{padding:24px;}
-.p-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;}
-.p-top h3{font-family:var(--disp);font-size:1.2rem;letter-spacing:1px;color:var(--ink);}
-.ring{position:relative;width:64px;height:64px;flex-shrink:0;}
-.ring svg{transform:rotate(-90deg);}
-.ring .bgc{stroke:rgba(255,255,255,.1);}
-.ring .fgc{stroke:url(#goldGrad);stroke-linecap:round;transition:stroke-dashoffset 1.6s cubic-bezier(.16,1,.3,1);}
-.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--gold);font-weight:700;}
-.p-body p{font-size:14px;color:var(--muted);margin-bottom:14px;min-height:66px;}
-.tags{display:flex;flex-wrap:wrap;gap:8px;}
-.tags span{font-size:11px;font-weight:600;letter-spacing:1px;padding:5px 12px;border-radius:100px;background:rgba(255,201,60,.08);border:1px solid var(--line);color:var(--gold-soft);}
-/* widget animations */
-.codewin{width:86%;background:#05080F;border:1px solid rgba(255,201,60,.25);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:11.5px;line-height:1.7;color:#9FE8B0;text-align:left;box-shadow:0 0 30px rgba(255,201,60,.08);min-height:104px;}
-.codewin .k{color:var(--gold);} .codewin .s{color:#8AB8FF;} .codewin .c{color:#5B6472;}
-.caret2{display:inline-block;width:8px;height:14px;background:var(--gold);vertical-align:-2px;animation:blink 1s steps(1) infinite;}
-.sweep{position:absolute;width:220px;height:220px;border-radius:50%;background:conic-gradient(from 0deg,rgba(255,201,60,.5),transparent 28%);animation:spin 3.2s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.orbit{position:absolute;width:150px;height:150px;border-radius:50%;border:1px solid rgba(255,201,60,.3);}
-.orbit.o2{width:100px;height:100px;border-color:rgba(59,130,246,.4);}
-.core{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle,var(--gold-soft),var(--gold-deep));box-shadow:0 0 24px var(--gold);animation:pulse 2s infinite;}
-.blip{position:absolute;width:8px;height:8px;border-radius:50%;background:var(--cape);box-shadow:0 0 12px var(--cape);animation:blink 1.8s infinite;}
-.gauge{display:flex;gap:10px;align-items:flex-end;height:90px;}
-.gauge i{width:26px;border-radius:6px 6px 3px 3px;background:linear-gradient(180deg,var(--gold),var(--gold-deep));animation:eq 1.6s ease-in-out infinite;box-shadow:0 0 16px rgba(255,201,60,.3);}
-.gauge i:nth-child(1){height:45%;animation-delay:0s;} .gauge i:nth-child(2){height:80%;animation-delay:.2s;}
-.gauge i:nth-child(3){height:60%;animation-delay:.4;} .gauge i:nth-child(4){height:92%;animation-delay:.1s;}
-.gauge i:nth-child(5){height:52%;animation-delay:.5;} .gauge i:nth-child(6){height:70%;animation-delay:.3;}
-@keyframes eq{50%{transform:scaleY(.55);}}
-.netnode{fill:var(--gold);} .netlink{stroke:rgba(255,201,60,.35);stroke-dasharray:6 6;animation:dash 1.4s linear infinite;}
-@keyframes dash{to{stroke-dashoffset:-24;}}
-.trings{position:relative;width:130px;height:130px;}
-.trings i{position:absolute;inset:0;border-radius:50%;border:2px solid var(--gold);animation:trg 2.4s ease-out infinite;}
-.trings i:nth-child(2){animation-delay:.8s;} .trings i:nth-child(3){animation-delay:1.6s;}
-@keyframes trg{from{transform:scale(.25);opacity:1;}to{transform:scale(1);opacity:0;}}
-.trings b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;}
-.playbtn{width:74px;height:74px;border-radius:50%;background:linear-gradient(180deg,var(--gold),var(--gold-deep));display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(255,201,60,.5);animation:pulse 2.2s infinite;}
-.playbtn svg{width:26px;height:26px;fill:#1A1200;margin-left:4px;}
-
-/* ---------- missions band + projects ---------- */
-.band{position:relative;overflow:hidden;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);}
-.band img{position:absolute;inset:-12%;width:124%;height:124%;object-fit:cover;will-change:transform;}
-.band-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,6,13,.88),rgba(4,6,13,.55) 50%,var(--space));}
-.band-inner{position:relative;z-index:2;padding:110px 0 30px;text-align:center;}
-.band-inner h2{font-family:var(--disp);font-size:clamp(2rem,5vw,3.4rem);letter-spacing:3px;text-transform:uppercase;}
-.band-inner h2 span{color:var(--gold);}
-.band-inner p{color:var(--muted);margin-top:10px;}
-#missions{background:var(--space);}
-.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
-#search{flex:1;min-width:220px;background:rgba(255,255,255,.03);border:1px solid var(--line-soft);border-radius:12px;color:var(--ink);font-family:var(--body);font-size:15px;padding:13px 18px;}
-#search::placeholder{color:#5B6472;}
-#search:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,201,60,.12);}
-#sort{background:var(--navy);border:1px solid var(--line-soft);color:var(--ink);font-family:var(--body);font-size:14px;padding:13px 14px;border-radius:12px;}
-#count{font-size:13px;color:var(--muted);letter-spacing:1px;}
-.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;}
-.chip{padding:9px 20px;background:transparent;border:1px solid var(--line-soft);color:var(--muted);font-size:13px;font-weight:600;letter-spacing:1px;border-radius:100px;cursor:pointer;transition:all .2s;font-family:var(--body);}
-.chip:hover{color:var(--gold);border-color:var(--gold);}
-.chip.on{background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:#1A1200;border-color:transparent;box-shadow:0 6px 22px rgba(255,201,60,.35);}
-.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;}
-.proj{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r);padding:26px;display:flex;flex-direction:column;gap:10px;transition:transform .25s,border-color .3s,box-shadow .3s;cursor:pointer;position:relative;overflow:hidden;backdrop-filter:blur(8px);}
-.proj:hover{transform:translateY(-6px);border-color:rgba(255,201,60,.45);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(255,201,60,.08);}
-.proj-top{display:flex;justify-content:space-between;align-items:center;font-size:13px;}
-.langdot{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink);font-size:13px;}
-.langdot i{width:10px;height:10px;border-radius:50%;font-style:normal;}
-.stars{color:var(--gold);font-weight:700;}
-.proj h3{font-family:var(--disp);font-size:1.35rem;letter-spacing:1px;color:var(--gold-soft);word-break:break-word;}
-.proj .focus{color:var(--cape);font-size:13px;font-weight:600;letter-spacing:.5px;}
-.proj .desc{color:var(--muted);font-size:14px;flex-grow:1;}
-.proj-foot{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:13px;font-weight:600;}
-.proj-foot .d{color:var(--gold);}
-.proj-foot .t{color:#5B6472;font-weight:500;}
-.proj.hidden{display:none;}
-
-/* ---------- signal ---------- */
-#signal{background:linear-gradient(180deg,var(--space),#0A0F22);}
-.channel{display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px;margin-bottom:26px;position:relative;overflow:hidden;}
-.channel::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold-deep),var(--gold),var(--cape));}
-.ch-avatar{width:104px;height:104px;border-radius:24px;background:linear-gradient(135deg,var(--gold),var(--gold-deep) 60%,var(--cape-deep));display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:44px;color:#1A1200;box-shadow:0 12px 40px rgba(255,201,60,.3);flex-shrink:0;}
-.channel h3{font-family:var(--disp);font-size:1.8rem;letter-spacing:2px;}
-.channel h3 span{color:var(--gold);}
-.channel p{color:var(--muted);font-size:14.5px;margin-top:6px;max-width:560px;}
-.ch-stats{display:flex;gap:22px;margin-top:14px;}
-.ch-stats div b{display:block;font-family:var(--disp);font-size:1.4rem;color:var(--gold);}
-.ch-stats div span{font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.vid-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
-.vid{background:var(--card);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;transition:all .3s;display:block;color:var(--ink);}
-.vid:hover{transform:translateY(-6px);border-color:var(--cape);box-shadow:0 20px 50px rgba(0,0,0,.5);}
-.vid-art{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#131E38,#0A1122);display:flex;align-items:center;justify-content:center;overflow:hidden;}
-.vid-art::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,201,60,.14),transparent 65%);}
-.vid-art .playbtn{width:60px;height:60px;position:relative;z-index:2;}
-.vid-dur{position:absolute;bottom:10px;right:10px;z-index:3;background:rgba(0,0,0,.8);font-size:11px;font-weight:700;padding:3px 10px;border-radius:6px;color:var(--gold);letter-spacing:1px;}
-.vid-body{padding:20px;}
-.vid-body .k{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--cape);}
-.vid-body h4{font-family:var(--disp);font-size:1.05rem;letter-spacing:.5px;margin:6px 0 4px;}
-.vid-body p{font-size:13.5px;color:var(--muted);}
-
-/* ---------- creed band ---------- */
-#creed .band-inner{padding:130px 0;}
-.creed-quote{font-family:var(--disp);font-size:clamp(1.5rem,3.6vw,2.6rem);letter-spacing:1px;max-width:820px;margin:0 auto;line-height:1.4;}
-.creed-quote span{color:var(--gold);}
-.creed-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px;text-align:left;}
-.creed{background:rgba(4,6,13,.72);border:1px solid var(--line-soft);border-radius:14px;padding:26px;backdrop-filter:blur(10px);}
-.creed b{font-family:var(--disp);letter-spacing:1px;color:var(--gold);font-size:1.05rem;display:block;margin-bottom:8px;}
-.creed span{font-size:14px;color:#C9CFD9;}
-
-/* ---------- contact ---------- */
-#contact{background:var(--navy);}
-.contact-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:26px;align-items:start;}
-.form-card{background:var(--card);border:1px solid var(--line-soft);border-radius:20px;padding:32px;}
-.form-card h3{font-family:var(--disp);letter-spacing:1px;font-size:1.3rem;margin-bottom:6px;}
-.form-card>p{font-size:14px;color:var(--muted);margin-bottom:22px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold);margin-bottom:8px;text-transform:uppercase;}
-.field input,.field textarea{width:100%;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid var(--line-soft);border-radius:12px;color:var(--ink);font-family:var(--body);font-size:15px;resize:vertical;}
-.field input:focus,.field textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,201,60,.12);}
-.form-row{display:flex;gap:12px;flex-wrap:wrap;}
-#formStatus{margin-top:14px;font-size:14px;color:var(--gold);min-height:22px;}
-.socials{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.soc{display:flex;align-items:center;gap:14px;padding:20px;background:var(--card);border:1px solid var(--line-soft);border-radius:14px;color:var(--ink);transition:all .25s;font-family:var(--body);font-size:15px;text-align:left;width:100%;cursor:pointer;}
-button.soc{cursor:pointer;}
-.soc:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 14px 36px rgba(255,201,60,.12);}
-.soc .si{width:46px;height:46px;border-radius:12px;background:rgba(255,201,60,.1);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.soc .si svg{width:22px;height:22px;fill:var(--gold);}
-.soc b{display:block;font-size:15px;}
-.soc span{font-size:12.5px;color:var(--muted);}
-
-/* ---------- finale / footer ---------- */
-.finale{position:relative;overflow:hidden;text-align:center;padding:120px 24px;}
-.finale img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.28;}
-.finale::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 20%,var(--space) 85%);}
-.finale-inner{position:relative;z-index:2;}
-.finale h2{font-family:var(--disp);font-size:clamp(2.2rem,7vw,5rem);letter-spacing:3px;background:linear-gradient(180deg,#fff,var(--gold) 60%,var(--gold-deep));-webkit-background-clip:text;background-clip:text;color:transparent;}
-.finale p{color:var(--muted);letter-spacing:4px;font-size:13px;margin-top:14px;text-transform:uppercase;}
-footer{border-top:1px solid var(--line-soft);padding:46px 24px 54px;text-align:center;background:#02040A;}
-footer .sigil{width:58px;height:58px;font-size:28px;margin:0 auto 16px;}
-footer p{color:var(--muted);font-size:13px;}
-footer .flinks{display:flex;gap:20px;justify-content:center;margin:16px 0;flex-wrap:wrap;}
-footer .flinks a{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-footer .flinks a:hover{color:var(--gold);}
-
-/* ---------- modal ---------- */
-#modalOv{position:fixed;inset:0;z-index:1400;background:rgba(2,4,10,.78);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px;}
-#modalOv.open{display:flex;}
-.modal{width:min(94%,620px);max-height:86vh;overflow:auto;background:#0B1226;border:1px solid rgba(255,201,60,.35);border-radius:18px;padding:32px;position:relative;box-shadow:0 30px 100px rgba(0,0,0,.6);}
-.modal-x{position:absolute;top:14px;right:14px;background:transparent;border:1px solid var(--line-soft);color:var(--muted);width:36px;height:36px;border-radius:10px;font-size:16px;cursor:pointer;}
-.modal-x:hover{color:#fff;border-color:#fff;}
-.modal .cat{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--cape);text-transform:uppercase;}
-.modal h3{font-family:var(--disp);font-size:2rem;color:var(--gold-soft);margin:6px 0;word-break:break-word;letter-spacing:1px;}
-.modal .f{color:var(--muted);font-size:14px;margin-bottom:12px;}
-.modal .d{color:#C9CFD9;margin-bottom:16px;}
-.clone{display:flex;gap:8px;margin:18px 0;}
-.clone code{flex:1;background:#02040A;border:1px solid var(--line-soft);border-radius:10px;padding:12px;font-size:12px;color:#9FE8B0;overflow:auto;white-space:nowrap;font-family:var(--mono);}
-.copybtn{background:linear-gradient(180deg,var(--gold),var(--gold-deep));border:none;color:#1A1200;font-weight:700;font-size:13px;letter-spacing:1px;padding:12px 20px;border-radius:10px;cursor:pointer;font-family:var(--body);}
-.modal-btns{display:flex;gap:10px;flex-wrap:wrap;}
-
-/* ---------- reveal defaults ---------- */
-.rv{opacity:0;}
-
-/* ---------- responsive ---------- */
-@media(max-width:1000px){
-  .power-grid{grid-template-columns:repeat(2,1fr);}
-  .origin-grid,.contact-grid{grid-template-columns:1fr;}
-  .vid-grid{grid-template-columns:1fr 1fr;}
-  .channel{grid-template-columns:1fr;text-align:center;justify-items:center;}
-  .ch-stats{justify-content:center;}
-  .j-steps{grid-template-columns:repeat(3,1fr);}
-}
-@media(max-width:720px){
-  .burger{display:flex;}
-  .nav-links{position:fixed;top:68px;right:0;flex-direction:column;background:rgba(4,6,13,.97);border-left:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);padding:18px;width:240px;gap:6px;transform:translateX(100%);transition:transform .3s;}
-  .nav-links.open{transform:translateX(0);}
-  .power-grid,.vid-grid,.values,.creed-grid,.socials{grid-template-columns:1fr;}
-  section.block{padding:76px 0;}
-  .sec-head{flex-wrap:wrap;}
-  .j-steps{grid-template-columns:repeat(2,1fr);}
-  .cursor-dot,.cursor-ring{display:none;}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important;}
-  html{scroll-behavior:auto;}
-  #embers{display:none;}
-  .ticker-track{animation:none;}
-  .rv{opacity:1;}
-}
-/* ============================================================
-   SENTRY HERO STATION · v2 (PoC)
-   layered parallax · kinetic type · live terminal · spotlight
-   ============================================================ */
-
-/* ---- cinema overlays (grain / scanlines / vignette) ---- */
-.cinema{position:fixed;inset:0;pointer-events:none;z-index:900;}
-.cinema.scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 3px);mix-blend-mode:overlay;}
-.cinema.vig{background:radial-gradient(ellipse at 50% 42%,transparent 52%,rgba(2,4,10,.6) 100%);}
-.cinema.tone{box-shadow:inset 0 0 22vmin rgba(59,130,246,.05);}
-
-/* ---- hero station layout ---- */
-.hero{isolation:isolate;}
-.hero-inner{position:relative;z-index:4;display:grid;grid-template-columns:1.06fr .94fr;gap:52px;align-items:center;text-align:left;width:100%;}
-.hero-left{position:relative;z-index:3;min-width:0;}
-.hero-right{position:relative;z-index:3;min-width:0;display:flex;align-items:center;justify-content:flex-end;}
-.hero .scroll-cue{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:5;margin-top:0;}
-
-/* ---- cursor spotlight ---- */
-.hero-spot{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(640px circle at var(--mx,50%) var(--my,40%),rgba(255,201,60,.12),rgba(59,130,246,.05) 42%,transparent 66%);}
-
-/* ---- HUD corner brackets ---- */
-.hero-corner{position:absolute;width:46px;height:46px;z-index:2;pointer-events:none;opacity:.65;}
-.hero-corner.hl{top:118px;left:16px;border-top:2px solid var(--gold);border-left:2px solid var(--gold);}
-
-/* ---- holographic data floor ---- */
-.data-floor{position:absolute;left:-35%;right:-35%;bottom:-10%;height:54%;z-index:1;pointer-events:none;
-  transform:perspective(620px) rotateX(60deg);transform-origin:center bottom;
-  background:
-    radial-gradient(ellipse at 50% 100%,rgba(255,201,60,.16),transparent 62%),
-    repeating-linear-gradient(90deg,rgba(59,130,246,.10) 0 1px,transparent 1px 72px),
-    repeating-linear-gradient(0deg,rgba(59,130,246,.07) 0 1px,transparent 1px 72px);
-  -webkit-mask-image:linear-gradient(180deg,transparent,#000 22%);
-   mask-image:linear-gradient(180deg,transparent,#000 22%);}
-.data-floor::after{content:"";position:absolute;left:0;right:0;top:-120px;height:140px;
-  background:linear-gradient(180deg,transparent,rgba(255,201,60,.15),transparent);
-  animation:floorsweep 5.5s linear infinite;}
-@keyframes floorsweep{0%{transform:translateY(0);}100%{transform:translateY(130vh);}}
-
-/* ---- mission stamp ---- */
-.stamp{display:inline-flex;gap:8px;align-items:center;margin:0 0 14px;padding:5px 12px;
-  border:1px dashed rgba(255,201,60,.35);border-radius:4px;font-family:var(--mono);
-  font-size:10px;letter-spacing:2.5px;color:var(--muted);background:rgba(4,6,13,.45);}
-.stamp::before{content:"◈";color:var(--gold);}
-
-/* ---- kinetic title ---- */
-.hero-left .eyebrow{margin-bottom:16px;}
-.kinetic-title{position:relative;display:inline-block;letter-spacing:calc(3px + var(--sv,0px));transition:letter-spacing .2s;}
-.kinetic-title .kt-letter{display:inline-block;will-change:transform,opacity;}
-.kinetic-title::before,.kinetic-title::after{content:attr(data-text);position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .15s;white-space:nowrap;}
-.kinetic-title::before{color:#FF3B5C;transform:translate(3px,1px);}
-.kinetic-title::after{color:var(--cape);transform:translate(-3px,-1px);}
-.kinetic-title:hover::before,.kinetic-title:hover::after{opacity:.45;}
-.kinetic-title:active::before,.kinetic-title:active::after{opacity:.85;}
-@media(hover:none){.kinetic-title::before,.kinetic-title::after{display:none;}}
-
-/* ---- role / lead alignment ---- */
-.hero-left .role{letter-spacing:4px;}
-.hero-left p.lead{margin-left:0;}
-.hero-left .role .handle{color:var(--gold);letter-spacing:2px;}
-
-/* ---- magnetic buttons ---- */
-.btn.magnetic{transition:transform .22s cubic-bezier(.22,1,.36,1),box-shadow .25s,border-color .25s;}
-.btn.magnetic i{font-style:normal;font-size:13px;transition:transform .22s;}
-.btn.magnetic:hover i{transform:translateX(3px);}
-
-/* ============ LIVE TERMINAL ============ */
-.term{position:relative;width:min(100%,560px);background:linear-gradient(180deg,rgba(11,18,38,.92),rgba(4,6,13,.97));
-  border:1px solid rgba(255,201,60,.28);border-radius:14px;
-  box-shadow:0 30px 90px rgba(0,0,0,.55),0 0 46px rgba(255,201,60,.07),inset 0 1px 0 rgba(255,255,255,.05);
-  overflow:hidden;transition:border-color .3s,box-shadow .3s;}
-.term:hover{border-color:rgba(255,201,60,.55);box-shadow:0 34px 100px rgba(0,0,0,.6),0 0 70px rgba(255,201,60,.16);}
-.term::after{content:"";position:absolute;left:0;right:0;height:90px;pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(59,130,246,.05),transparent);
-  animation:termscan 4.5s linear infinite;}
-@keyframes termscan{0%{top:-20%;}100%{top:110%;}}
-.term-head{position:relative;display:flex;align-items:center;gap:10px;padding:10px 14px;
-  border-bottom:1px solid rgba(255,201,60,.14);background:rgba(4,6,13,.66);}
-.term-lights{display:flex;gap:7px;}
-.term-lights i{width:11px;height:11px;border-radius:50%;display:block;}
-.term-lights i:nth-child(1){background:#FF5F57;}
-.term-lights i:nth-child(2){background:#FEBC2E;}
-.term-lights i:nth-child(3){background:#28C840;}
-.term-title{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.term-ctrl{margin-left:auto;display:flex;gap:10px;align-items:center;flex-shrink:0;}
-.term-tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;color:var(--gold);
-  border:1px solid rgba(255,201,60,.35);padding:2px 9px;border-radius:999px;animation:tpulse 2.2s ease-in-out infinite;}
-@keyframes tpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,201,60,.35);}50%{box-shadow:0 0 12px 2px rgba(255,201,60,.14);}}
-.term-sfx{background:transparent;border:1px solid rgba(245,241,230,.18);color:var(--muted);font-family:var(--mono);
-  font-size:8px;font-weight:600;letter-spacing:1.5px;padding:2px 8px;border-radius:999px;cursor:pointer;transition:all .2s;}
-.term-sfx:hover{color:var(--gold);border-color:var(--gold);}
-.term-sfx.on{color:#6EE7A0;border-color:rgba(110,231,160,.5);}
-.term-screen{padding:14px 16px 12px;min-height:300px;max-height:430px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;position:relative;}
-.term-body{font-family:var(--mono);font-size:12.5px;line-height:1.7;overflow-y:auto;overflow-x:hidden;max-height:340px;scrollbar-width:thin;}
-.term-body::-webkit-scrollbar{width:5px;}
-.term-body::-webkit-scrollbar-thumb{background:rgba(255,201,60,.3);border-radius:3px;}
-.tline{white-space:pre-wrap;word-break:break-word;}
-.tline.tc{margin-top:6px;}
-.t-ok{color:#6EE7A0;}
-.t-warn{color:var(--gold);}
-.t-err{color:#FF5F57;}
-.t-info{color:#8FB3FF;}
-.t-dim{color:var(--muted);}
-.t-gold{color:var(--gold-soft);}
-.t-out{color:#C9CFD9;}
-.t-head{color:var(--gold);font-weight:700;letter-spacing:1px;}
-.term-inputline{display:flex;align-items:center;gap:8px;margin-top:12px;font-family:var(--mono);font-size:12.5px;}
-.term-prompt{color:var(--gold);white-space:nowrap;}
-#termInput{flex:1;background:transparent;border:none;outline:none;color:var(--ink);font-family:var(--mono);font-size:12.5px;min-width:0;padding:2px 0;caret-color:var(--gold);}
-#termInput::placeholder{color:rgba(154,163,178,.45);}
-.term-cursor{display:none;width:7px;height:14px;background:var(--gold);flex-shrink:0;animation:termblink 1.06s step-end infinite;}
-.term.ready .term-cursor{display:inline-block;}
-@keyframes termblink{50%{opacity:0;}}
-.term-foot{padding:8px 14px;border-top:1px solid rgba(255,201,60,.1);background:rgba(4,6,13,.6);position:relative;z-index:2;}
-.term-hint{font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
-.term-hint b{color:var(--gold);font-weight:500;}
-.term-glow{position:absolute;inset:-4px;z-index:-1;pointer-events:none;
-  background:radial-gradient(60% 80% at 70% 40%,rgba(59,130,246,.22),transparent 60%);filter:blur(20px);}
-
-/* system mem bar */
-.mem{display:flex;justify-content:space-between;gap:14px;margin-top:18px;padding:8px 12px;border:1px solid rgba(255,201,60,.14);
-  border-radius:8px;background:rgba(4,6,13,.5);font-family:var(--mono);font-size:9.5px;letter-spacing:1.5px;color:var(--muted);}
-.mem b{color:var(--gold);font-weight:600;}
-
-/* ---- hero station responsive ---- */
-@media(max-width:1000px){
-  .hero-inner{grid-template-columns:1fr;gap:38px;}
-  .hero-right{justify-content:stretch;}
-  .term{width:100%;}
-  .hero .scroll-cue{display:none;}
-  .hero{padding:150px 0 90px;}
-}
-@media(hover:none){.hero-spot{display:none;}}
-
-/* ---- hero station reduced-motion ---- */
-@media(prefers-reduced-motion:reduce){
-  .cinema,.hero-spot,.hero-corner,.data-floor,.data-floor::after,.term::after,.term-glow,.term-tag,.hero-spot{display:none!important;}
-  .kinetic-title::before,.kinetic-title::after{display:none;}
-  .kinetic-title{letter-spacing:3px;transition:none;}
-  .term{width:min(100%,560px);}
-  .term-screen{min-height:260px;}
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="cinema scan" aria-hidden="true"></div>
-<div class="cinema vig tone" aria-hidden="true"></div>
-<a class="skip" href="#origin">Skip to content</a>
+<a class="skip-link" href="#main">Skip to content</a>
 
-<div id="loader" role="status" aria-label="Loading">
-  <div class="sigil">S</div>
-  <div class="load-bar"><div id="loadFill"></div></div>
-  <div id="loadTxt">IGNITING…</div>
+<div id="loader" role="dialog" aria-modal="true" aria-label="Loading">
+  <div class="loader-scene" aria-hidden="true">
+    <div class="loader-moon"></div>
+    <div class="loader-ring r1"></div>
+    <div class="loader-ring r2"></div>
+    <div class="loader-fog"></div>
+    <div class="loader-embers"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+  </div>
+  <div class="loader-terminal" aria-hidden="true">
+    <div class="loader-lines" id="loaderLines"></div>
+    <div class="loader-bar"><div class="loader-bar-fill" id="loaderBar"></div></div>
+  </div>
+  <button type="button" class="btn btn-ghost loader-skip" id="skipIntro">Skip Intro</button>
 </div>
 
-<div id="progress" aria-hidden="true"></div>
-<div class="cursor-dot" aria-hidden="true"></div>
-<div class="cursor-ring" aria-hidden="true"></div>
+<div id="scrollProgress" aria-hidden="true"></div>
+<div id="cursorAura" aria-hidden="true"></div>
 
-<nav aria-label="Main">
+<header class="nav" id="navbar">
   <div class="nav-inner">
-    <a href="#top" class="brand"><span class="brand-mark">S</span><span>MOHAMMAD ZIM<small>MR-DESTROYER</small></span></a>
-    <button class="burger" id="burger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#origin" data-spy="origin">Origin</a></li>
-      <li><a href="#powers" data-spy="powers">Powers</a></li>
-      <li><a href="#missions" data-spy="missions">Missions</a></li>
-      <li><a href="#signal" data-spy="signal">Signal</a></li>
-      <li><a href="#contact" data-spy="contact">Contact</a></li>
-    </ul>
-  </div>
-</nav>
-
-<!-- HERO -->
-<header class="hero" id="top">
-  <div class="hero-bg" id="heroBg"><img src="wp2041119.jpg" alt="Sentry meditating above Earth, wreathed in golden energy" fetchpriority="high"></div>
-  <div class="hero-shade"></div>
-  <div class="data-floor" aria-hidden="true"></div>
-  <canvas id="embers" aria-hidden="true"></canvas>
-  <div class="hero-spot" aria-hidden="true"></div>
-  <div class="hero-corner hl" aria-hidden="true"></div>
-  <div class="container hero-inner">
-    <div class="hero-left">
-      <span class="eyebrow"><i></i>OFFENSIVE SECURITY ENGINEER</span>
-      <span class="stamp">MISSION FILE #SENTRY-01 · CLEARANCE: DOJO</span>
-      <h1 class="kinetic-title" data-text="MOHAMMAD ZIM">MOHAMMAD ZIM</h1>
-      <div class="role">a.k.a <strong class="handle">Mr-Destroyer</strong> <em>·</em> Builder of Security Tools</div>
-      <p class="lead">I turn curiosity about how systems break into <strong style="color:var(--gold-soft)">fast, reliable, open-source hacking tools</strong> — and I teach everything I learn on <strong style="color:var(--gold-soft)">ZimShell</strong>.</p>
-      <div class="hero-cta">
-        <a href="#missions" class="btn btn-gold magnetic"><span>Explore My Work</span><i>▸</i></a>
-        <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener" class="btn btn-ghost magnetic"><span>Watch ZimShell</span><i>▶</i></a>
+    <a href="#home" class="nav-brand" aria-label="Home — Nightfall Protocol">
+      <svg class="crescent" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 3.2A9.6 9.6 0 1 0 20.8 14 7.6 7.6 0 0 1 16.6 3.2Z" fill="currentColor"/></svg>
+      <span class="brand-name">NIGHTFALL</span>
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <a href="#home" class="nav-link is-active">Home</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#skills" class="nav-link">Skills</a>
+      <a href="#projects" class="nav-link">Projects</a>
+      <a href="#methodology" class="nav-link">Methodology</a>
+      <a href="#experience" class="nav-link">Experience</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
+    <div class="nav-actions">
+      <span class="status-badge"><span class="status-dot" aria-hidden="true"></span>Available</span>
+      <div class="theme-toggle" role="group" aria-label="Theme and performance">
+        <button type="button" id="themeBtn" aria-pressed="false" title="Toggle Blood Moon theme">🌙<span class="sr-only">Toggle theme</span></button>
+        <button type="button" id="perfBtn" aria-pressed="false" title="Toggle performance mode">⚡<span class="sr-only">Toggle performance mode</span></button>
+        <button type="button" id="motionBtn" aria-pressed="false" title="Toggle reduced motion">⏸<span class="sr-only">Toggle reduced motion</span></button>
       </div>
-      <div class="hero-stats">
-        <div class="hstat"><b><span data-count="19">0</span>+</b><span>Security Tools</span></div>
-        <div class="hstat"><b><span data-count="48">0</span></b><span>Public Repos</span></div>
-        <div class="hstat"><b><span data-count="10">0</span></b><span>Languages</span></div>
-        <div class="hstat"><b><span data-count="2500">0</span>+</b><span>Learners</span></div>
-      </div>
-    </div>
-    <div class="hero-right">
-      <div class="term" id="term" role="region" aria-label="Interactive terminal. Type help to see available commands." aria-keyshortcuts="Enter ArrowUp ArrowDown Tab">
-        <div class="term-head">
-          <span class="term-lights"><i></i><i></i><i></i></span>
-          <span class="term-title">sentry@zim — live uplink</span>
-          <span class="term-ctrl">
-            <button class="term-sfx" id="termSfx" type="button" aria-pressed="false">SFX:OFF</button>
-            <span class="term-tag">LIVE</span>
-          </span>
-        </div>
-        <div class="term-screen">
-          <div class="term-body" id="termBody" aria-live="polite"></div>
-          <div class="term-inputline">
-            <span class="term-prompt" id="termPrompt">zim@sentry:~$</span>
-            <input id="termInput" type="text" autocapitalize="off" autocomplete="off" spellcheck="false" aria-label="Terminal input. Type help for commands." placeholder="type 'help'">
-            <span class="term-cursor" aria-hidden="true"></span>
-          </div>
-        </div>
-        <div class="term-foot"><span class="term-hint">try <b>help</b> · <b>projects</b> · <b>recon</b> · <b>sudo hire-me</b></span></div>
-      </div>
-      <div class="term-glow" aria-hidden="true"></div>
+      <button type="button" class="hamburger" id="hamburger" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </div>
-  <div class="scroll-cue">SCROLL TO BEGIN ↓</div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#home" class="nav-link">Home</a>
+    <a href="#about" class="nav-link">About</a>
+    <a href="#skills" class="nav-link">Skills</a>
+    <a href="#projects" class="nav-link">Projects</a>
+    <a href="#methodology" class="nav-link">Methodology</a>
+    <a href="#experience" class="nav-link">Experience</a>
+    <a href="#contact" class="nav-link">Contact</a>
+  </div>
 </header>
 
-<div class="ticker" aria-hidden="true"><div class="ticker-track" id="ticker">PYTHON · WEB SECURITY · LINUX · BUG BOUNTY · OSINT · RECON · CVE RESEARCH · BASH · NETWORKING · DOCKER ·&nbsp;</div></div>
-
-<!-- ORIGIN -->
-<section class="block" id="origin">
-  <div class="container">
-    <div class="sec-head rv"><span class="sec-num">01</span><h2>The <span>Origin</span></h2><span class="sec-rule"></span></div>
-    <p class="sec-sub rv">The man behind the power. Security researcher, tool-builder, teacher — documenting the whole journey in public.</p>
-    <div class="origin-grid">
-      <div class="portrait rv">
-        <span class="float-tag">EST. 2022</span>
-        <img src="wp2041118.jpg" alt="Sentry in gold and blue, cape billowing" loading="lazy">
-        <div class="portrait-badge"><b>MOHAMMAD ZIM</b><span>Offensive Security · Bug Bounty · Open Source</span></div>
-      </div>
-      <div class="bio">
-        <p class="rv">I'm <strong>Mohammad Zim</strong>, known online as <strong>Mr-Destroyer</strong>. What started as curiosity about how websites work became a craft: <strong>building offensive security tools</strong>, hunting bugs, and studying the cracks in every system.</p>
-        <p class="rv">My philosophy is simple — security tools should be <strong>fast, reliable, and built for real workflows</strong>: payload generation, endpoint hunting, credential discovery, exploitation. Everything I ship is free and open-source.</p>
-        <p class="rv">And I don't gatekeep. On my channel <strong>ZimShell</strong> I break down tools, techniques, and CVEs so the next hacker learns faster than I did. <strong>Hack the planet — then teach it.</strong></p>
-        <div class="values">
-          <div class="value rv"><div class="ic">🔨</div><b>Builder</b><span>19+ tools shipped, from recon hunters to exploit kits.</span></div>
-          <div class="value rv"><div class="ic">🎯</div><b>Hunter</b><span>Bug bounty mindset: recon wins, exploits finish.</span></div>
-          <div class="value rv"><div class="ic">📡</div><b>Teacher</b><span>ZimShell: demos, walkthroughs, CVE breakdowns.</span></div>
-        </div>
-        <div class="journey rv">
-          <h3>The Journey</h3>
-          <div class="j-steps">
-            <div class="j-step"><b>2022</b><span>First Linux install, first Python script</span></div>
-            <div class="j-step"><b>2023</b><span>Villain · EndpointHunter · CredStalker</span></div>
-            <div class="j-step"><b>2024</b><span>WPGhost CVE-2024-10924 · ZimShell live</span></div>
-            <div class="j-step"><b>2025</b><span>CVE-2025-55182 RCE research</span></div>
-            <div class="j-step"><b>2026</b><span>This site · 48 repos strong</span></div>
-          </div>
-        </div>
+<main id="main"><!-- ================= HERO ================= -->
+<section id="home" class="hero section" aria-label="Introduction">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-stars"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-moon" data-depth="18"></div>
+    <div class="hero-castle" data-depth="10"></div>
+    <div class="hero-fog f1" data-depth="26"></div>
+    <div class="hero-fog f2" data-depth="40"></div>
+    <div class="hero-clouds"></div>
+    <div class="hero-scanlines"></div>
+    <div class="hero-vignette"></div>
+    <div class="bat-field" id="batField"></div>
+  </div>
+  <div class="hero-glow" id="heroGlow" aria-hidden="true"></div>
+  <div class="container hero-inner">
+    <div class="hero-copy reveal">
+      <p class="hero-eyebrow mono">ETHICAL HACKER / SECURITY RESEARCHER</p>
+      <h1 class="hero-title">I hunt <span class="blood">vulnerabilities</span> in the dark.</h1>
+      <p class="hero-tagline mono" aria-live="polite"><span id="typedText"></span><span class="type-caret" aria-hidden="true"></span></p>
+      <p class="hero-support">I design, test, and strengthen digital systems through ethical security research, penetration testing, and defensive engineering — authorized work only, documented end to end.</p>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">Explore My Work</a>
+        <a href="#about" class="btn btn-ghost">View Security Profile</a>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- POWERS -->
-<section class="block" id="powers">
-  <div class="container">
-    <div class="sec-head rv"><span class="sec-num">02</span><h2>Powers &amp; <span>Capabilities</span></h2><span class="sec-rule"></span></div>
-    <p class="sec-sub rv">Six disciplines, each with its own instrument panel. Every widget below is live and animated — hover, watch, explore.</p>
-    <div class="power-grid">
-
-      <article class="power rv">
-        <div class="p-visual"><div class="codewin"><span class="c"># endpointhunter — live logic</span><br><span class="k">import</span> requests<br>targets = load_scope(<span class="s">"scope.txt"</span>)<br><span class="k">for</span> t <span class="k">in</span> targets:<br>&nbsp;&nbsp;found = hunt_js(t)<br>&nbsp;&nbsp;print(<span class="s">f"{t}: {len(found)} endpoints"</span>)<span class="caret2"></span></div></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Python &amp; Automation</h3><div class="ring" data-ring="95"><svg width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE89A"/><stop offset="1" stop-color="#E8930C"/></linearGradient></defs><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>95%</b></div></div>
-          <p>My primary weapon. Multi-threaded scanners, exploit scripts, automation pipelines — 90% of my tools are Python.</p>
-          <div class="tags"><span>PYTHON</span><span>THREADING</span><span>REQUESTS</span><span>TOOLING</span></div>
-        </div>
-      </article>
-
-      <article class="power rv">
-        <div class="p-visual"><div class="sweep"></div><div class="orbit"></div><div class="orbit o2"></div><div class="core"></div><span class="blip" style="top:30%;left:30%;"></span><span class="blip" style="top:62%;left:66%;animation-delay:.6s;"></span><span class="blip" style="top:40%;left:70%;animation-delay:1.1s;"></span></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Web App Security</h3><div class="ring" data-ring="88"><svg width="64" height="64" viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke="#FFC93C" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>88%</b></div></div>
-          <p>Injection, broken auth, access control, SSRF. I build scanners that find it and exploits that prove it.</p>
-          <div class="tags"><span>SQLi</span><span>XSS</span><span>LFI/RFI</span><span>JWT</span><span>XXE</span></div>
-        </div>
-      </article>
-
-      <article class="power rv">
-        <div class="p-visual"><div class="gauge" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Linux &amp; Systems</h3><div class="ring" data-ring="90"><svg width="64" height="64" viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke="#FFC93C" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>90%</b></div></div>
-          <p>Home turf. Bash automation, server hardening reversed into attack paths, Docker labs for every exploit.</p>
-          <div class="tags"><span>LINUX</span><span>BASH</span><span>DOCKER</span><span>NETWORKING</span></div>
-        </div>
-      </article>
-
-      <article class="power rv">
-        <div class="p-visual"><svg width="220" height="120" viewBox="0 0 220 120" aria-hidden="true">
-          <line class="netlink" x1="110" y1="60" x2="40" y2="30"/><line class="netlink" x1="110" y1="60" x2="40" y2="90"/>
-          <line class="netlink" x1="110" y1="60" x2="180" y2="30"/><line class="netlink" x1="110" y1="60" x2="180" y2="90"/>
-          <line class="netlink" x1="40" y1="30" x2="40" y2="90"/><line class="netlink" x1="180" y1="30" x2="180" y2="90"/>
-          <circle class="netnode" cx="110" cy="60" r="9"><animate attributeName="r" values="9;12;9" dur="2s" repeatCount="indefinite"/></circle>
-          <circle class="netnode" cx="40" cy="30" r="5" opacity=".8"/><circle class="netnode" cx="40" cy="90" r="5" opacity=".8"/>
-          <circle class="netnode" cx="180" cy="30" r="5" opacity=".8"/><circle class="netnode" cx="180" cy="90" r="5" opacity=".8"/>
-        </svg></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Recon &amp; OSINT</h3><div class="ring" data-ring="85"><svg width="64" height="64" viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke="#FFC93C" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>85%</b></div></div>
-          <p>Endpoints, secrets, subdomains, leaks. My hunters chew through JS and HTML so bounty targets can't hide.</p>
-          <div class="tags"><span>ENDPOINTS</span><span>SECRETS</span><span>DORKING</span><span>LEAKS</span></div>
-        </div>
-      </article>
-
-      <article class="power rv">
-        <div class="p-visual"><div class="trings"><i></i><i></i><i></i><b>🎯</b></div></div>
-        <div class="p-body">
-          <div class="p-top"><h3>CVE Research &amp; Exploits</h3><div class="ring" data-ring="82"><svg width="64" height="64" viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke="#FFC93C" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>82%</b></div></div>
-          <p>From advisory to working PoC: WordPress CVE-2024-10924, React RCE CVE-2025-55182, session-hijack chains.</p>
-          <div class="tags"><span>CVE</span><span>RCE</span><span>PoC</span><span>WORDPRESS</span></div>
-        </div>
-      </article>
-
-      <article class="power rv">
-        <div class="p-visual"><div class="playbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
-        <div class="p-body">
-          <div class="p-top"><h3>Teaching — ZimShell</h3><div class="ring" data-ring="100"><svg width="64" height="64" viewBox="0 0 64 64"><circle class="bgc" cx="32" cy="32" r="27" fill="none" stroke-width="6"/><circle class="fgc" cx="32" cy="32" r="27" fill="none" stroke="#FFC93C" stroke-width="6" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><b>♥</b></div></div>
-          <p>2,500+ learners. Tool demos, hacking tutorials, CVE breakdowns — complex attacks explained simply.</p>
-          <div class="tags"><span>DEMOS</span><span>TUTORIALS</span><span>WRITEUPS</span><span>COURSES</span></div>
-        </div>
-      </article>
-
+    <div class="hero-visual reveal">
+      <div class="profile-card" id="profileCard" data-depth="6">
+        <div class="profile-ring" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#E63958" stroke-width="0.6" stroke-dasharray="4 3"/></svg></div>
+        <img id="heroPortrait" class="profile-img" src="assets/elias.gif?v=8" alt="Animated profile portrait of Mohammad Zim" width="800" height="450" decoding="async" onerror="this.onerror=null;this.src='assets/elias-poster.jpg'">
+        <span class="float-label fl-1 mono">WEB SECURITY</span>
+        <span class="float-label fl-2 mono">NETWORK DEFENSE</span>
+        <span class="float-label fl-3 mono">OSINT</span>
+        <span class="float-label fl-4 mono">SECURITY RESEARCH</span>
+        <span class="float-label fl-5 mono">CTF PLAYER</span>
+      </div>
+      <div class="id-card mono">
+        <div class="id-row"><span>NAME</span><b>Mohammad Zim</b></div>
+        <div class="id-row"><span>ROLE</span><b>Ethical Hacker</b></div>
+        <div class="id-row"><span>LOCATION</span><b>Dhaka, Bangladesh (UTC+6)</b></div>
+        <div class="id-row"><span>STATUS</span><b class="ok">● Open to selected projects</b></div>
+        <div class="id-row"><span>SPECIALTY</span><b>Web · Recon · CVE Research</b></div>
+      </div>
     </div>
   </div>
+  <a href="#about" class="scroll-indicator" aria-label="Scroll to About section"><span class="mouse-wheel" aria-hidden="true"></span></a>
 </section>
 
-<!-- MISSIONS -->
-<div class="band">
-  <img id="bandImg" src="wp2041124.jpg" alt="" aria-hidden="true" loading="lazy">
-  <div class="band-shade"></div>
-  <div class="container band-inner">
-    <div class="sec-head rv" style="justify-content:center;"><span class="sec-num">03</span><h2>Featured <span>Missions</span></h2></div>
-    <p class="rv">Every project below is real, open-source, and ready to run. Click any card for details.</p>
-  </div>
-</div>
-<section class="block" id="missions" style="padding-top:70px;">
+<!-- ================= ABOUT ================= -->
+<section id="about" class="section about" aria-label="About the operator">
   <div class="container">
-    <div class="toolbar">
-      <input id="search" placeholder="Search projects — try 'jwt', 'cve', 'scanner'…" aria-label="Search projects">
-      <select id="sort" aria-label="Sort projects"><option value="stars">Most starred</option><option value="name">A – Z</option><option value="lang">Language</option></select>
-      <span id="count"></span>
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">DOSSIER // 01</p>
+      <h2 class="section-title">About the Operator</h2>
+      <p class="section-sub">An ancient vampire's dossier, written by a modern security engineer.</p>
     </div>
-    <div class="chips" id="chips">
-      <button class="chip on" data-f="all">All</button>
-      <button class="chip" data-f="recon">Recon &amp; OSINT</button>
-      <button class="chip" data-f="security">Web Security</button>
-      <button class="chip" data-f="exploitation">Exploitation</button>
-      <button class="chip" data-f="utility">Utilities</button>
-      <button class="chip" data-f="learning">Learning</button>
-    </div>
-    <div class="proj-grid" id="grid"></div>
-  </div>
-</section>
-
-<!-- SIGNAL -->
-<section class="block" id="signal">
-  <div class="container">
-    <div class="sec-head rv"><span class="sec-num">04</span><h2>The <span>Signal</span> — ZimShell</h2><span class="sec-rule"></span></div>
-    <p class="sec-sub rv">My YouTube channel where tools meet teaching. Demos, walkthroughs, and CVE breakdowns — no fluff, just hacks.</p>
-    <div class="channel rv">
-      <div class="ch-avatar">Z</div>
-      <div>
-        <h3>Zim<span>Shell</span></h3>
-        <p>Offensive security, taught the practical way. New hackers welcome — every video assumes curiosity, not credentials.</p>
-        <div class="ch-stats">
-          <div><b><span data-count="2500">0</span>+</b><span>Subscribers</span></div>
-          <div><b><span data-count="120">0</span>+</b><span>Tutorials</span></div>
-          <div><b><span data-count="48">0</span></b><span>Tools demoed</span></div>
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="about-frame">
+          <img id="aboutPortrait" class="about-img" src="assets/elias.gif?v=8" alt="Mohammad Zim — animated portrait" width="800" height="450" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='assets/elias-poster.jpg'">
+          <div class="about-frame-glow" aria-hidden="true"></div>
+        </div>
+        <ul class="facts-grid" id="factsGrid"></ul>
+      </div>
+      <div class="about-copy reveal">
+        <p class="about-bio">I'm a cybersecurity professional focused on discovering weaknesses, understanding how systems fail, and helping teams build stronger defenses. My work combines offensive security techniques, secure development, threat modeling, and clear technical reporting — always inside authorized scope, always with responsible disclosure.</p>
+        <div class="core-principles" id="corePrinciples"></div>
+        <div class="vials" id="vials" role="group" aria-label="Operating traits meter">
+          <p class="vials-title mono">OPERATOR TRAITS</p>
         </div>
       </div>
-      <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener" class="btn btn-gold">Subscribe</a>
-    </div>
-    <div class="vid-grid">
-      <a class="vid rv" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener">
-        <div class="vid-art"><div class="playbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><span class="vid-dur">SERIES</span></div>
-        <div class="vid-body"><span class="k">TOOL DEMOS</span><h4>Exploitation Walkthroughs</h4><p>Watch each tool break a live target, start to shell.</p></div>
-      </a>
-      <a class="vid rv" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener">
-        <div class="vid-art"><div class="playbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><span class="vid-dur">SERIES</span></div>
-        <div class="vid-body"><span class="k">TUTORIALS</span><h4>Hacking Fundamentals</h4><p>Web security and methodology for ambitious beginners.</p></div>
-      </a>
-      <a class="vid rv" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener">
-        <div class="vid-art"><div class="playbtn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><span class="vid-dur">NEW</span></div>
-        <div class="vid-body"><span class="k">CVE BREAKDOWNS</span><h4>From Report to RCE</h4><p>Advisories decoded into working proof-of-concepts.</p></div>
-      </a>
+      <div class="blood-line" aria-hidden="true"></div>
     </div>
   </div>
 </section>
 
-<!-- CREED -->
-<div class="band" id="creed">
-  <img id="creedImg" src="wp2041118.jpg" alt="" aria-hidden="true" loading="lazy">
-  <div class="band-shade"></div>
-  <div class="container band-inner">
-    <p class="creed-quote rv">"With great power comes great responsibility — <span>so I publish my tools, teach my methods, and hack to protect.</span>"</p>
-    <div class="creed-grid">
-      <div class="creed rv"><b>BUILD IN PUBLIC</b><span>Every tool open-source. Every technique reproducible. No black boxes.</span></div>
-      <div class="creed rv"><b>BREAK TO PROTECT</b><span>Offense informs defense — I hack systems so defenders can fix them first.</span></div>
-      <div class="creed rv"><b>TEACH EVERYTHING</b><span>ZimShell, writeups, and a free hacking course. Knowledge compounds.</span></div>
+<!-- ================= SKILLS ================= -->
+<section id="skills" class="section skills" aria-label="Skills and capabilities">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">ARSENAL // 02</p>
+      <h2 class="section-title">Skills &amp; Capabilities</h2>
+      <p class="section-sub">Disciplines sharpened in authorized labs, CTF arenas, and client engagements.</p>
+    </div>
+    <div class="skills-layout">
+      <div class="skill-cards" id="skillCards"></div>
+      <aside class="constellation-wrap reveal" aria-label="Skill constellation">
+        <div class="constellation" id="constellation" role="img" aria-label="Constellation diagram linking related security skill categories"></div>
+        <ul class="constellation-fallback" id="constellationFallback">
+          <li>Web Application Security</li><li>Network Security</li><li>Cloud Security</li><li>Secure Code Review</li><li>Threat Modeling</li><li>Digital Forensics</li><li>OSINT</li><li>Social Engineering Awareness</li><li>Security Automation</li><li>CTF &amp; Red Team Techniques</li>
+        </ul>
+      </aside>
     </div>
   </div>
-</div>
-
-<!-- CONTACT -->
-<section class="block" id="contact">
+</section><!-- ================= PROJECTS ================= -->
+<section id="projects" class="section projects" aria-label="Featured projects">
   <div class="container">
-    <div class="sec-head rv"><span class="sec-num">05</span><h2>Open a <span>Channel</span></h2><span class="sec-rule"></span></div>
-    <p class="sec-sub rv">Questions, collabs, or just want to talk hacking — send a message or find me on any of these platforms.</p>
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">HUNT LOG // 03</p>
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-sub">Open-source security tooling and research — legal, documented, defensive-minded.</p>
+    </div>
+    <div class="filter-bar" role="group" aria-label="Filter projects" id="filterBar">
+      <button type="button" class="filter-btn is-active" data-filter="all">All</button>
+      <button type="button" class="filter-btn" data-filter="redteam">Red Team</button>
+      <button type="button" class="filter-btn" data-filter="recon">Recon</button>
+      <button type="button" class="filter-btn" data-filter="web">Web Security</button>
+      <button type="button" class="filter-btn" data-filter="osint">OSINT</button>
+      <button type="button" class="filter-btn" data-filter="cve">CVE Research</button>
+      <button type="button" class="filter-btn" data-filter="dev">Dev &amp; Learning</button>
+    </div>
+    <div class="project-grid" id="projectGrid"></div>
+    <h3 class="archive-title mono">// FULL ARCHIVE</h3>
+    <div class="archive-grid" id="archiveGrid"></div>
+  </div>
+</section>
+
+<!-- ================= METHODOLOGY ================= -->
+<section id="methodology" class="section methodology" aria-label="Security methodology">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">PROTOCOL // 04</p>
+      <h2 class="section-title">The Hunt Cycle</h2>
+      <p class="section-sub">Every engagement follows the same oath: authorized, documented, responsible.</p>
+    </div>
+    <div class="hunt-track">
+      <div class="hunt-thread" aria-hidden="true"><div class="hunt-thread-fill" id="threadFill"></div></div>
+      <div class="hunt-marker" id="huntMarker" aria-hidden="true">🦇</div>
+      <ol class="hunt-stages" id="huntStages"></ol>
+    </div>
+  </div>
+</section>
+
+<!-- ================= EXPERIENCE ================= -->
+<section id="experience" class="section experience" aria-label="Experience timeline">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">CHRONICLE // 05</p>
+      <h2 class="section-title">Experience</h2>
+      <p class="section-sub">A career drawn like a thread through the castle halls.</p>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+</section>
+
+<!-- ================= CERTS & STATS ================= -->
+<section class="section certs" aria-label="Certifications and achievements" id="certifications">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">HONORS // 06</p>
+      <h2 class="section-title">Certifications &amp; Achievements</h2>
+      <p class="section-sub">Badges from the crypt — placeholders until verified. No invented credentials.</p>
+    </div>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="badge-grid" id="badgeGrid"></div>
+    <div class="thm-badges reveal">
+      <p class="thm-title mono">TRYHACKME BADGES</p>
+      <ul id="thmBadges"></ul>
+    </div>
+  </div>
+</section><!-- ================= TERMINAL ================= -->
+<section class="section terminal-section" aria-label="Interactive terminal" id="terminal">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">INTERFACE // 07</p>
+      <h2 class="section-title">NIGHTFALL TERMINAL</h2>
+      <p class="section-sub">A decorative demo — type <code>help</code> to begin.</p>
+    </div>
+    <div class="terminal reveal">
+      <div class="terminal-head">
+        <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
+        <span class="t-title mono">nightfall@zim:~</span>
+        <span class="t-warn mono">decorative — no system commands executed</span>
+      </div>
+      <div class="terminal-body" id="termBody" aria-live="polite"></div>      <form class="terminal-input-row" id="termForm">
+        <span class="t-prompt mono">nightfall@zim:~$</span>
+        <label class="sr-only" for="termInput">Terminal command input</label>
+        <input type="text" id="termInput" autocomplete="off" spellcheck="false" placeholder="type help…">
+        <button type="submit" class="t-send mono">ENTER</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section id="contact" class="section contact" aria-label="Contact">
+  <div class="contact-bg">
+    <div class="contact-window">
+      <div class="cw-bars"></div>
+      <div class="cw-moon"></div>
+      <div class="cw-bats"><span></span><span></span><span></span></div>
+    </div>
+    <div class="signal-panel mono">
+      <div class="sp-row"><span>LINK</span><b class="ok">SECURE</b></div>
+      <div class="sp-row"><span>CHANNEL</span><b>NIGHTFALL/01</b></div>
+      <div class="sp-row"><span>WAVES</span><b class="wavebars"><i></i><i></i><i></i><i></i><i></i></b></div>
+    </div>
+  </div>  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono">SIGNAL // 08</p>
+      <h2 class="section-title">Send a Signal Through the Night</h2>
+      <p class="section-sub">Assessments, research collaboration, or a hard question worth answering.</p>
+    </div>
     <div class="contact-grid">
-      <div class="form-card rv">
-        <h3>Send a message</h3>
-        <p>Opens your email app, addressed to me. I read everything.</p>
-        <form id="cform" novalidate>
-          <div class="field"><label for="cName">Your name</label><input id="cName" placeholder="Ada Haxxor" autocomplete="name"></div>
-          <div class="field"><label for="cEmail">Your email</label><input id="cEmail" type="email" placeholder="you@domain.com" autocomplete="email"></div>
-          <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" rows="5" placeholder="Hi Zim — loved the EndpointHunter demo…"></textarea></div>
-          <div class="form-row"><button class="btn btn-gold" type="submit">Send Message</button><button class="btn btn-ghost" type="button" id="copyEmail">Copy Email</button></div>
-        </form>
-        <div id="formStatus" role="status"></div>
-      </div>
-      <div class="socials">
-        <a class="soc rv" href="https://github.com/Mr-Destroyer" target="_blank" rel="noopener"><span class="si"><svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg></span><span><b>GitHub</b><span>@Mr-Destroyer · 48 repos</span></span></a>
-        <a class="soc rv" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener"><span class="si"><svg viewBox="0 0 24 24"><path d="M23.5 6.19a3.02 3.02 0 00-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.5A3.02 3.02 0 00.5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 002.12 2.14c1.88.5 9.38.5 9.38.5s7.5 0 9.38-.5a3.02 3.02 0 002.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.55 15.57V8.43L15.82 12l-6.27 3.57z"/></svg></span><span><b>YouTube</b><span>ZimShell · @Study_Hard69</span></span></a>
-        <a class="soc rv" href="https://tryhackme.com/p/MohammadZim" target="_blank" rel="noopener"><span class="si"><svg viewBox="0 0 24 24"><path d="M12 1.5L1.5 6v12L12 22.5 22.5 18V6L12 1.5zm0 2.26l8 3.56v9.36l-8 3.56-8-3.56V7.32l8-3.56z"/></svg></span><span><b>TryHackMe</b><span>@MohammadZim</span></span></a>
-        <button class="soc rv" id="copyEmail2"><span class="si"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></span><span><b>Email</b><span>istudy204@gmail.com · tap to copy</span></span></button>
+      <form class="contact-form reveal" id="contactForm" novalidate>
+        <div class="form-field">
+          <label for="cfName">Name</label>
+          <input type="text" id="cfName" name="name" required minlength="2" autocomplete="name" placeholder="Your name">
+          <p class="field-error" id="errName" role="alert" hidden></p>
+        </div>
+        <div class="form-field">
+          <label for="cfEmail">Email</label>
+          <input type="email" id="cfEmail" name="email" required autocomplete="email" placeholder="you@example.com">
+          <p class="field-error" id="errEmail" role="alert" hidden></p>
+        </div>        <div class="form-field">
+          <label for="cfType">Project type</label>
+          <select id="cfType" name="type" required>
+            <option value="">Select a project type…</option>
+            <option>Security assessment</option>
+            <option>Vulnerability research</option>
+            <option>CTF / training</option>
+            <option>Speaking / writing</option>
+            <option>Other</option>
+          </select>
+          <p class="field-error" id="errType" role="alert" hidden></p>
+        </div>
+        <div class="form-field">
+          <label for="cfMsg">Message</label>
+          <textarea id="cfMsg" name="message" rows="5" required minlength="10" placeholder="Scope, timeline, and what you need."></textarea>
+          <p class="field-error" id="errMsg" role="alert" hidden></p>
+        </div>
+        <button type="submit" class="btn btn-primary btn-wide">Transmit Secure Inquiry</button>
+        <p class="form-note mono">No backend attached — validates locally, sends nothing.</p>
+        <p class="form-success" id="formSuccess" role="status" hidden>Transmission received. I'll respond as soon as possible.</p>
+      </form>      <div class="contact-links reveal">
+        <h3 class="mono">DIRECT CHANNELS</h3>
+        <a class="contact-link" href="https://github.com/Mr-Destroyer" target="_blank" rel="noopener noreferrer"><span class="cl-icon">🐙</span><span><b>GitHub</b><i>github.com/Mr-Destroyer</i></span></a>
+        <a class="contact-link" href="https://tryhackme.com/p/MohammadZim" target="_blank" rel="noopener noreferrer"><span class="cl-icon">🛡</span><span><b>TryHackMe</b><i>tryhackme.com/p/MohammadZim</i></span></a>
+        <a class="contact-link" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener noreferrer"><span class="cl-icon">▶</span><span><b>YouTube</b><i>youtube.com/@Study_Hard69</i></span></a>
+        <a class="contact-link" href="mailto:[YOUR EMAIL]"><span class="cl-icon">✉</span><span><b>Email</b><i>[YOUR EMAIL]</i></span></a>
+        <a class="contact-link" href="[YOUR RESUME URL]" download><span class="cl-icon">📄</span><span><b>Resume</b><i>[YOUR RESUME URL]</i></span></a>
+        <p class="disclosure-note mono">Responsible disclosure always — owners first, credit when earned.</p>
       </div>
     </div>
   </div>
-</section>
+</section></main>
 
-<!-- FINALE -->
-<div class="finale">
-  <img src="wp2041124.jpg" alt="" aria-hidden="true" loading="lazy">
-  <div class="finale-inner">
-    <h2>HACK THE PLANET.</h2>
-    <p>Built with passion · Powered by curiosity</p>
-    <div style="margin-top:30px;"><a href="#top" class="btn btn-gold">Back to Top</a></div>
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <p class="footer-name">Mohammad Zim <span class="mono">/ MR_DESTROYER</span></p>
+      <p class="footer-role mono">Ethical Hacker • Security Researcher • Cybersecurity Engineer</p>
+      <p class="footer-quote">"Security is strongest when curiosity meets responsibility."</p>
+    </div>
+    <nav class="footer-nav" aria-label="Footer">
+      <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#methodology">Methodology</a><a href="#experience">Experience</a><a href="#contact">Contact</a>
+    </nav>
+    <div class="footer-social">
+      <a href="https://github.com/Mr-Destroyer" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://tryhackme.com/p/MohammadZim" target="_blank" rel="noopener noreferrer">TryHackMe</a>
+      <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener noreferrer">YouTube</a>
+      <a href="[YOUR EMAIL]" class="mono">EMAIL</a>
+      <a href="#" id="privacyLink">Privacy</a>
+      <a href="#" id="disclosureLink">Responsible Disclosure</a>
+    </div>
   </div>
-</div>
-
-<footer>
-  <div class="sigil">S</div>
-  <div class="flinks"><a href="#origin">Origin</a><a href="#powers">Powers</a><a href="#missions">Missions</a><a href="#signal">Signal</a><a href="#contact">Contact</a></div>
-  <p>© 2026 Mohammad Zim (Mr-Destroyer). Sentry artwork shown as thematic backdrop.</p>
+  <div class="container footer-bottom">
+    <p>© <span id="year">2026</span> Mohammad Zim — All rights reserved.</p>
+    <p class="built mono">Built in the shadows. 🦇</p>
+  </div>
+  <button type="button" id="backTop" aria-label="Back to top" class="back-top">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 3.2A9.6 9.6 0 1 0 20.8 14 7.6 7.6 0 0 1 16.6 3.2Z" fill="currentColor"/></svg>
+  </button>
 </footer>
 
-<div id="modalOv" role="dialog" aria-modal="true" aria-label="Project details">
-  <div class="modal">
-    <button class="modal-x" id="modalX" aria-label="Close">✕</button>
-    <div class="cat" id="mCat"></div>
-    <h3 id="mName"></h3>
-    <div class="f" id="mFocus"></div>
-    <p class="d" id="mDesc"></p>
-    <div class="tags" id="mTags"></div>
-    <div class="clone"><code id="mClone"></code><button class="copybtn" id="mCopy">COPY</button></div>
-    <div class="modal-btns"><a class="btn btn-gold" id="mOpen" target="_blank" rel="noopener" style="padding:12px 26px;">View on GitHub</a></div>
+<!-- ================= PROJECT MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" id="projectModal">
+    <button type="button" class="modal-close" id="modalClose" aria-label="Close case study">×</button>
+    <div class="modal-scroll" id="modalScroll"><!-- filled by JS --></div>
   </div>
 </div>
-<div id="toast" role="status"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script>
-const PROJECTS=[
- {name:"villain",focus:"Undetectable payload & shell generation",desc:"Flagship red-team toolkit — payload generation and remote execution with evasion in mind.",lang:"Python",stars:12,cat:"exploitation",tags:["payloads","evasion","red-team"],url:"https://github.com/Mr-Destroyer/villain"},
- {name:"endpointhunter",focus:"Endpoint, secret & LFI discovery",desc:"Hunts API endpoints, LFI paths, secrets and cloud URLs hidden in JS, CSS and HTML. Multi-threaded for speed.",lang:"Python",stars:11,cat:"recon",tags:["recon","api","bug-bounty"],url:"https://github.com/Mr-Destroyer/endpointhunter"},
- {name:"CredStalker",focus:"Exposed credential hunting",desc:"Automated sweep for API keys, passwords, tokens and sensitive data exposed on websites.",lang:"Python",stars:10,cat:"recon",tags:["credentials","osint","scanner"],url:"https://github.com/Mr-Destroyer/CredStalker-"},
- {name:"vulnx",focus:"Automated vulnerability detection",desc:"Scans for common web flaws and demonstrates impact with safe proof-of-concept injection.",lang:"Python",stars:9,cat:"security",tags:["scanner","dast","web"],url:"https://github.com/Mr-Destroyer/vulnx"},
- {name:"WPGhost",focus:"WordPress CVE-2024-10924 research",desc:"Scanner and research exploiter for a critical WordPress CVE — built to study the flaw, not abuse it.",lang:"Python",stars:3,cat:"exploitation",tags:["wordpress","cve","research"],url:"https://github.com/Mr-Destroyer/WPGhost"},
- {name:"EmailSpoofer",focus:"SMTP security testing",desc:"Demonstrates email-spoofing risks for awareness training and mail-server hardening.",lang:"Python",stars:2,cat:"security",tags:["smtp","awareness","testing"],url:"https://github.com/Mr-Destroyer/EmailSpoofer"},
- {name:"SQLZ",focus:"SQL injection learning lab",desc:"All-in-one SQLi practice toolkit — learn injection classes hands-on in your own lab.",lang:"Python",stars:1,cat:"security",tags:["sqli","learning","lab"],url:"https://github.com/Mr-Destroyer/SQLZ"},
- {name:"God_Scanner",focus:"Multi-purpose recon scanner",desc:"One command, full attack-surface overview — ports, headers, tech stack and misconfigurations.",lang:"Python",stars:1,cat:"recon",tags:["recon","automation"],url:"https://github.com/Mr-Destroyer/God_Scanner"},
- {name:"CVE-2025-55182",focus:"React RCE research",desc:"Proof-of-concept research for a React-ecosystem RCE chain — command injection analysis.",lang:"Python",stars:0,cat:"exploitation",tags:["cve","rce","react"],url:"https://github.com/Mr-Destroyer/CVE-2025-55182"},
- {name:"sessionexploit",focus:"Session & auth research",desc:"Studies cookie-session encoding patterns (base64/md5 chains) for auth-bypass research.",lang:"Python",stars:0,cat:"security",tags:["sessions","auth","research"],url:"https://github.com/Mr-Destroyer/sessionexploit"},
- {name:"JWT-MODIFY",focus:"JWT payload toolkit",desc:"Decode, modify and re-sign JWTs in your own lab to test auth assumptions.",lang:"Python",stars:0,cat:"utility",tags:["jwt","auth","lab"],url:"https://github.com/Mr-Destroyer/JWT-MODIFY"},
- {name:"Admin-Finder",focus:"Admin panel discovery",desc:"Fast wordlist-based discovery of login and admin surfaces during authorized tests.",lang:"Perl",stars:0,cat:"recon",tags:["fuzzing","discovery"],url:"https://github.com/Mr-Destroyer/Admin-Finder"},
- {name:"Recon-Search-Assistant",focus:"Smarter security dorking",desc:"Structured Google-dork assistant that turns broad questions into precise recon queries.",lang:"HTML",stars:0,cat:"recon",tags:["dorking","osint"],url:"https://github.com/Mr-Destroyer/Recon-Search-Assistant"},
- {name:"ZimPwn",focus:"LFI / RFI detection",desc:"Quick file-inclusion scanner for your own labs — learn path traversal safely.",lang:"Python",stars:0,cat:"security",tags:["lfi","rfi","lab"],url:"https://github.com/Mr-Destroyer/ZimPwn"},
- {name:"Jarvis_Zim",focus:"Text-to-voice experiments",desc:"Fun Iron-Man-inspired TTS playground built with shell scripting.",lang:"Shell",stars:0,cat:"utility",tags:["tts","automation","fun"],url:"https://github.com/Mr-Destroyer/Jarvis_Zim"},
- {name:"ZIMTHEGOAT",focus:"Hacker-style desktop theme",desc:"Hyprland desktop theme — my daily driver, riced for focus and demos.",lang:"Shell",stars:0,cat:"utility",tags:["linux","ricing","hyprland"],url:"https://github.com/Mr-Destroyer/ZIMTHEGOAT"},
- {name:"leaker",focus:"Passive leak enumeration",desc:"Quiet, passive checks for exposed data tied to a target — OSINT-friendly.",lang:"Go",stars:0,cat:"recon",tags:["osint","leaks"],url:"https://github.com/Mr-Destroyer/leaker"},
- {name:"cybersecurity_course",focus:"Free hacking course",desc:"My beginner-to-intermediate cybersecurity course. The on-ramp I wish I had.",lang:"HTML",stars:0,cat:"learning",tags:["course","beginners"],url:"https://github.com/Mr-Destroyer/cybersecurity_course"},
- {name:"0x41haz-writeup",focus:"Reverse-engineering notes",desc:"Beginner-friendly RE writeup — registers, stack frames and patching, explained clearly.",lang:"Markdown",stars:0,cat:"learning",tags:["reversing","writeup"],url:"https://github.com/Mr-Destroyer/0x41haz-writeup"}
-];
-const LANGC={Python:"#3572A5",Perl:"#0298C3",HTML:"#E34C26",Shell:"#89E051",Go:"#00ADD8",Markdown:"#083FA1"};
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const reduced=matchMedia("(prefers-reduced-motion:reduce)").matches;
-gsap.registerPlugin(ScrollTrigger);
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
-function copyTxt(txt,msg){if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>toast(msg)).catch(()=>toast(txt));}else{const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast(msg);}catch(e){toast(txt);}ta.remove();}}
-
-/* loader */
-(function(){const l=$("#loader"),f=$("#loadFill"),t=$("#loadTxt");const steps=["IGNITING…","CHARGING SOLAR CORE…","LOADING 19 PROJECTS…","TUNING ZIMSHELL SIGNAL…","READY"];let i=0;if(reduced){l.classList.add("done");return;}const h=setInterval(()=>{f.style.width=((i+1)/steps.length*100)+"%";t.textContent=steps[i];i++;if(i>=steps.length){clearInterval(h);setTimeout(()=>l.classList.add("done"),350);}},300);setTimeout(()=>l.classList.add("done"),2600);})();
-
-/* cursor */
-(function(){if(matchMedia("(hover:none)").matches)return;const d=$(".cursor-dot"),r=$(".cursor-ring");let mx=-99,my=-99,rx=-99,ry=-99;addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;d.style.left=mx+"px";d.style.top=my+"px";});(function f(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;r.style.left=rx+"px";r.style.top=ry+"px";requestAnimationFrame(f);})();const sel="a,button,.chip,.proj,.soc,#sort";document.addEventListener("mouseover",e=>{if(e.target.closest(sel))r.classList.add("big");});document.addEventListener("mouseout",e=>{if(e.target.closest(sel))r.classList.remove("big");});})();
-
-/* embers */
-(function(){const c=$("#embers"),x=c.getContext("2d");let W,H,P=[];function size(){W=c.width=c.offsetWidth;H=c.height=c.offsetHeight;}size();addEventListener("resize",size);if(reduced){return;}for(let i=0;i<70;i++)P.push({x:Math.random(),y:Math.random(),r:.8+Math.random()*2.2,s:.0006+Math.random()*.0022,o:Math.random()*Math.PI*2});(function draw(){requestAnimationFrame(draw);if(document.hidden)return;size();x.clearRect(0,0,W,H);P.forEach(p=>{p.y-=p.s;p.o+=.03;if(p.y<-.02){p.y=1.02;p.x=Math.random();}const tw=.45+.55*Math.abs(Math.sin(p.o));x.beginPath();x.arc(p.x*W,p.y*H,p.r,0,7);x.fillStyle="rgba(255,"+(180+Math.floor(50*tw))+","+(60+Math.floor(60*tw))+","+(.55*tw)+")";x.shadowColor="rgba(255,201,60,.8)";x.shadowBlur=8*tw;x.fill();x.shadowBlur=0;});});})();
-
-/* ticker */
-(function(){const t=$("#ticker");t.innerHTML+=t.innerHTML;})();
-
-/* hero parallax + band parallax */
-if(!reduced){
- gsap.to("#heroBg",{yPercent:14,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:true}});
- gsap.to("#bandImg",{yPercent:10,ease:"none",scrollTrigger:{trigger:".band",start:"top bottom",end:"bottom top",scrub:true}});
- gsap.to("#creedImg",{yPercent:10,ease:"none",scrollTrigger:{trigger:"#creed",start:"top bottom",end:"bottom top",scrub:true}});
-}
-
-/* reveals */
-if(reduced){$$(".rv").forEach(e=>e.style.opacity=1);}
-else{$$(".rv").forEach(el=>{gsap.fromTo(el,{opacity:0,y:36},{opacity:1,y:0,duration:.9,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 88%",once:true}});});}
-
-/* counters */
-$$("[data-count]").forEach(el=>{const t=+el.dataset.count,o={v:0};gsap.to(o,{v:t,duration:2,ease:"power2.out",scrollTrigger:{trigger:el,start:"top 92%",once:true},onUpdate:()=>el.textContent=Math.floor(o.v).toLocaleString()});});
-
-/* rings */
-$$(".ring").forEach(r=>{const pct=r.dataset.ring==="100"?100:+r.dataset.ring;const fg=r.querySelector(".fgc");const C=169.6;const target=C*(1-pct/100);if(reduced){fg.style.strokeDashoffset=target;return;}gsap.to(fg,{strokeDashoffset:target,duration:1.8,ease:"power3.out",scrollTrigger:{trigger:r,start:"top 88%",once:true}});});
-
-/* projects */
-let f="all",q="",sort="stars";
-const CATL={recon:"Recon & OSINT",security:"Web Security",exploitation:"Exploitation",utility:"Utilities",learning:"Learning"};
-function list(){let L=PROJECTS.map((p,i)=>({...p,_i:i}));if(f!=="all")L=L.filter(p=>p.cat===f);if(q)L=L.filter(p=>(p.name+p.focus+p.desc+p.lang+(p.tags||[]).join(" ")).toLowerCase().includes(q));if(sort==="stars")L.sort((a,b)=>b.stars-a.stars);if(sort==="name")L.sort((a,b)=>a.name.localeCompare(b.name));if(sort==="lang")L.sort((a,b)=>a.lang.localeCompare(b.lang));return L;}
-function render(anim){const g=$("#grid"),L=list();g.innerHTML=L.map(p=>`<article class="proj" data-i="${p._i}" tabindex="0" role="button" aria-label="${p.name} details"><div class="proj-top"><span class="langdot"><i style="background:${LANGC[p.lang]||"#FFC93C"}"></i>${p.lang}</span><span class="stars">★ ${p.stars}</span></div><h3>${p.name}</h3><div class="focus">${p.focus}</div><p class="desc">${p.desc}</p><div class="proj-foot"><span class="d">View details →</span><span class="t">${(p.tags||[]).slice(0,2).map(t=>"#"+t).join(" ")}</span></div></article>`).join("");$("#count").textContent="Showing "+L.length+" / "+PROJECTS.length;$$("#grid .proj").forEach(c=>{const open=()=>openModal(PROJECTS[+c.dataset.i]);c.onclick=open;c.onkeydown=e=>{if(e.key==="Enter")open();};if(!reduced){c.onmousemove=e=>{const r2=c.getBoundingClientRect();const px=(e.clientX-r2.left)/r2.width-.5,py=(e.clientY-r2.top)/r2.height-.5;c.style.transform=`perspective(900px) rotateY(${px*6}deg) rotateX(${-py*6}deg) translateY(-6px)`;};c.onmouseleave=()=>c.style.transform="";}});if(anim&&!reduced)gsap.fromTo("#grid .proj",{opacity:0,y:22},{opacity:1,y:0,duration:.4,stagger:.04,ease:"power2.out",overwrite:true});}
-render(false);
-$("#chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;$$("#chips .chip").forEach(x=>x.classList.remove("on"));b.classList.add("on");f=b.dataset.f;render(true);});
-$("#search").addEventListener("input",e=>{q=e.target.value.trim().toLowerCase();render(false);});
-$("#sort").addEventListener("change",e=>{sort=e.target.value;render(true);});
-fetch("https://api.github.com/users/Mr-Destroyer/repos?per_page=100").then(r=>r.ok?r.json():null).then(d=>{if(!d)return;let n=0;d.forEach(repo=>{const p=PROJECTS.find(x=>x.url.toLowerCase().endsWith("/"+repo.name.toLowerCase()));if(p&&typeof repo.stargazers_count==="number"&&repo.stargazers_count!==p.stars){p.stars=repo.stargazers_count;n++;}});render(false);if(n)toast("Star counts synced with GitHub");}).catch(()=>{});
-
-/* modal */
-function openModal(p){$("#mCat").textContent=CATL[p.cat]||p.cat;$("#mName").textContent=p.name;$("#mFocus").textContent=p.focus+" · "+p.lang+" · ★ "+p.stars;$("#mDesc").textContent=p.desc;$("#mTags").innerHTML=(p.tags||[]).map(t=>"<span>#"+t.toUpperCase()+"</span>").join("");$("#mClone").textContent="git clone "+p.url+".git";$("#mOpen").href=p.url;$("#modalOv").classList.add("open");}
-function closeModal(){$("#modalOv").classList.remove("open");}
-$("#modalX").onclick=closeModal;$("#modalOv").addEventListener("click",e=>{if(e.target.id==="modalOv")closeModal();});
-$("#mCopy").onclick=()=>copyTxt($("#mClone").textContent,"Clone URL copied");
-
-/* nav */
-(function(){const b=$("#burger"),l=$("#navLinks");b.onclick=()=>{const o=l.classList.toggle("open");b.classList.toggle("open",o);b.setAttribute("aria-expanded",o);};l.querySelectorAll("a").forEach(a=>a.onclick=()=>{l.classList.remove("open");b.classList.remove("open");});const links=$$("[data-spy]");const spy=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting)links.forEach(x=>x.classList.toggle("active",x.dataset.spy===en.target.id));});},{rootMargin:"-40% 0px -55% 0px"});["origin","powers","missions","signal","contact"].forEach(id=>{const s=document.getElementById(id);if(s)spy.observe(s);});addEventListener("scroll",()=>{const h=document.documentElement;$("#progress").style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";},{passive:true});})();
-
-/* contact */
-$("#cform").addEventListener("submit",e=>{e.preventDefault();const n=$("#cName").value.trim()||"there",m=$("#cEmail").value.trim(),msg=$("#cMsg").value.trim();if(!msg){$("#formStatus").textContent="Please write a message first.";return;}location.href="mailto:istudy204@gmail.com?subject="+encodeURIComponent("Portfolio contact — "+n)+"&body="+encodeURIComponent(msg+(m?"\n\n— "+n+" ("+m+")":"\n\n— "+n));$("#formStatus").textContent="Opening your email app…";e.target.reset();});
-$("#copyEmail").onclick=()=>copyTxt("istudy204@gmail.com","Email copied");
-$("#copyEmail2").onclick=()=>copyTxt("istudy204@gmail.com","Email copied");
-
-addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
-addEventListener("load",()=>ScrollTrigger.refresh());
-</script>
-<script>
-/* ============================================================
-   SENTRY HERO STATION ENGINE · v2 (PoC)
-   kinetic type · scroll-velocity typography · spotlight ·
-   magnetic buttons · live interactive terminal
-   ============================================================ */
-(function () {
-  "use strict";
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var fine = !reduced;
-  function $(s) { return document.querySelector(s); }
-  function $$(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
-  function dly(ms) { return fine ? ms : 0; }
-
-  /* ---------- 1 · kinetic title decrypt ---------- */
-  var title = $(".kinetic-title");
-  if (title && window.gsap) {
-    var original = "MOHAMMAD ZIM";
-    title.setAttribute("aria-label", original);
-    var holder = document.createElement("span");
-    holder.setAttribute("aria-hidden", "true");
-    var letters = [];
-    for (var i = 0; i < original.length; i++) {
-      var s = document.createElement("span");
-      s.className = "kt-letter";
-      var ch = original.charAt(i);
-      s.textContent = ch === " " ? "\u00A0" : ch;
-      s.setAttribute("data-ch", ch);
-      letters.push(s);
-      holder.appendChild(s);
-    }
-    title.textContent = "";
-    title.appendChild(holder);
-    if (fine) {
-      var glyphs = "ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789#_$@%";
-      letters.forEach(function (l, idx) {
-        gsap.set(l, { opacity: 0, y: 20, rotateX: -22 });
-        var start = 450 + idx * 90;
-        var sc = setInterval(function () {
-          l.textContent = glyphs.charAt(Math.floor(Math.random() * glyphs.length));
-        }, 46);
-        setTimeout(function () {
-          clearInterval(sc);
-          gsap.to(l, { opacity: 1, y: 0, rotateX: 0, duration: 0.55, ease: "power3.out" });
-          l.textContent = l.getAttribute("data-ch");
-        }, start + 420);
-      });
-    }
-  }
-
-  /* ---------- 2 · scroll velocity -> typography weight ---------- */
-  if (fine) {
-    var root = document.documentElement, lastY = window.scrollY, lastT = performance.now();
-    window.addEventListener("scroll", function () {
-      var y = window.scrollY, t = performance.now();
-      var vel = Math.abs(y - lastY) / Math.max(16, t - lastT) * 10;
-      lastY = y; lastT = t;
-      vel = Math.min(4, vel || 0);
-      root.style.setProperty("--sv", (vel * 1.2).toFixed(2) + "px");
-      clearTimeout(root._svt);
-      root._svt = setTimeout(function () { root.style.setProperty("--sv", "0px"); }, 220);
-    }, { passive: true });
-  }
-
-  /* ---------- 3 · cursor spotlight ---------- */
-  var spot = $(".hero-spot");
-  if (spot && fine && window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-    window.addEventListener("mousemove", function (e) {
-      var r = spot.getBoundingClientRect();
-      spot.style.setProperty("--mx", (e.clientX - r.left) + "px");
-      spot.style.setProperty("--my", (e.clientY - r.top) + "px");
-    }, { passive: true });
-  }
-
-  /* ---------- 4 · magnetic buttons ---------- */
-  if (fine && window.matchMedia("(hover: hover)").matches) {
-    $$(".magnetic").forEach(function (b) {
-      b.addEventListener("mousemove", function (e) {
-        var r = b.getBoundingClientRect();
-        var dx = e.clientX - (r.left + r.width / 2);
-        var dy = e.clientY - (r.top + r.height / 2);
-        var m = Math.sqrt(dx * dx + dy * dy) || 1;
-        var lim = 10;
-        dx = dx / m * Math.min(lim, m * 0.16);
-        dy = dy / m * Math.min(lim, m * 0.16);
-        b.style.transform = "translate(" + dx.toFixed(1) + "px," + dy.toFixed(1) + "px) translateY(-3px)";
-      });
-      b.addEventListener("mouseleave", function () { b.style.transform = ""; });
-    });
-  }
-/* ---------- 5 · live terminal ---------- */
-  var tbody = $("#termBody"), input = $("#termInput"), term = $("#term"), sfxBtn = $("#termSfx");
-  if (!tbody || !input || !term) return;
-  var promptTxt = "zim@sentry:~$";
-  var history = [], hIdx = -1, busy = false, inputEnabled = false;
-  var sfxOn = false, actx = null;
-
-  function esc(s) {
-    return String(s).replace(/[&<>]/g, function (c) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
-    });
-  }
-  function say(h, c) {
-    var d = document.createElement("div");
-    d.className = "tline" + (c ? " " + c : "");
-    d.innerHTML = h;
-    tbody.appendChild(d);
-    tbody.scrollTop = tbody.scrollHeight;
-    return d;
-  }
-  function blip(freq, dur, type, gain) {
-    if (!sfxOn) return;
-    try {
-      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      if (actx.state === "suspended") { actx.resume(); }
-      var o = actx.createOscillator(), g = actx.createGain();
-      o.type = type || "triangle";
-      o.frequency.value = freq;
-      g.gain.value = gain || 0.04;
-      o.connect(g); g.connect(actx.destination);
-      o.start();
-      g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + (dur || 0.08));
-      o.stop(actx.currentTime + (dur || 0.1));
-    } catch (e) { /* audio blocked */ }
-  }
-  function printOut(outs, cb) {
-    var i = 0;
-    (function next() {
-      if (i >= outs.length) { if (cb) { cb(); } return; }
-      say(outs[i].h, outs[i].c);
-      i++;
-      setTimeout(next, dly(60));
-    })();
-  }
-  function typeCmd(txt, done) {
-    if (!fine) {
-      say(esc(promptTxt + " " + txt), "t-dim");
-      if (done) { done(); }
-      return;
-    }
-    busy = true;
-    var i = 0;
-    var d = say("");
-    var dt = txt.length > 42 ? 6 : 18;
-    (function tick() {
-      if (i <= txt.length) {
-        d.innerHTML = esc(promptTxt + " " + txt.slice(0, i)) + '<span class="t-ok">\u258B</span>';
-        i++;
-        setTimeout(tick, dt);
-      } else {
-        d.innerHTML = esc(promptTxt + " " + txt) + '<span class="t-gold"> \u2588</span>';
-        busy = false;
-        if (done) { done(); }
-      }
-    })();
-  }
-  function echoL(h, c) {
-    say(h, c);
-    if (fine) blip(440, 0.07, "triangle", 0.03);
-  }
-
-  var HELP = [
-    { h: "<span class='t-head'>AVAILABLE COMMANDS</span>" },
-    { h: "help .......... list commands", c: "t-out" },
-    { h: "whoami ........ identify the operator", c: "t-out" },
-    { h: "projects ...... flagship arsenal", c: "t-out" },
-    { h: "status ........ uplinks + live stats", c: "t-out" },
-    { h: "recon ......... run a port sweep", c: "t-out" },
-    { h: "bio ........... read profile.txt", c: "t-out" },
-    { h: "contact ....... open every channel", c: "t-out" },
-    { h: "ls ............ list sentry files", c: "t-out" },
-    { h: "ping .......... ping the dojo", c: "t-out" },
-    { h: "sudo hire-me .. apply for a contract", c: "t-warn" }
-  ];
-  var NMAP = [
-    { h: "Starting Nmap 8.10 ( https://nmap.org )", c: "t-dim" },
-    { h: "zimshell.local — authorized port sweep", c: "t-dim" },
-    { h: "PORT      STATE  SERVICE", c: "t-head" },
-    { h: "22/tcp    open   ssh", c: "t-ok" },
-    { h: "80/tcp    open   http (zimshell web)", c: "t-ok" },
-    { h: "443/tcp   open   https (tls 1.3)", c: "t-ok" },
-    { h: "1337/tcp  open   zero-day forge [REDACTED]", c: "t-warn" },
-    { h: "9000/tcp  open   spiderman", c: "t-ok" },
-    { h: "Nmap done — 5 ports swept, nothing exposed.", c: "t-dim" }
-  ];
-  var PROJECTS = [
-    { h: "<span class='t-head'>FLAGSHIP ARSENAL (★ = stars)</span>" },
-    { h: "endpointhunter ... ★ 11 .... JS & endpoint harvesting", c: "t-out" },
-    { h: "villain .......... ★ 12 .... undetectable payload gen", c: "t-out" },
-    { h: "CredStalker ...... ★ 10 .... exposed credential hunter", c: "t-out" },
-    { h: "vulnx ............ ★ 9 ..... auto vulnerability finder", c: "t-out" },
-    { h: "Fucker ........... ★ 6 ..... web app vulnerability scanner", c: "t-out" },
-    { h: "WPGhost .......... ★ 3 ..... wordpress CVE-2024-10924", c: "t-out" },
-    { h: "CVE-2025-55182 ... ★ 0 ..... react RCE research", c: "t-out" },
-    { h: "+ 12 more in the Arsenal → scroll to #missions", c: "t-dim" }
-  ];
-  var PROFILE = [
-    { h: "<span class='t-head'>MISSION PROFILE — sentry://zim</span>" },
-    { h: "name ...... MOHAMMAD ZIM · handle: MR_DESTROYER", c: "t-out" },
-    { h: "role ...... OFFENSIVE_SECURITY_ENGINEER", c: "t-out" },
-    { h: "zone ...... PYTHON · WEB_SECURITY · LINUX · OSINT", c: "t-out" },
-    { h: "bio ....... security tools should be fast, reliable", c: "t-out" },
-    { h: "           and built for real workflows. i ship", c: "t-out" },
-    { h: "           them free + open-source, then teach", c: "t-out" },
-    { h: "           every byte on ZIMSHELL.", c: "t-out" },
-    { h: "motto ..... \"hack the planet — then teach it.\"", c: "t-warn" }
-  ];
-  var WHOAMI_OUT = [
-    { h: "name ......... MOHAMMAD ZIM", c: "t-out" },
-    { h: "handle ....... MR_DESTROYER", c: "t-out" },
-    { h: "role ......... OFFENSIVE_SECURITY_ENGINEER", c: "t-out" },
-    { h: "base ......... PYTHON · WEB_SECURITY · LINUX", c: "t-out" },
-    { h: "clearance .... TOP_SECRET//DOJO", c: "t-warn" },
-    { h: "alias ........ ZERO_DAY_ARCHITECT", c: "t-out" }
-  ];
-  var STATUS_OUT = [
-    { h: "tools shipped .. 19+", c: "t-ok" },
-    { h: "public repos ... 48", c: "t-ok" },
-    { h: "languages ...... 10", c: "t-ok" },
-    { h: "learners ....... 2500+", c: "t-ok" },
-    { h: "uplinks ........ github ✓ · youtube ✓ · tryhackme ✓", c: "t-dim" }
-  ];
-  var CONTACT_OUT = [
-    { h: "email ..... istudy204@gmail.com", c: "t-out" },
-    { h: "github .... github.com/Mr-Destroyer", c: "t-out" },
-    { h: "youtube ... youtube.com/@Study_Hard69 (ZimShell)", c: "t-out" },
-    { h: "tryhackme . tryhackme.com/p/MohammadZim", c: "t-out" },
-    { h: "status .... all channels open.", c: "t-dim" }
-  ];
-  var LS_OUT = [
-    { h: "bio.txt    profile/   projects/", c: "t-ok" },
-    { h: "zimsignal/ cve-pocs/  patents/", c: "t-ok" },
-    { h: "status.log .hidden_dojo/   ← permission denied", c: "t-dim" }
-  ];
-  var HIRE_OUT = [
-    { h: "[sudo] password for zim: \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588", c: "t-dim" },
-    { h: "authenticating against star-volt ledger ...", c: "t-dim" },
-    { h: "access granted.", c: "t-ok" },
-    { h: "→ opening secure channel: istudy204@gmail.com", c: "t-gold" },
-    { h: "→ write \"HIRE-ZIM\" in the subject line.", c: "t-gold" }
-  ];
-  var PING_OUT = [
-    { h: "PING sentry (127.0.0.1) 56(84) bytes of data.", c: "t-dim" },
-    { h: "64 bytes: icmp_seq=1 ttl=64 time=0.432 ms", c: "t-ok" },
-    { h: "reply from zim: reliability 100% — operator online.", c: "t-warn" }
-  ];
-  var COMMANDS = {
-    help: function () { printOut(HELP); },
-    whoami: function () { printOut(WHOAMI_OUT); },
-    projects: function () { printOut(PROJECTS); },
-    status: function () { printOut(STATUS_OUT); },
-    recon: function () { printOut(NMAP); },
-    bio: function () { printOut(PROFILE); },
-    profile: function () { printOut(PROFILE); },
-    contact: function () { printOut(CONTACT_OUT); },
-    ls: function () { printOut(LS_OUT); },
-    ping: function () { printOut(PING_OUT); },
-    clear: function () { return "CLEAR"; },
-    hire: function () { printOut(HIRE_OUT); }
-  };
-
-  function resolve(raw) {
-    var parts = raw.trim().replace(/\s+/g, " ").split(" ");
-    var c = (parts[0] || "").toLowerCase();
-    var rest = parts.slice(1).join(" ");
-    if (c === "sudo") {
-      if (/hire/.test(rest)) { return { fn: COMMANDS.hire }; }
-      return { fn: COMMANDS.whoami };
-    }
-    if (c === "cat") { return { fn: /bio|profile/i.test(rest) ? COMMANDS.bio : COMMANDS.ls }; }
-    if (c === "nmap") { return { fn: COMMANDS.recon }; }
-    if (c === "echo") {
-      return { fn: function () { say(esc(rest || ""), "t-out"); } };
-    }
-    if (c === "curl" || c === "wget") {
-      return { fn: function () { printOut([{ h: "blocked: external requests disabled. try 'recon'.", c: "t-err" }]); } };
-    }
-    return { fn: COMMANDS[c] || null };
-  }
-
-  function exec(raw) {
-    if (busy || !inputEnabled) return;
-    if (!raw || !raw.trim()) { say(promptTxt, "t-dim"); input.value = ""; return; }
-    say(esc(promptTxt + " " + raw), "t-dim");
-    var res = resolve(raw);
-    if (res && res.fn) {
-      if (fine) blip(524, 0.06, "triangle", 0.035);
-      var out = res.fn();
-      if (out === "CLEAR") { tbody.innerHTML = ""; }
-    } else {
-      say("zsh: command not found: " + esc(raw.split(/\s+/)[0]), "t-err");
-      say("type 'help' for the command list.", "t-dim");
-      if (fine) blip(190, 0.09, "sawtooth", 0.04);
-    }
-    history.push(raw);
-    hIdx = history.length;
-    input.value = "";
-    input.focus();
-  }
-
-  input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      if (busy || !inputEnabled) return;
-      e.preventDefault();
-      exec(input.value);
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (hIdx > 0) { hIdx--; input.value = history[hIdx]; }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (hIdx < history.length - 1) { hIdx++; input.value = history[hIdx]; }
-      else { hIdx = history.length; input.value = ""; }
-    } else if (e.key === "Tab") {
-      e.preventDefault();
-      var cur = input.value.trim();
-      var names = ["help", "whoami", "projects", "status", "recon", "bio", "contact", "ls", "ping", "cat bio.txt", "sudo hire-me", "clear", "echo"];
-      for (var k = 0; k < names.length; k++) {
-        if (cur && names[k].indexOf(cur) === 0) { input.value = names[k]; break; }
-      }
-    }
-  });
-
-  term.addEventListener("click", function (e) {
-    if (e.target === sfxBtn) return;
-    input.focus();
-  });
-
-  if (sfxBtn) {
-    sfxBtn.addEventListener("click", function () {
-      sfxOn = !sfxOn;
-      sfxBtn.classList.toggle("on", sfxOn);
-      sfxBtn.textContent = sfxOn ? "SFX:ON" : "SFX:OFF";
-      sfxBtn.setAttribute("aria-pressed", sfxOn ? "true" : "false");
-      if (sfxOn) blip(660, 0.09, "triangle", 0.03);
-    });
-  }
-
-  var BOOT = [
-    { h: "<span class='t-head'>SENTRY OS v4.2.0 — SECURE BOOT</span>", d: 200 },
-    { h: "[ OK ] loading operator profile ......... zim", c: "t-ok", d: 130 },
-    { h: "[ OK ] mounting /tool.arsenal ......... 48 weapons", c: "t-ok", d: 130 },
-    { h: "[ OK ] github uplink ................. 48 repos · 19 tools", c: "t-ok", d: 130 },
-    { h: "[ OK ] zimshell signal ............... LIVE", c: "t-ok", d: 130 },
-    { h: "[ OK ] tracers armed · clearing throttle", c: "t-dim", d: 170 }
-  ];
-
-  function boot() {
-    busy = true;
-    var i = 0;
-    (function nxt() {
-      if (i >= BOOT.length) { setTimeout(runIntro, dly(140)); return; }
-      echoL(BOOT[i].h, BOOT[i].c);
-      i++;
-      setTimeout(nxt, dly(BOOT[i - 1].d));
-    })();
-  }
-  function runIntro() {
-    typeCmd("whoami", function () {
-      printOut(WHOAMI_OUT, function () {
-        typeCmd("nmap -sS -T4 zimshell.local", function () {
-          printOut(NMAP, function () {
-            typeCmd("cat bio.txt", function () {
-              printOut(PROFILE, function () { ready(); });
-            });
-          });
-        });
-      });
-    });
-  }
-  function ready() {
-    busy = false;
-    inputEnabled = true;
-    term.classList.add("ready");
-    input.placeholder = "";
-    echoL("<span class='t-head'>[ SYSTEM ONLINE ] type 'help' to begin.</span>", "t-ok");
-    if (window.matchMedia("(hover: none)").matches === false) { input.focus(); }
-  }
-
-  setTimeout(boot, dly(1100));
-})();
-</script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
