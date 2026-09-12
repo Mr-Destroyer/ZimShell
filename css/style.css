@@ -355,6 +355,14 @@ body.perf #cursorRing{display:none}
 .principle .p-icon{font-size:20px;line-height:1.4}
 .principle b{display:block;color:var(--silver);font-size:14px}
 .principle p{color:var(--muted);font-size:12.5px;line-height:1.55}
+/* --- Dossier case-file header (§3.4). Sits under the section head and
+   reads as the cover page of a pulled file: a classification stamp and
+   a three-row metadata block, both ruled like a form. --- */
+.dossier-head{display:flex;flex-wrap:wrap;align-items:center;gap:18px 26px;margin-top:26px;padding-top:20px;border-top:1px solid var(--line-soft)}
+.dossier-meta{display:flex;flex-wrap:wrap;gap:8px 26px;font-size:10.5px}
+.dossier-meta>div{display:flex;align-items:baseline;gap:8px}
+.dossier-meta dt{color:var(--muted);letter-spacing:.18em}
+.dossier-meta dd{color:var(--silver);letter-spacing:.08em}
 .vials-title{font-size:11px;letter-spacing:.3em;color:var(--muted);margin-bottom:16px}
 .vial-row{display:grid;grid-template-columns:110px 1fr 44px;gap:12px;align-items:center;margin-bottom:12px}
 .vial-label{font-size:12.5px;color:var(--silver)}
@@ -432,6 +440,9 @@ body.perf .cg-node-ring{filter:none}
 .cg-readout-name{font-weight:600;color:var(--silver);font-size:14.5px}
 .cg-readout-level{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red)}
 .cg-readout-desc{color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:10px}
+/* Idle-state copy sits alone in the panel, so it needs no bottom margin.
+   A class rather than an inline style — the CSP has no 'unsafe-inline'. */
+.cg-readout-idle{margin:0}
 .cg-readout-tools{display:flex;flex-wrap:wrap;gap:6px}
 .cg-readout-tools span{font-family:var(--mono);font-size:10px;color:var(--candle);border:1px solid var(--line-soft);border-radius:999px;padding:3px 9px}
 .cg-readout-links{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:10px}
@@ -479,6 +490,51 @@ body.perf .cg-node-ring{filter:none}
 .pbtn:hover{text-decoration:none;border-color:var(--red);background:rgba(230,57,88,.12)}
 .pbtn.primary{background:linear-gradient(135deg,var(--crimson),#5E1029);border-color:var(--red);color:#fff}
 .pbtn.primary:hover{background:linear-gradient(135deg,var(--red),var(--crimson))}
+/* --- GitHub live stats strip (§3.6). Sits between the description and
+   the tags. It ships with the hardcoded PROJECTS[] values already in
+   place, so it is correct before any fetch resolves — the .is-live
+   class (added only after the API answers) lifts it from placeholder
+   dimness to full contrast. No layout shift either way: the strip
+   occupies its final height from first paint. --- */
+.gh-strip{display:flex;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.06em;color:var(--muted);margin-bottom:12px;opacity:.72;transition:opacity .4s}
+.gh-strip.is-live{opacity:1}
+.gh-strip .gh-stars{color:var(--candle)}
+.gh-strip .gh-lang{color:var(--moon)}
+.gh-sep{opacity:.5}
+/* The archive rows carry the same data; keep them consistent. */
+.ac-stars.is-live{color:var(--candle)}
+
+/* --- Recon feed (§4.2). Public GitHub activity rendered as a readout.
+   Hidden via the [hidden] attribute when the fetch fails, so a
+   rate-limit leaves no empty frame on the page. --- */
+.recon-feed{margin-top:52px;border:1px solid var(--line);border-radius:16px;background:rgba(10,7,12,.6);overflow:hidden}
+.recon-feed[hidden]{display:none}
+.rf-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:rgba(21,16,24,.55)}
+.rf-title{font-size:11px;letter-spacing:.28em;color:var(--red)}
+.rf-src{font-size:10px;letter-spacing:.1em;color:var(--muted);margin-left:auto}
+.rf-list{list-style:none}
+.rf-row{display:grid;grid-template-columns:84px minmax(0,1.1fr) minmax(0,2fr) 68px;gap:14px;align-items:baseline;padding:10px 18px;border-bottom:1px solid var(--line-soft);font-size:12px;transition:background .25s}
+.rf-row:last-child{border-bottom:0}
+.rf-row:hover{background:rgba(230,57,88,.05)}
+.rf-kind{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--candle);border:1px solid rgba(227,155,90,.3);border-radius:4px;padding:2px 6px;text-align:center;justify-self:start}
+/* Pushes are the signal worth spotting in a recon feed — the rest are
+   context. Only the PUSH marker gets the crimson treatment. */
+.rf-kind[data-k="PUSH"]{color:var(--red);border-color:var(--line)}
+.rf-repo{font-family:var(--mono);font-size:11.5px;color:var(--silver);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-msg{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rf-time{font-family:var(--mono);font-size:10.5px;color:var(--muted);text-align:right}
+
+/* --- Availability widget (§4.3). Manually toggled in data.js. --- */
+.avail-widget{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 18px;margin-bottom:22px}
+.avail-dot{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);flex-shrink:0;animation:pulse 2.4s ease-in-out infinite}
+/* Engaged state: the dot goes cold and stops beating. An availability
+   indicator that keeps pulsing while closed is just noise. */
+.avail-widget.is-closed .avail-dot{background:var(--muted);box-shadow:none;animation:none}
+.status-badge.is-closed .status-dot{background:var(--muted);box-shadow:none;animation:none}
+.avail-text b{display:block;color:var(--silver);font-size:14px}
+.avail-text i{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.5}
+body.reduced .avail-dot{animation:none}
+body.perf .avail-dot{animation:none}
 .archive-title{font-size:11px;letter-spacing:.3em;color:var(--muted);margin:52px 0 18px}
 .archive-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .archive-card{display:block;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;transition:border-color .25s,transform .25s}
@@ -745,6 +801,12 @@ body.perf .t-matrix{text-shadow:none}
   .tl-item{width:auto;margin-left:34px !important}
   .tl-item .tl-dot{left:-33px !important;right:auto !important}
   .hunt-stages{grid-template-columns:repeat(2,1fr)}
+  /* Recon feed: the 4-column readout cannot hold 4 columns at this
+     width without the commit message collapsing to nothing, so the
+     message drops to its own full-width line. The row becomes a
+     2-line block: kind+repo+time on top, message beneath. */
+  .rf-row{grid-template-columns:78px minmax(0,1fr) 60px;gap:10px}
+  .rf-msg{grid-column:1/-1;white-space:normal;font-size:11.5px}
   /* Tooltip is hover-only decoration; on touch layouts it would hang past
      the viewport edge (nowrap + centered on edge nodes) and widen the ICB. */
   .const-tip{display:none}
