@@ -1,20 +1,56 @@
 /* =========================================================
    NIGHTFALL PROTOCOL — vampire-gothic security portfolio
-   Theme tokens below are the single source of truth.
+   =========================================================
+   DESIGN LANGUAGE BIBLE (§2) — tokens below are the single
+   source of truth. Every new section pulls from these; no
+   arbitrary hues, no fourth typeface, no bespoke easings.
+
+   PALETTE   near-black ground + crimson accent + moon/candle
+             secondaries. Blood-Moon is an alternate theme,
+             not a second palette.
+   TYPE      three roles, strictly:
+               --disp  gothic display serif  → headings, names
+               --body  grotesk               → prose, UI
+               --mono  monospace             → data, code, tags
+   MOTIF     scanlines, RGB-split glitch, redaction bars,
+             dossier stamp, embers, moon phases.
+   MOTION    one entrance style (.reveal), glitch as accent
+             only, scroll-scrubbed for progress.
    ========================================================= */
 :root{
+  /* --- palette: ground --- */
   --bg:#070709; --bg2:#0D0A0F; --card:#151018; --card2:#1A131E;
+  /* --- palette: accent --- */
   --burgundy:#3A0D1E; --crimson:#9D1838; --red:#E63958;
+  /* --- palette: secondary --- */
   --silver:#D5D0D6; --muted:#938B98; --moon:#8AA7C7; --candle:#E39B5A;
+  /* --- semantic status (badges, dots, form states) --- */
+  --ok:#7FB98A;
+  /* --- lines & surfaces --- */
   --line:rgba(230,57,88,.16); --line-soft:rgba(213,208,214,.08);
+  --accent-rgb:230,57,88;          /* crimson as channels, for rgba() */
+  --accent-soft:rgba(var(--accent-rgb),.10);
+  --accent-mid:rgba(var(--accent-rgb),.25);
+  /* --- type: three roles, no fourth --- */
   --disp:'Cinzel',serif; --body:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  /* --- geometry --- */
   --r:14px; --nav-h:64px; --glow:0 0 24px rgba(230,57,88,.25);
+  /* --- motion: shared timing so nothing invents its own feel --- */
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in-out:cubic-bezier(.4,0,.2,1);
+  --t-fast:.25s; --t-mid:.45s; --t-slow:.7s;
+  /* --- motif: glitch --- */
+  --glitch-a:#ff003c; --glitch-b:#00e5ff;   /* RGB-split pair */
+  --scanline:rgba(0,0,0,.14);
+  --stamp-red:rgba(230,57,88,.55);
   color-scheme:dark;
 }
 body.blood-moon{
   --bg:#0B0507; --bg2:#140709; --card:#1C0D12; --card2:#241017;
   --crimson:#C41E44; --red:#FF4D6F; --moon:#C98A8A;
   --line:rgba(255,77,111,.24);
+  --accent-rgb:255,77,111;
+  --stamp-red:rgba(255,77,111,.55);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 12px)}
@@ -46,6 +82,10 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .btn-primary{background:linear-gradient(135deg,var(--crimson),#5E1029);color:#fff;border:1px solid rgba(230,57,88,.5);box-shadow:var(--glow)}
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(230,57,88,.4)}
 .btn-ghost{color:var(--silver);border:1px solid var(--line);background:rgba(21,16,24,.5)}
+/* §3.3 — magnetic CTAs. JS sets `translate` toward a nearby pointer
+   (≤8px); this transition is the settle-back. Never applies to focus —
+   keyboard users get the standard focus ring, no movement. */
+.btn.magnetic{transition:transform .25s,translate .3s var(--ease-out),box-shadow .25s,background .25s,border-color .25s}
 .btn-ghost:hover{border-color:var(--red);transform:translateY(-2px)}
 .btn-wide{width:100%}
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
@@ -57,21 +97,107 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 }
 body.reduced *,body.reduced *::before,body.reduced *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
 body.reduced .reveal{opacity:1;transform:none}
-@keyframes pulse{50%{opacity:.4;transform:scale(.8)}}
-.theme-toggle{display:flex;gap:4px;border:1px solid var(--line);border-radius:10px;padding:4px}
-.theme-toggle button{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:14px;transition:background .25s}
-.theme-toggle button:hover{background:rgba(230,57,88,.15)}
-.theme-toggle button[aria-pressed="true"]{background:rgba(230,57,88,.25);box-shadow:inset 0 0 0 1px var(--line)}
-.hamburger{display:none;flex-direction:column;gap:5px;width:40px;height:40px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px}
-.hamburger span{width:18px;height:2px;background:var(--silver);transition:transform .3s,opacity .3s}
-.hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
-.hamburger[aria-expanded="true"] span:nth-child(2){opacity:0}
-.hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-.mobile-menu{display:none;flex-direction:column;padding:12px 24px 20px;background:rgba(7,7,9,.97);border-bottom:1px solid var(--line);transform:translateY(-8px);opacity:0;transition:transform .3s,opacity .3s}
-.mobile-menu.open{transform:none;opacity:1}
-.mobile-menu .nav-link{padding:12px 4px;border-bottom:1px solid var(--line-soft)}
-#scrollProgress{position:fixed;top:0;left:0;bottom:0;width:3px;z-index:1100;background:linear-gradient(var(--crimson),var(--red));transform-origin:top;transform:scaleY(0);box-shadow:0 0 10px rgba(230,57,88,.6)}
-#cursorAura{position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(230,57,88,.09),transparent 65%);transform:translate(-50%,-50%);opacity:0;transition:opacity .4s}
+/* No-JS fallback: without JS the observer never adds .in, so every
+   .reveal section would sit at opacity:0 forever. When scripting is
+   unavailable (html has no .js class — main.js sets it first thing),
+   all gated content is simply shown. */
+html:not(.js) .reveal{opacity:1;transform:none}
+html:not(.js) .redact-bar{display:none}
+
+/* ============ MOTIF VOCABULARY ============
+   Shared visual language lifted from the caption-glitch-rgb
+   composition and generalized into reusable classes. Every
+   section uses these instead of inventing its own treatment.
+   --------------------------------------------------------- */
+
+/* --- Scanline overlay: the CRT texture. Pure background-image,
+       no filter, no repaint cost on scroll. --- */
+.scanlines{position:relative}
+.scanlines::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(0deg,var(--scanline) 0 1px,transparent 1px 4px);
+  opacity:.5;
+}
+
+/* --- RGB-split glitch: chromatic aberration via text-shadow.
+       The exact technique from caption-glitch-rgb.html (offset
+       #ff003c left, #00e5ff right) with the same travel distance,
+       but as a hover/reveal accent rather than a looping effect.
+       Looping glitch reads as broken; this only fires on intent. --- */
+.glitch{position:relative;display:inline-block}
+.glitch:hover,.glitch:focus-visible{
+  animation:glitchSplit .42s steps(2,end) 1;
+}
+@keyframes glitchSplit{
+  0%  {transform:translateX(0);    text-shadow:none}
+  20% {transform:translateX(-6px); text-shadow:6px 0 var(--glitch-a),-6px 0 var(--glitch-b)}
+  45% {transform:translateX(4px);  text-shadow:-4px 0 var(--glitch-a),4px 0 var(--glitch-b)}
+  70% {transform:translateX(-2px); text-shadow:2px 0 var(--glitch-a),-2px 0 var(--glitch-b)}
+  100%{transform:translateX(0);    text-shadow:none}
+}
+/* One-shot reveal variant — settles into the clean final state.
+   Used for the hero headline on first load, never looping. */
+.glitch-once{animation:glitchSplit .5s steps(2,end) 1}
+/* Reduced motion: no split, no travel — the text simply is. */
+body.reduced .glitch:hover,body.reduced .glitch:focus-visible,
+body.reduced .glitch-once{animation:none;text-shadow:none;transform:none}
+
+/* --- Redaction bars: black bars that slide away to reveal text.
+       The signature transition. Used sparingly (About bio + case
+       study NDA fields) so it stays special. --- */
+.redact{position:relative;overflow:hidden}
+.redact-bar{
+  position:absolute;top:0;bottom:0;left:0;right:0;z-index:2;
+  background:var(--bg2);
+  transform-origin:right center;
+  transform:scaleX(1);
+  transition:transform .75s var(--ease-out);
+  pointer-events:none;
+}
+.redact-bar:nth-of-type(2){transform-origin:left center;transition-delay:.08s}
+.redact.in .redact-bar{transform:scaleX(0)}
+/* Reduced motion: bars are removed outright, text is simply visible. */
+body.reduced .redact-bar{display:none}
+/* Bio variant (§3.4): bars sit over the paragraph; the paragraph itself
+   needs the stacking context and overflow clip the motif expects. */
+p.redact{display:block}
+p.redact .redact-bar{transition:transform .7s var(--ease-out)}
+
+/* §4.1 — Blood-Moon theme pulse: a single full-screen crimson breath
+   that cross-fades the theme change instead of snapping. One animation,
+   removed on animationend by JS. Reduced/perf never receive the class. */
+body.theme-pulse::after{
+  content:'';position:fixed;inset:0;z-index:2000;pointer-events:none;
+  background:radial-gradient(ellipse at center,rgba(230,57,88,.22),rgba(157,24,56,.12) 55%,transparent 80%);
+  animation:themePulse .9s var(--ease-out) forwards;
+}
+@keyframes themePulse{
+  0%{opacity:0}
+  30%{opacity:1}
+  100%{opacity:0}
+}
+
+/* --- Dossier stamp: wax-seal / classification mark. --- */
+.stamp{
+  display:inline-block;font-family:var(--mono);font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;
+  color:var(--stamp-red);border:2px solid var(--stamp-red);
+  border-radius:4px;padding:6px 12px;
+  transform:rotate(-3deg);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);
+  opacity:.9;
+}
+.stamp-sealed{color:var(--muted);border-color:rgba(147,139,152,.5);transform:rotate(-2deg)}
+
+/* --- Grain / noise: subtle film texture over flat gradients.
+       SVG feTurbulence as a data URI — zero requests, and it's
+       a static background so it costs nothing on scroll. --- */
+.grain::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body.perf .grain::before{display:none}
 
 /* ============ LOADING SCREEN ============ */
 #loader{position:fixed;inset:0;z-index:2000;background:radial-gradient(ellipse at 50% 38%,#150a10 0%,var(--bg) 65%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;transition:opacity .7s,visibility .7s}
@@ -100,6 +226,13 @@ body.reduced .reveal{opacity:1;transform:none}
 .loader-bar{height:2px;background:var(--line);margin-top:18px;border-radius:2px;overflow:hidden}
 .loader-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--crimson),var(--red));transition:width .4s ease}
 .loader-skip{position:fixed;bottom:28px;right:28px;font-size:13px;padding:9px 20px}
+/* --- Crimson flash-to-black as the loader clears. This is the cut from
+   the boot sequence into the site — one frame of overexposed red, then
+   gone. Reduced motion: the flash never gets added to the DOM at all
+   (see finishLoader() in main.js), so there is nothing to disable. --- */
+.loader-flash{position:absolute;inset:0;z-index:5;pointer-events:none;background:var(--red);opacity:0;transition:opacity .34s ease-out}
+.loader-flash.go{opacity:.85;transition:opacity .08s linear}
+body.reduced .loader-flash{display:none}
 
 /* ============ NAVIGATION ============ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:var(--nav-h);background:rgba(7,7,9,.72);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transition:background .3s}
@@ -132,6 +265,26 @@ body.reduced .reveal{opacity:1;transform:none}
 .mobile-menu .nav-link{padding:12px 4px;border-bottom:1px solid var(--line-soft)}
 #scrollProgress{position:fixed;top:0;left:0;bottom:0;width:3px;z-index:1100;background:linear-gradient(var(--crimson),var(--red));transform-origin:top;transform:scaleY(0);box-shadow:0 0 10px rgba(230,57,88,.6)}
 #cursorAura{position:fixed;width:340px;height:340px;border-radius:50%;pointer-events:none;z-index:1;background:radial-gradient(circle,rgba(230,57,88,.09),transparent 65%);transform:translate(-50%,-50%);opacity:0;transition:opacity .4s}
+/* --- Section ticks along the scroll strip (§3.2). The strip stops being
+   a bare progress bar and becomes a minimap: one tick per section
+   boundary, the passed ones lit. Pure CSS positioning; the tick
+   positions come from buildScrollMinimap() in main.js. --- */
+.sp-ticks{position:absolute;inset:0}
+.sp-tick{position:absolute;left:0;right:0;height:1px;background:rgba(213,208,214,.22);transition:background .3s}
+.sp-tick.is-passed{background:rgba(255,255,255,.5)}
+/* §4.1 — heartbeat: the last tick pulses when every section has been
+   passed (the visitor is in the contact region). Pure decoration. */
+.sp-tick.heartbeat{animation:tickHeartbeat 1.6s ease-in-out infinite}
+@keyframes tickHeartbeat{0%,100%{background:rgba(255,255,255,.5);box-shadow:none}50%{background:var(--red);box-shadow:0 0 8px rgba(230,57,88,.8)}}
+body.reduced .sp-tick.heartbeat,body.perf .sp-tick.heartbeat{animation:none}
+/* --- Cursor ring: a lagging outline that follows the pointer. Purely
+   decorative; hidden entirely on touch/coarse pointers and in
+   performance mode, and it never intercepts clicks. --- */
+#cursorRing{position:fixed;top:0;left:0;width:26px;height:26px;border:1px solid var(--accent-mid);border-radius:50%;pointer-events:none;z-index:1099;opacity:0;transform:translate(-50%,-50%);transition:opacity .35s,width .25s,height .25s,border-color .25s;will-change:transform}
+#cursorRing.on{opacity:.7}
+#cursorRing.hot{width:42px;height:42px;border-color:var(--red)}
+@media (hover:none),(pointer:coarse){#cursorRing{display:none}}
+body.perf #cursorRing{display:none}
 
 /* ============ HERO ============ */
 .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:calc(var(--nav-h) + 40px);overflow:hidden}
@@ -227,15 +380,72 @@ body.reduced .reveal{opacity:1;transform:none}
 .skill-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .skill-tools span{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--line-soft);padding:3px 8px;border-radius:999px;transition:color .25s,border-color .25s}
 .skill-card:hover .skill-tools span{color:var(--candle);border-color:var(--line)}
+/* ============ SKILL CONSTELLATION (signature widget) ============
+   A real interactive node graph, not a decorative swirl.
+   · Node radius encodes skill level (r 9→15 in a 100×100 viewBox)
+   · Edges come from SKILL_LINKS; de-duped at render time
+   · Hover/focus on a node dims everything not connected to it
+   · Keyboard: nodes are real <button>s, arrow keys walk the ring
+   Reduced motion: no pulse, no draw-in — graph renders static.
+   Perf mode: glow filters dropped, edge count unchanged.
+   ---------------------------------------------------------------- */
 .constellation-wrap{position:sticky;top:calc(var(--nav-h) + 24px)}
 .constellation{position:relative;width:100%;aspect-ratio:1;background:radial-gradient(circle at 50% 50%,rgba(21,16,24,.6),transparent 70%);border:1px solid var(--line-soft);border-radius:18px;overflow:visible}
-.constellation svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.const-node{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--card2);border:1px solid var(--line);font-size:17px;cursor:pointer;transition:border-color .25s,box-shadow .25s,transform .25s}
-.const-node:hover,.const-node:focus-visible{border-color:var(--red);box-shadow:0 0 18px rgba(230,57,88,.4);transform:translate(-50%,-50%) scale(1.12);z-index:2}
-.const-tip{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:var(--mono);font-size:10.5px;color:var(--silver);white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s}
-.const-node:hover .const-tip,.const-node:focus-visible .const-tip{opacity:1}
+.constellation svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:manipulation}
+/* edges */
+.cg-edge{stroke:rgba(var(--accent-rgb),.22);stroke-width:.45;transition:stroke .3s,stroke-width .3s,opacity .3s}
+.cg-edge.is-lit{stroke:var(--red);stroke-width:.8;opacity:1}
+.cg-edge.is-dim{opacity:.18}
+/* the "signal" pulse that travels the graph — decorative, pauses offscreen */
+.cg-signal{fill:var(--red);filter:drop-shadow(0 0 3px rgba(var(--accent-rgb),.9))}
+body.perf .cg-signal{display:none}
+body.perf .cg-node-ring{filter:none}
+/* nodes */
+.cg-node{cursor:pointer}
+.cg-node-ring{
+  fill:var(--card2);stroke:rgba(var(--accent-rgb),.45);stroke-width:.6;
+  transition:fill .3s,stroke .3s,stroke-width .3s;
+  filter:drop-shadow(0 0 4px rgba(var(--accent-rgb),.35));
+}
+.cg-node-glyph{font-size:5.2px;text-anchor:middle;dominant-baseline:central;pointer-events:none;user-select:none}
+.cg-node:hover .cg-node-ring,.cg-node:focus-visible .cg-node-ring{
+  stroke:var(--red);stroke-width:1;fill:var(--burgundy);
+  filter:drop-shadow(0 0 8px rgba(var(--accent-rgb),.8));
+}
+.cg-node.is-lit .cg-node-ring{stroke:var(--red);fill:var(--burgundy)}
+.cg-node.is-dim{opacity:.3}
+.cg-node:focus-visible{outline:none}
+/* focus ring drawn in SVG so it follows the circle, not the bbox */
+.cg-focus{fill:none;stroke:var(--red);stroke-width:.7;stroke-dasharray:2 1.5;opacity:0}
+.cg-node:focus-visible .cg-focus{opacity:1}
+/* keyboard users can see which node is selected */
+.cg-node[aria-pressed="true"] .cg-node-ring{stroke:var(--red);stroke-width:1}
+
+/* Readout panel — replaces the old hover tooltip. Always present,
+   so it works identically for mouse, keyboard, and screen readers. */
+.cg-readout{
+  margin-top:16px;background:var(--card);border:1px solid var(--line-soft);
+  border-radius:12px;padding:16px 18px;min-height:118px;
+}
+.cg-readout-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cg-readout-icon{font-size:18px}
+.cg-readout-name{font-weight:600;color:var(--silver);font-size:14.5px}
+.cg-readout-level{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--red)}
+.cg-readout-desc{color:var(--muted);font-size:12.5px;line-height:1.6;margin-bottom:10px}
+.cg-readout-tools{display:flex;flex-wrap:wrap;gap:6px}
+.cg-readout-tools span{font-family:var(--mono);font-size:10px;color:var(--candle);border:1px solid var(--line-soft);border-radius:999px;padding:3px 9px}
+.cg-readout-links{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:10px}
+.cg-readout-links b{color:var(--red);font-weight:500}
+.cg-hint{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-top:10px;text-align:center}
 .constellation-fallback{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--muted)}
 .constellation-fallback li::before{content:"◆ ";color:var(--crimson)}
+/* The fallback list is the accessible equivalent of the graph for
+   non-visual users; hide it visually when the graph rendered fine. */
+.constellation-fallback.is-hidden{display:none}
+@media (max-width:860px){
+  /* graph is small on phones — keep it, but give the readout room */
+  .cg-readout{padding:14px}
+}
 
 /* ============ PROJECTS ============ */
 .projects{background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 55%,var(--bg) 100%)}
@@ -333,6 +543,28 @@ body.reduced .reveal{opacity:1;transform:none}
 .tl-tools{display:flex;flex-wrap:wrap;gap:6px}
 .tl-tools span{font-family:var(--mono);font-size:10px;color:var(--muted);border:1px solid var(--line-soft);border-radius:999px;padding:3px 9px}
 
+/* ============ ETHICS — Research Ethics & Scope ============
+   This section exists because some of the published tooling is
+   dual-use. It names that openly and states the line. Visually it is
+   the calmest section on the page: no glitch, no embers, no motion
+   beyond the standard reveal. Deliberate — a compliance statement that
+   strobes would undercut itself. --- */
+.ethics-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:44px;align-items:start;position:relative;z-index:1}
+.ethics-lead{background:linear-gradient(180deg,var(--card),rgba(13,10,15,.6));border:1px solid var(--line);border-radius:18px;padding:30px;position:relative;overflow:hidden}
+/* a faint vertical rule, like a margin in a printed policy doc */
+.ethics-lead::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--crimson),transparent)}
+.ethics-lead .stamp{margin-bottom:20px}
+.ethics-lead-text{color:var(--silver);font-size:15px;line-height:1.75}
+.ethics-close{margin-top:20px;padding-top:18px;border-top:1px solid var(--line-soft);color:var(--muted);font-size:11.5px;line-height:1.7;letter-spacing:.04em}
+.ethics-rules{list-style:none;counter-reset:oath}
+.ethics-rules li{counter-increment:oath;position:relative;padding:0 0 22px 54px;border-bottom:1px solid var(--line-soft);margin-bottom:22px}
+.ethics-rules li:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+/* the numeral, drawn as a rule-marked badge rather than a plain number */
+.ethics-rules li::before{content:counter(oath,decimal-leading-zero);position:absolute;left:0;top:-2px;font-family:var(--mono);font-size:12px;color:var(--red);letter-spacing:.1em;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:rgba(230,57,88,.06)}
+.er-title{display:block;font-family:var(--disp);font-size:16.5px;color:var(--silver);font-weight:600;margin-bottom:6px}
+.er-text{color:var(--muted);font-size:13.5px;line-height:1.7}
+body.reduced .ethics-lead::before{background:var(--crimson)}
+
 /* ============ CERTS & STATS ============ */
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:44px}
 .stat{background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:20px 16px;text-align:center;transition:border-color .3s}
@@ -347,6 +579,20 @@ body.reduced .reveal{opacity:1;transform:none}
 .badge b{display:block;color:var(--silver);font-size:14.5px;margin-bottom:4px}
 .badge .b-meta{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
 .badge .b-verify{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:10.5px;color:var(--red);letter-spacing:.1em}
+/* Sealed cert card: held at a lower visual temperature than a verified
+   one. It is not hidden and not apologised for — it is simply not yet
+   earned, and the card says so. */
+.badge-sealed{border-style:dashed;border-color:var(--line-soft)}
+.badge-sealed:hover{border-color:var(--muted);box-shadow:none}
+.badge-sealed .badge-icon{filter:grayscale(.85) brightness(.75);box-shadow:none}
+.badge-sealed b{color:var(--muted)}
+.badge-sealed .stamp{margin-top:12px;font-size:9px;padding:5px 9px;letter-spacing:.16em}
+/* Fork marker (§ data integrity). Four repos in the archive are forks of
+   other people's work. Marking them costs nothing and keeps the rest of
+   the list credible — an unmarked fork presented as original work is the
+   kind of detail a security-minded visitor will check. */
+.fork-flag{position:absolute;left:0;right:0;bottom:0;z-index:2;margin:0;padding:5px 10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--candle);background:rgba(7,7,9,.82);border-top:1px solid rgba(227,155,90,.25);text-transform:uppercase}
+.ac-fork{font-style:normal;font-family:var(--mono);font-size:9px;color:var(--candle);border:1px solid rgba(227,155,90,.35);border-radius:4px;padding:1px 5px;margin-left:6px;letter-spacing:.1em;vertical-align:1px}
 .thm-badges{margin-top:44px;border:1px solid var(--line-soft);border-radius:16px;padding:22px;background:rgba(13,10,15,.5)}
 .thm-title{font-size:11px;letter-spacing:.3em;color:var(--muted);margin-bottom:16px}
 .thm-badges ul{list-style:none;display:flex;flex-wrap:wrap;gap:10px}
@@ -368,12 +614,33 @@ body.reduced .reveal{opacity:1;transform:none}
 .terminal-body .t-out.ok{color:#7FB98A}
 .terminal-body .t-out.err{color:var(--red)}
 .terminal-body .t-caret{display:inline-block;width:8px;height:15px;background:var(--red);vertical-align:middle;animation:blink 1.1s steps(1) infinite}
+/* min-width:0 on the input lets the flex row actually shrink it. Without
+   it the input's intrinsic size (default ~170px) plus the prompt plus the
+   SEND button exceeds a 390px row, and .terminal{overflow:hidden} then
+   CLIPS the button off the right edge — visible breakage, not just a
+   scrollbar. Fixed here, and the button drops its label below 560px. */
 .terminal-input-row{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid var(--line-soft);background:rgba(13,10,15,.6)}
 .t-prompt{font-size:12.5px;color:var(--red);white-space:nowrap}
-.terminal-input-row input{flex:1;background:transparent;border:0;color:var(--silver);font-family:var(--mono);font-size:13px;outline:none}
+.terminal-input-row input{flex:1;min-width:0;background:transparent;border:0;color:var(--silver);font-family:var(--mono);font-size:13px;outline:none}
 .terminal-input-row input:focus-visible{outline:none}
 .t-send{font-size:10.5px;letter-spacing:.2em;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:6px 12px;transition:color .25s,border-color .25s}
 .t-send:hover{color:var(--red);border-color:var(--red)}
+/* Two labels, one shown at a time: the word on wide rows, a glyph when
+   the row gets tight. The accessible name lives on the button itself. */
+.t-send-mini{display:none}
+/* --- Blinking block cursor. Sits outside the input, after it, so the
+   caret reads as a terminal block rather than a text I-beam. Decorative
+   only (aria-hidden) — the real caret still works. --- */
+.t-block-cursor{display:inline-block;width:8px;height:15px;background:var(--red);opacity:.25;vertical-align:middle;transition:opacity .2s}
+.t-block-cursor.on{opacity:1;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+/* --- Honesty banner under the terminal. This is not decoration: it is
+   the disclosure that keeps the whole widget truthful. Never hide it. --- */
+.t-hint{font-size:10px;letter-spacing:.16em;color:var(--muted);text-align:center;margin-top:12px;opacity:.75}
+/* --- `matrix` easter egg. Renders inside the terminal body, then
+   removes itself. Reduced motion: a single static frame. --- */
+.t-matrix{margin:6px 0;font-family:var(--mono);font-size:11px;line-height:1.15;color:#7FB98A;letter-spacing:.06em;white-space:pre;overflow:hidden;text-shadow:0 0 6px rgba(127,185,138,.4)}
+body.perf .t-matrix{text-shadow:none}
 
 /* ============ CONTACT ============ */
 .contact{overflow:hidden}
@@ -408,6 +675,18 @@ body.reduced .reveal{opacity:1;transform:none}
 .field-error{color:var(--red);font-size:12px;margin-top:6px}
 .form-note{font-size:10.5px;color:var(--muted);margin-top:14px;text-align:center}
 .form-success{margin-top:14px;text-align:center;color:#7FB98A;font-size:14px;border:1px solid rgba(127,185,138,.35);background:rgba(127,185,138,.08);border-radius:10px;padding:12px}
+
+/* §3.11 — PGP key block. Rendered only when PROFILE.pgpKey is set;
+   the styles live here so the block needs no JS beyond its creation. */
+.pgp-block{margin-top:20px;border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden}
+.pgp-block summary{cursor:pointer;list-style:none;padding:13px 18px;font-size:11px;letter-spacing:.3em;color:var(--muted);transition:color .3s,background .3s;user-select:none}
+.pgp-block summary::-webkit-details-marker{display:none}
+.pgp-block summary:hover{color:var(--red);background:rgba(230,57,88,.06)}
+.pgp-block[open] summary{color:var(--red);border-bottom:1px solid var(--line-soft)}
+.pgp-body{padding:16px 18px}
+.pgp-fp{font-size:11px;letter-spacing:.12em;color:var(--silver);margin-bottom:12px;word-spacing:.4em}
+.pgp-key{max-height:180px;overflow:auto;font-size:10.5px;line-height:1.5;color:var(--candle);background:var(--bg2);border:1px solid var(--line-soft);border-radius:10px;padding:12px 14px;white-space:pre-wrap;word-break:break-all;margin-bottom:12px}
+.pgp-copy.copied{color:#7FB98A;border-color:rgba(127,185,138,.4)}
 .contact-links h3{font-size:11px;letter-spacing:.3em;color:var(--muted);margin-bottom:18px}
 .contact-link{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:14px 18px;margin-bottom:12px;transition:border-color .3s,transform .3s,background .3s}
 .contact-link:hover{border-color:var(--red);transform:translateX(6px);text-decoration:none;background:var(--card2)}
@@ -423,6 +702,11 @@ body.reduced .reveal{opacity:1;transform:none}
 .footer-name .mono{font-size:11px;color:var(--red);letter-spacing:.14em}
 .footer-role{font-size:11px;color:var(--muted);margin:8px 0 12px;letter-spacing:.06em}
 .footer-quote{color:var(--muted);font-size:13.5px;font-style:italic;max-width:320px}
+/* --- Moon phase (§4.1). Real astronomy, computed in JS from the current
+   date — no API. The glyph is a text character, so this line costs
+   nothing and degrades to plain text if JS never runs. --- */
+.moon-phase{font-size:10.5px;color:var(--muted);letter-spacing:.16em;margin-top:14px;opacity:.8}
+.moon-phase .mp-glyph{color:var(--moon);margin-right:7px;font-size:13px;vertical-align:-1px}
 .footer-nav{display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;align-content:start}
 .footer-nav a,.footer-social a{color:var(--muted);font-size:13.5px;transition:color .25s;width:fit-content}
 .footer-nav a:hover,.footer-social a:hover{color:var(--red);text-decoration:none}
@@ -444,6 +728,7 @@ body.reduced .reveal{opacity:1;transform:none}
   .about-grid{grid-template-columns:1fr;gap:40px}
   .blood-line{display:none}
   .contact-grid{grid-template-columns:1fr}
+  .ethics-grid{grid-template-columns:1fr;gap:32px}
   .stats-row{grid-template-columns:repeat(3,1fr)}
   .badge-grid{grid-template-columns:repeat(2,1fr)}
   .hunt-stages{grid-template-columns:repeat(4,1fr);gap:26px 14px}
@@ -478,11 +763,27 @@ body.reduced .reveal{opacity:1;transform:none}
   .hunt-stage{text-align:left;display:grid;grid-template-columns:52px 1fr;gap:14px}
   .hs-dot{margin:0}
   .hunt-stage:hover .hs-text{max-height:200px}
+  /* Ethics numerals move above the text instead of beside it — at this
+     width the 54px text-indent squeezes the rule copy into a column
+     too narrow to read. */
+  .ethics-lead{padding:24px 22px}
+  .ethics-rules li{padding:0 0 20px}
+  .ethics-rules li::before{position:static;margin-bottom:10px}
+  .ethics-rules li{padding-left:0}
   .footer-grid{grid-template-columns:1fr}
   .footer-bottom{flex-direction:column;align-items:flex-start}
   .modal-scroll{padding:26px 20px}
   .float-label.fl-2,.float-label.fl-3{display:none}
   .terminal-body{height:260px;font-size:12px}
+  /* At this width the prompt + input + SEND button no longer fit on one
+     line without clipping, so the button becomes an icon-sized ↵. It
+     keeps its accessible name via aria-label in the markup. */
+  .terminal-input-row{gap:8px;padding:10px 12px}
+  .t-prompt{font-size:11px}
+  .t-send{padding:6px 10px;font-size:12px;letter-spacing:0}
+  .t-send-full{display:none}
+  .t-send-mini{display:inline}
+  .t-hint{font-size:9px;letter-spacing:.1em}
   .theme-toggle{display:none}
 }
 

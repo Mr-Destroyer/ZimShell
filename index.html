@@ -39,8 +39,13 @@
   <button type="button" class="btn btn-ghost loader-skip" id="skipIntro">Skip Intro</button>
 </div>
 
-<div id="scrollProgress" aria-hidden="true"></div>
+<!-- Scroll strip: doubles as a section minimap. The bar itself is driven by
+     scaleY() in main.js; the tick marks are positioned by
+     buildScrollMinimap() at each section boundary. aria-hidden because the
+     nav links already convey the same structure to assistive tech. -->
+<div id="scrollProgress" aria-hidden="true"><div class="sp-ticks" id="scrollTicks"></div></div>
 <div id="cursorAura" aria-hidden="true"></div>
+<div id="cursorRing" aria-hidden="true"></div>
 
 <header class="nav" id="navbar">
   <div class="nav-inner">
@@ -55,10 +60,11 @@
       <a href="#projects" class="nav-link">Projects</a>
       <a href="#methodology" class="nav-link">Methodology</a>
       <a href="#experience" class="nav-link">Experience</a>
+      <a href="#ethics" class="nav-link">Ethics</a>
       <a href="#contact" class="nav-link">Contact</a>
     </nav>
     <div class="nav-actions">
-      <span class="status-badge"><span class="status-dot" aria-hidden="true"></span>Available</span>
+      <span class="status-badge" id="statusBadge"><span class="status-dot" aria-hidden="true"></span><span id="statusText">Available</span></span>
       <div class="theme-toggle" role="group" aria-label="Theme and performance">
         <button type="button" id="themeBtn" aria-pressed="false" title="Toggle Blood Moon theme">🌙<span class="sr-only">Toggle theme</span></button>
         <button type="button" id="perfBtn" aria-pressed="false" title="Toggle performance mode">⚡<span class="sr-only">Toggle performance mode</span></button>
@@ -76,6 +82,7 @@
     <a href="#projects" class="nav-link">Projects</a>
     <a href="#methodology" class="nav-link">Methodology</a>
     <a href="#experience" class="nav-link">Experience</a>
+    <a href="#ethics" class="nav-link">Ethics</a>
     <a href="#contact" class="nav-link">Contact</a>
   </div>
 </header>
@@ -145,7 +152,7 @@
         <ul class="facts-grid" id="factsGrid"></ul>
       </div>
       <div class="about-copy reveal">
-        <p class="about-bio">I'm a cybersecurity professional focused on discovering weaknesses, understanding how systems fail, and helping teams build stronger defenses. My work combines offensive security techniques, secure development, threat modeling, and clear technical reporting — always inside authorized scope, always with responsible disclosure.</p>
+        <p class="about-bio" id="aboutBio">I'm a cybersecurity professional focused on discovering weaknesses, understanding how systems fail, and helping teams build stronger defenses. My work combines offensive security techniques, secure development, threat modeling, and clear technical reporting — always inside authorized scope, always with responsible disclosure.</p>
         <div class="core-principles" id="corePrinciples"></div>
         <div class="vials" id="vials" role="group" aria-label="Operating traits meter">
           <p class="vials-title mono">OPERATOR TRAITS</p>
@@ -240,11 +247,30 @@
       <ul id="thmBadges"></ul>
     </div>
   </div>
+</section>
+
+<!-- ================= RESEARCH ETHICS ================= -->
+<section id="ethics" class="section ethics" aria-label="Research ethics and scope" aria-labelledby="ethicsTitle">
+  <div class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow mono" id="ethicsEyebrow">OATH // 07</p>
+      <h2 class="section-title" id="ethicsTitle">Research Ethics &amp; Scope</h2>
+      <p class="section-sub" id="ethicsSub">Some of what I publish is dual-use. Here is exactly how I draw the line.</p>
+    </div>
+    <div class="ethics-grid">
+      <div class="ethics-lead reveal">
+        <span class="stamp" id="ethicsStamp">AUTHORIZED SCOPE ONLY</span>
+        <p class="ethics-lead-text" id="ethicsLead"></p>
+        <p class="ethics-close mono" id="ethicsClose"></p>
+      </div>
+      <ol class="ethics-rules" id="ethicsRules"></ol>
+    </div>
+  </div>
 </section><!-- ================= TERMINAL ================= -->
 <section class="section terminal-section" aria-label="Interactive terminal" id="terminal">
   <div class="container">
     <div class="section-head reveal">
-      <p class="section-eyebrow mono">INTERFACE // 07</p>
+      <p class="section-eyebrow mono">INTERFACE // 08</p>
       <h2 class="section-title">NIGHTFALL TERMINAL</h2>
       <p class="section-sub">A decorative demo — type <code>help</code> to begin.</p>
     </div>
@@ -254,12 +280,17 @@
         <span class="t-title mono">nightfall@zim:~</span>
         <span class="t-warn mono">decorative — no system commands executed</span>
       </div>
-      <div class="terminal-body" id="termBody" aria-live="polite"></div>      <form class="terminal-input-row" id="termForm">
+      <div class="terminal-body" id="termBody" aria-live="polite" aria-label="Terminal output"></div>
+      <form class="terminal-input-row" id="termForm">
         <span class="t-prompt mono">nightfall@zim:~$</span>
         <label class="sr-only" for="termInput">Terminal command input</label>
-        <input type="text" id="termInput" autocomplete="off" spellcheck="false" placeholder="type help…">
-        <button type="submit" class="t-send mono">ENTER</button>
+        <input type="text" id="termInput" autocomplete="off" spellcheck="false" placeholder="type help…" aria-describedby="termHint">
+        <!-- Block cursor sits behind the input text as a visual affordance;
+             the real caret is still the native one, so this is decoration. -->
+        <span class="t-block-cursor" id="termCursor" aria-hidden="true"></span>
+        <button type="submit" class="t-send mono" aria-label="Run command"><span class="t-send-full">ENTER</span><span class="t-send-mini" aria-hidden="true">↵</span></button>
       </form>
+      <p class="t-hint mono" id="termHint">TAB COMPLETES · ↑/↓ HISTORY · NO SYSTEM COMMANDS ARE EXECUTED</p>
     </div>
   </div>
 </section>
@@ -279,7 +310,7 @@
     </div>
   </div>  <div class="container">
     <div class="section-head reveal">
-      <p class="section-eyebrow mono">SIGNAL // 08</p>
+      <p class="section-eyebrow mono">SIGNAL // 09</p>
       <h2 class="section-title">Send a Signal Through the Night</h2>
       <p class="section-sub">Assessments, research collaboration, or a hard question worth answering.</p>
     </div>
@@ -313,14 +344,15 @@
         </div>
         <button type="submit" class="btn btn-primary btn-wide">Transmit Secure Inquiry</button>
         <p class="form-note mono">No backend attached — validates locally, sends nothing.</p>
-        <p class="form-success" id="formSuccess" role="status" hidden>Transmission received. I'll respond as soon as possible.</p>
+        <p class="form-success" id="formSuccess" role="status" hidden>No signal left this terminal — this form has no backend and nothing was sent. Use a direct channel above.</p>
       </form>      <div class="contact-links reveal">
         <h3 class="mono">DIRECT CHANNELS</h3>
-        <a class="contact-link" href="https://github.com/Mr-Destroyer" target="_blank" rel="noopener noreferrer"><span class="cl-icon">🐙</span><span><b>GitHub</b><i>github.com/Mr-Destroyer</i></span></a>
-        <a class="contact-link" href="https://tryhackme.com/p/MohammadZim" target="_blank" rel="noopener noreferrer"><span class="cl-icon">🛡</span><span><b>TryHackMe</b><i>tryhackme.com/p/MohammadZim</i></span></a>
-        <a class="contact-link" href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener noreferrer"><span class="cl-icon">▶</span><span><b>YouTube</b><i>youtube.com/@Study_Hard69</i></span></a>
-        <a class="contact-link" href="mailto:[YOUR EMAIL]"><span class="cl-icon">✉</span><span><b>Email</b><i>[YOUR EMAIL]</i></span></a>
-        <a class="contact-link" href="[YOUR RESUME URL]" download><span class="cl-icon">📄</span><span><b>Resume</b><i>[YOUR RESUME URL]</i></span></a>
+        <!-- Rendered from PROFILE in js/data.js by renderContactChannels().
+             The email and resume rows were REMOVED rather than stubbed —
+             this site is GitHub-first and publishes no address. Setting
+             PROFILE.email / PROFILE.resume re-adds the rows automatically;
+             no HTML edit needed. -->
+        <div id="contactChannels"></div>
         <p class="disclosure-note mono">Responsible disclosure always — owners first, credit when earned.</p>
       </div>
     </div>
@@ -333,16 +365,22 @@
     <div class="footer-brand">
       <p class="footer-name">Mohammad Zim <span class="mono">/ MR_DESTROYER</span></p>
       <p class="footer-role mono">Ethical Hacker • Security Researcher • Cybersecurity Engineer</p>
-      <p class="footer-quote">"Security is strongest when curiosity meets responsibility."</p>
+      <!-- Quote rotates once per browser session (see pickQuote in main.js). -->
+      <p class="footer-quote" id="footerQuote"></p>
+      <!-- Real moon phase, computed in pure JS from the current date.
+           No API, no library — see moonPhase() in main.js. -->
+      <p class="moon-phase mono" id="moonPhase" title="Current moon phase, computed locally"></p>
     </div>
     <nav class="footer-nav" aria-label="Footer">
-      <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#methodology">Methodology</a><a href="#experience">Experience</a><a href="#contact">Contact</a>
+      <a href="#home">Home</a><a href="#about">About</a><a href="#skills">Skills</a><a href="#projects">Projects</a><a href="#methodology">Methodology</a><a href="#experience">Experience</a><a href="#ethics">Ethics</a><a href="#contact">Contact</a>
     </nav>
-    <div class="footer-social">
+    <div class="footer-social" id="footerSocial">
+      <!-- Rendered from PROFILE in js/data.js — keeps contact links in one
+           place and drops email/resume rows when they are null. -->
       <a href="https://github.com/Mr-Destroyer" target="_blank" rel="noopener noreferrer">GitHub</a>
       <a href="https://tryhackme.com/p/MohammadZim" target="_blank" rel="noopener noreferrer">TryHackMe</a>
       <a href="https://youtube.com/@Study_Hard69" target="_blank" rel="noopener noreferrer">YouTube</a>
-      <a href="[YOUR EMAIL]" class="mono">EMAIL</a>
+      <a href="#ethics">Research Ethics</a>
       <a href="#" id="privacyLink">Privacy</a>
       <a href="#" id="disclosureLink">Responsible Disclosure</a>
     </div>
