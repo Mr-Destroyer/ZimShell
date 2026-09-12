@@ -462,7 +462,9 @@
         el.setAttribute('aria-pressed', 'false');
       });
       edgeEls.forEach(ln => ln.classList.remove('is-lit', 'is-dim'));
-      readout.innerHTML = `<p class="cg-readout-desc" style="margin:0">Select a node to inspect a discipline — its level, tooling, and what it connects to.</p>`;
+      /* No inline style here: `style-src` without 'unsafe-inline' blocks
+         style attributes, so the zero margin is a class instead. */
+      readout.innerHTML = `<p class="cg-readout-desc cg-readout-idle">Select a node to inspect a discipline — its level, tooling, and what it connects to.</p>`;
     }
     clear();
 
@@ -546,6 +548,13 @@
   function projectCard(p, i) {
     const cat = (D.PROJECT_CATS && D.PROJECT_CATS[p.cat]) || p.cat;
     const status = (p.status || '').toLowerCase();
+    /* §3.6 — live GitHub readout. The card ships with the hardcoded
+       values from PROJECTS[] already in the DOM (so it is correct with
+       JS off, offline, or rate-limited) and carries data-repo so
+       ghPaintRepos() can upgrade them in place when the API answers.
+       The star count is duplicated as a title attribute so a screen
+       reader gets the full sentence, not just "★ 12". */
+    const repo = repoOf(p.url);
     return `
       <article class="project-card reveal" data-cat="${p.cat}" tabindex="0" role="button" aria-haspopup="dialog" aria-label="${esc(p.name)} case study">
         <div class="project-thumb"><span class="pt-number">// ${String(i + 1).padStart(2, '0')}</span><span class="pt-status ${status}">${esc(p.status)}</span><span class="pt-glyph" aria-hidden="true">${p.icon}</span></div>
@@ -555,6 +564,12 @@
           <h3 class="project-name">${esc(p.name)}</h3>
           <p class="project-tagline">${esc(p.tagline)}</p>
           <p class="project-desc">${esc(p.desc)}</p>
+          <p class="gh-strip mono" data-repo="${esc(repo)}" title="Star count and last push, refreshed from the public GitHub API">
+            <span class="gh-stars" title="${p.stars} stars on GitHub${p.forks ? ' · ' + p.forks + ' forks' : ''}">★ ${p.stars}</span>
+            <span class="gh-sep" aria-hidden="true">·</span>
+            <span class="gh-push">—</span>
+            ${p.lang ? `<span class="gh-sep" aria-hidden="true">·</span><span class="gh-lang">${esc(p.lang)}</span>` : ''}
+          </p>
           <div class="project-tags">${p.tags.map(t => `<span>#${esc(t)}</span>`).join('')}</div>
           <div class="project-actions">
             <button type="button" class="pbtn primary" data-cs="${i}">View Case Study</button>
@@ -569,7 +584,7 @@
     const featured = D.PROJECTS.map((p, i) => ({ p, i })).filter(x => x.p.featured);
     grid.innerHTML = featured.map(x => projectCard(x.p, x.i)).join('');
     if (archive) archive.innerHTML = D.PROJECTS.map((p) =>
-      `<a class="archive-card" href="${p.url}" target="_blank" rel="noopener noreferrer"><span class="ac-head"><span class="ac-name">${p.icon} ${esc(p.name)}${p.fork ? ' <em class="ac-fork">FORK</em>' : ''}</span><span class="ac-stars">★ ${p.stars}</span></span><span class="ac-desc">${esc(p.desc)}</span></a>`).join('');
+      `<a class="archive-card" href="${p.url}" target="_blank" rel="noopener noreferrer"><span class="ac-head"><span class="ac-name">${p.icon} ${esc(p.name)}${p.fork ? ' <em class="ac-fork">FORK</em>' : ''}</span><span class="ac-stars" data-repo="${esc(repoOf(p.url))}" title="${p.stars} stars on GitHub">★ ${p.stars}</span></span><span class="ac-desc">${esc(p.desc)}</span></a>`).join('');
     $$('.filter-btn').forEach(btn => btn.addEventListener('click', () => {
       $$('.filter-btn').forEach(b => b.classList.remove('is-active'));
       btn.classList.add('is-active');
@@ -1244,6 +1259,59 @@
     });
   }
 
+  /* ---------- Dossier case-file header (§3.4) ----------
+     Fills the About section's case-file header from DOSSIER in data.js.
+     The stamp itself is static text in the markup (so it is present
+     without JS); this only adds the metadata rows and the file number.
+     No motion of its own — it rides the section's shared .reveal. */
+  function renderDossier() {
+    const Ds = D.DOSSIER;
+    if (!Ds) return;
+    const stamp = $('#dossierStamp');
+    if (stamp && Ds.stamp) stamp.textContent = Ds.stamp;
+    const meta = $('#dossierMeta');
+    if (!meta) return;
+    const rows = [
+      ['FILE', Ds.fileNo],
+      ['SUBJECT', Ds.subject],
+      ['STATUS', Ds.clearance]
+    ].filter(r => r[1]);
+    meta.innerHTML = rows.map(([k, v]) =>
+      `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+  }
+
+  /* ---------- Availability widget (§4.3) ----------
+     Renders AVAILABILITY from data.js into the contact panel AND the nav
+     badge, so both always agree. Manually toggled by editing
+     `open: true|false` in data.js — deliberately not automated, because
+     a status that updates itself can silently become a lie.
+
+     The dot's colour is driven by the data (green when open, muted when
+     engaged) and the text is never inferred — whatever the data says is
+     what the visitor reads. */
+  function renderAvailability() {
+    const A = D.AVAILABILITY;
+    if (!A) return;
+    const label = A.open ? A.openLabel : A.closedLabel;
+    /* nav badge */
+    const navText = $('#statusText');
+    if (navText) navText.textContent = label;
+    const navBadge = $('#statusBadge');
+    if (navBadge) {
+      navBadge.classList.toggle('is-closed', !A.open);
+      navBadge.title = label + (A.detail ? ' — ' + A.detail : '');
+    }
+    /* contact panel widget */
+    const w = $('#availWidget');
+    if (!w) return;
+    w.classList.toggle('is-closed', !A.open);
+    const l = $('#availLabel'), d = $('#availDetail');
+    if (l) l.textContent = label;
+    if (d) d.textContent = A.detail || '';
+    /* The dot is decorative; the text carries the meaning, so the widget
+       needs no extra ARIA beyond the visible label. */
+  }
+
   /* ---------- Contact channels ----------
      GitHub-only, per the owner's call. Email and résumé are deliberately
      absent rather than stubbed — data.js holds `email: null` / `resume:
@@ -1438,6 +1506,25 @@
     /* Single editable source of truth: PROFILE.avatar in data.js drives both. */
     const av = D.PROFILE && D.PROFILE.avatar;
     if (av) imgs.forEach(img => { if (img.getAttribute('src') !== av) img.src = av; });
+
+    /* Poster fallback, moved out of the markup. These were inline
+       `onerror="this.onerror=null;this.src=..."` attributes, which forced
+       'unsafe-inline' into script-src and would have made the CSP
+       decorative. Binding here instead keeps the policy strict and
+       behaves identically: on a load error, swap once to the static
+       poster and clear the handler so a broken poster cannot loop. */
+    imgs.forEach(img => {
+      const poster = (D.PROFILE && D.PROFILE.avatarPoster) || 'assets/elias-poster.jpg';
+      img.addEventListener('error', function onErr() {
+        img.removeEventListener('error', onErr);
+        if (img.getAttribute('src') !== poster) img.src = poster;
+      });
+      /* If the GIF already failed before this listener attached (cached
+         error, or a fast 404), complete + naturalWidth 0 tells us so. */
+      if (img.complete && img.naturalWidth === 0 && img.getAttribute('src') !== poster) {
+        img.src = poster;
+      }
+    });
     /* Watchdog — sample the hero GIF through canvas 3x over ~1.6s.
        Three identical samples = the browser isn't animating it. */
     const check = async () => {
@@ -1544,6 +1631,278 @@
     setTimeout(cleanup, 14000); /* fallback sweep */
   }
 
+  /* ---------- GitHub live data (§3.6 stats strip + §4.2 recon feed) ----------
+     ONE request powers both widgets.
+
+     The public /users/<user>/repos endpoint returns every repository in a
+     single response, so the per-card star counts and last-commit dates
+     cost exactly one fetch — not one per card, which would be 30+
+     requests and an instant rate-limit.
+
+     Caching (§6): the response is stored in localStorage under
+     `nf_gh_cache` with a fetch timestamp and a TTL from GITHUB.ttlHours.
+     A fresh cache means NO network request at all. A stale cache is
+     rendered immediately and refreshed in the background, so the UI
+     never blocks on the network and a slow connection never shows a
+     spinner.
+
+     Failure policy (§6): silent, on every path. Rate-limited, offline,
+     CORS failure, non-200, malformed JSON, localStorage disabled — all
+     of them leave the hardcoded PROJECTS[] values on screen and print
+     nothing to the visitor. Console.warn only, for the developer.
+
+     Repo names are derived from each project's own `url` (last path
+     segment) rather than its display `name`, because the two differ:
+     the repo is `CredStalker-`, the display name is `CredStalker`. The
+     URL is the only field guaranteed to be exact.
+     ------------------------------------------------------------ */
+  const GH_CACHE_KEY = 'gh_cache';
+  /* Cache schema version. Bumped when the shape of a cached event
+     changes, so a cache written by an older build is discarded instead
+     of being read with the wrong field names. v1 events carried `msg`,
+     which was always empty (see ghEventDetail below); v2 carries
+     `detail`. */
+  const GH_CACHE_V = 2;
+
+  /* "3d ago" style relative time. Coarse on purpose — a recon feed that
+     says "2 months ago" is more useful than one that says "2026-07-14". */
+  function relTime(iso) {
+    const then = Date.parse(iso);
+    if (isNaN(then)) return '';
+    const s = Math.max(0, (Date.now() - then) / 1000);
+    if (s < 3600) return Math.max(1, Math.round(s / 60)) + 'm ago';
+    if (s < 86400) return Math.round(s / 3600) + 'h ago';
+    if (s < 2592000) return Math.round(s / 86400) + 'd ago';
+    if (s < 31536000) return Math.round(s / 2592000) + 'mo ago';
+    return Math.round(s / 31536000) + 'y ago';
+  }
+
+  /* Last path segment of a GitHub URL = the exact repo name. */
+  function repoOf(url) {
+    try { return decodeURIComponent(String(url).replace(/\/+$/, '').split('/').pop()); }
+    catch { return ''; }
+  }
+
+  /* Read the cache. Returns { at, repos, events } or null.
+     A cache from an older schema is treated as absent — cheaper to
+     refetch than to render a half-understood object. */
+  function ghReadCache() {
+    try {
+      const raw = localStorage.getItem('nf_' + GH_CACHE_KEY);
+      if (!raw) return null;
+      const v = JSON.parse(raw);
+      if (!v || typeof v !== 'object' || !v.repos) return null;
+      if (v.v !== GH_CACHE_V) return null;   /* stale shape → refetch */
+      return v;
+    } catch { return null; }
+  }
+  function ghWriteCache(repos, events) {
+    try {
+      localStorage.setItem('nf_' + GH_CACHE_KEY, JSON.stringify({ v: GH_CACHE_V, at: Date.now(), repos, events }));
+    } catch { /* quota or private mode — cache is an optimisation, not a requirement */ }
+  }
+
+  /* Build the feed's detail line for one event.
+
+     This deliberately does NOT read payload.commits. The public events
+     API used to include commit messages there, but GitHub removed them
+     from the unauthenticated feed — a live check shows PushEvent
+     payloads now carry only {before, head, push_id, ref, repository_id}.
+     Reading commits[0].message therefore always produced '', which left
+     the detail cell permanently blank.
+
+     Everything below is derived from fields that are actually present,
+     so the line is real rather than a placeholder:
+       PushEvent   → branch + short head SHA      "main · 8ce4da8"
+       CreateEvent → ref type + ref name          "branch · main"
+       DeleteEvent → ref type + ref name          "branch · stale"
+       PullRequest → action + PR number           "opened · #12"
+       IssuesEvent → action + issue number        "opened · #7"
+       ReleaseEvent→ tag name                     "v1.2.0"
+       WatchEvent  → "starred"
+       ForkEvent   → "forked"
+     Returns '' when nothing usable is present; the row still renders
+     with its other three cells. */
+  function ghEventDetail(e) {
+    const p = (e && e.payload) || {};
+    const short = (sha) => (typeof sha === 'string' && sha ? sha.slice(0, 7) : '');
+    /* refs/heads/main → main ; refs/tags/v1 → v1 */
+    const branch = (ref) => String(ref || '').replace(/^refs\/(heads|tags)\//, '');
+    switch (e.type) {
+      case 'PushEvent': {
+        const b = branch(p.ref);
+        const sha = short(p.head);
+        return [b, sha].filter(Boolean).join(' · ');
+      }
+      case 'CreateEvent':
+      case 'DeleteEvent': {
+        const kind = p.ref_type || '';
+        const name = branch(p.ref) || p.ref || '';
+        /* A branch creation often carries a description worth showing. */
+        const desc = (e.type === 'CreateEvent' && p.ref_type === 'repository' && p.description)
+          ? String(p.description).split('\n')[0].slice(0, 90) : '';
+        return [kind, name].filter(Boolean).join(' · ') || desc;
+      }
+      case 'PullRequestEvent':
+        return [p.action, p.number ? '#' + p.number : ''].filter(Boolean).join(' · ');
+      case 'PullRequestReviewEvent':
+        return [p.action, p.review && p.review.state].filter(Boolean).join(' · ');
+      case 'IssuesEvent':
+      case 'IssueCommentEvent':
+        return [p.action, p.issue && p.issue.number ? '#' + p.issue.number : ''].filter(Boolean).join(' · ');
+      case 'ReleaseEvent':
+        return (p.release && (p.release.tag_name || p.release.name)) || '';
+      case 'WatchEvent':
+        return p.action === 'started' ? 'starred' : (p.action || '');
+      case 'ForkEvent':
+        return 'forked';
+      case 'PublicEvent':
+        return 'made public';
+      case 'MemberEvent':
+        return [p.action, p.member && p.member.login].filter(Boolean).join(' · ');
+      default:
+        return '';
+    }
+  }
+
+  /* Fetch both endpoints. Resolves to null on ANY failure — callers must
+     treat null as "keep what's on screen", never as an error to show. */
+  async function ghFetch(user) {
+    try {
+      const [rr, er] = await Promise.all([
+        fetch(`https://api.github.com/users/${encodeURIComponent(user)}/repos?per_page=100&sort=pushed`, { headers: { Accept: 'application/vnd.github+json' } }),
+        fetch(`https://api.github.com/users/${encodeURIComponent(user)}/events/public?per_page=30`, { headers: { Accept: 'application/vnd.github+json' } })
+          .catch(() => null)
+      ]);
+      if (!rr.ok) return null;
+      const repos = await rr.json();
+      if (!Array.isArray(repos)) return null;
+      /* index by lowercased repo name for case-insensitive lookup */
+      const index = {};
+      repos.forEach(r => {
+        if (!r || !r.name) return;
+        index[r.name.toLowerCase()] = {
+          stars: r.stargazers_count || 0,
+          forks: r.forks_count || 0,
+          pushed: r.pushed_at || r.updated_at || '',
+          lang: r.language || '',
+          archived: !!r.archived,
+          desc: r.description || '',
+          url: r.html_url || ''
+        };
+      });
+      /* events are best-effort: a failure here must not lose the repos */
+      let events = [];
+      try {
+        if (er && er.ok) {
+          const ev = await er.json();
+          if (Array.isArray(ev)) {
+            events = ev
+              .filter(e => e && e.type && e.repo && e.created_at)
+              .slice(0, 12)
+              .map(e => ({
+                type: e.type,
+                repo: e.repo.name,
+                at: e.created_at,
+                detail: ghEventDetail(e)
+              }));
+          }
+        }
+      } catch { /* events are optional */ }
+      return { repos: index, events };
+    } catch { return null; }   /* offline, DNS, CORS, abort — all the same to us */
+  }
+
+  /* Paint the star/commit readout into every element carrying data-repo.
+     Handles both shapes: the featured card (a <p> wrapping .gh-stars and
+     .gh-push) and the archive row (the .ac-stars span IS the data-repo
+     element itself). Both end up with the same live star count. */
+  function ghPaintRepos(index) {
+    $$('[data-repo]').forEach(el => {
+      const key = el.dataset.repo.toLowerCase();
+      const r = index[key];
+      if (!r) return;                       /* repo renamed/removed → keep hardcoded value */
+      const starText = '★ ' + r.stars;
+      const starTitle = r.stars + ' stars on GitHub' + (r.forks ? ' · ' + r.forks + ' forks' : '');
+      /* featured card: nested spans */
+      const stars = el.querySelector('.gh-stars');
+      const push = el.querySelector('.gh-push');
+      if (stars) { stars.textContent = starText; stars.title = starTitle; }
+      /* archive row: the element itself is the star readout */
+      else if (el.classList.contains('ac-stars')) { el.textContent = starText; el.title = starTitle; }
+      if (push && r.pushed) {
+        push.textContent = relTime(r.pushed);
+        push.title = 'Last pushed ' + new Date(r.pushed).toLocaleDateString();
+      }
+      /* live values now back this element — drops the offline dimming */
+      el.classList.add('is-live');
+    });
+  }
+
+  /* §4.2 — the recon feed. Renders recent public activity as a terminal-
+     adjacent readout. Hidden entirely if there is nothing to show, so a
+     failed fetch leaves no empty box and no error state. */
+  function ghPaintFeed(events) {
+    const box = $('#reconFeed');
+    if (!box) return;
+    if (!events || !events.length) { box.hidden = true; return; }
+    const label = {
+      PushEvent: 'PUSH', CreateEvent: 'CREATE', PullRequestEvent: 'PR',
+      IssuesEvent: 'ISSUE', ReleaseEvent: 'RELEASE', WatchEvent: 'STAR',
+      ForkEvent: 'FORK', PublicEvent: 'PUBLIC', DeleteEvent: 'DELETE'
+    };
+    const rows = events.map(e => {
+      const short = e.repo.split('/').pop();
+      const kind = label[e.type] || e.type.replace(/Event$/, '').toUpperCase();
+      /* The detail cell is always emitted, even when empty. It is a grid
+         column: omitting it let auto-placement drop .rf-time into
+         column 3 instead of column 4, so the timestamp silently shifted
+         left on every row without a message. An empty span holds the
+         column open and keeps every row aligned. */
+      const detail = e.detail || '';
+      return `<li class="rf-row">
+        <span class="rf-kind" data-k="${esc(kind)}">${esc(kind)}</span>
+        <span class="rf-repo">${esc(short)}</span>
+        <span class="rf-msg">${esc(detail)}</span>
+        <span class="rf-time">${esc(relTime(e.at))}</span>
+      </li>`;
+    }).join('');
+    box.innerHTML = `<div class="rf-head">
+        <span class="rf-title mono">RECON FEED // LIVE</span>
+        <span class="rf-src mono">via public GitHub activity</span>
+      </div>
+      <ul class="rf-list">${rows}</ul>`;
+    box.hidden = false;
+  }
+
+  /* Orchestrator: cache → paint → (maybe) refresh. */
+  function initGitHub() {
+    const cfg = D.GITHUB || {};
+    const user = cfg.user;
+    if (!user) return;
+    const ttl = (cfg.ttlHours || 6) * 3600 * 1000;
+    const cached = ghReadCache();
+
+    /* 1. Render whatever we already have, immediately. */
+    if (cached) {
+      ghPaintRepos(cached.repos);
+      ghPaintFeed(cached.events);
+    }
+
+    /* 2. Decide whether a network request is warranted at all. */
+    if (cfg.enabled === false) return;
+    const fresh = cached && (Date.now() - cached.at) < ttl;
+    if (fresh) return;                       /* inside TTL → zero requests */
+
+    /* 3. Refresh in the background. Nothing waits on this. */
+    ghFetch(user).then(res => {
+      if (!res) return;                      /* silent: keep cached/hardcoded */
+      ghWriteCache(res.repos, res.events);
+      ghPaintRepos(res.repos);
+      ghPaintFeed(res.events);
+    });
+  }
+
   /* ---------- Boot ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('no-scroll');
@@ -1554,10 +1913,14 @@
     renderSkills();
     renderConstellation();
     renderProjects();
+    /* after renderProjects — it paints into the cards that renderer made */
+    initGitHub();
     renderHunt();
     renderExperience();
     renderCerts();
     renderEthics();
+    renderDossier();
+    renderAvailability();
     renderContactChannels();
     initTerminal();
     spawnBats();
