@@ -1643,6 +1643,336 @@ body.reduced .project-card.in{animation:none}
 .rf-sync{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
 .rf-sync.is-live{color:var(--candle)}
 
+/* ============================================================
+   08 · TERMINAL SESSION (items 81-90)
+   ============================================================ */
+
+/* 81. Terminal chrome. The head and the input row become positioned
+   boxes so their pseudo-elements have somewhere to sit, and the
+   terminal gets `position:relative` so the cast vignette can be
+   inset against it. The header keeps its existing flex layout.
+   RM: the breathing glow is the only motion here and it is
+   neutralised by the body.reduced rule at the end of this block. */
+.terminal{position:relative}
+.terminal-head{position:relative;overflow:hidden}
+.terminal-input-row{position:relative}
+
+/* 82. Typed output carries a faint phosphor halo, so a fresh line reads
+   as something the machine just emitted rather than a div that faded
+   in. Text-shadow only — no layout, no paint beyond the glyphs.
+   RM: none needed, this is static styling. */
+.terminal-body .t-line{text-shadow:0 0 7px rgba(213,208,214,.10)}
+.terminal-body .t-out.ok{text-shadow:0 0 8px rgba(127,185,138,.22)}
+.terminal-body .t-out.err{text-shadow:0 0 8px rgba(230,57,88,.26)}
+.terminal-body .t-cmd{text-shadow:0 0 9px rgba(230,57,88,.30)}
+body.perf .terminal-body .t-line{text-shadow:none}
+
+/* 83. CRT flicker on the terminal. One long, irregular opacity drift on
+   a ::after laid over the body — the panel behaves like a phosphor
+   tube that is never quite steady. It is a pseudo-element so nothing
+   in the DOM shifts, and pointer-events:none keeps the terminal fully
+   clickable through it. The two stops that drop to .74 are deliberately
+   sparse: a constant flicker reads as a broken screen, an occasional
+   one reads as a live one.
+   RM: no flicker at all. Perf: removed. */
+.terminal-body::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:2;
+  background:rgba(var(--accent-rgb),.05);opacity:0;
+  animation:crtFlicker 9.5s steps(1,end) infinite
+}
+@keyframes crtFlicker{
+  0%,42%,44%,62%,64%,100%{opacity:0}
+  43%{opacity:1}
+  63%{opacity:.85}
+  81%{opacity:.55}
+}
+body.reduced .terminal-body::after,body.perf .terminal-body::after{display:none}
+
+/* 84. The header lamp breathes in the site's crimson rather than
+   sitting at a flat colour — the one part of the chrome that is
+   unambiguously alive.
+   RM: steady lit lamp, no pulse. */
+.terminal-head::after{
+  content:'';position:absolute;right:14px;top:50%;width:6px;height:6px;
+  margin-top:-3px;border-radius:50%;background:var(--red);
+  box-shadow:0 0 8px rgba(230,57,88,.8);
+  animation:lampBreathe 3.4s ease-in-out infinite
+}
+@keyframes lampBreathe{0%,100%{opacity:.35}50%{opacity:1}}
+/* the honesty label already owns the right-hand side of the header, so
+   the lamp tucks in just past it on wide rows and is dropped when the
+   row is tight enough that it would collide. */
+@media (max-width:560px){.terminal-head::after{display:none}}
+body.reduced .terminal-head::after{animation:none;opacity:.9}
+body.perf .terminal-head::after{box-shadow:none;animation:none;opacity:.9}
+
+/* 85. Prompt echo. The `<span class="t-echo">` that run() prepends to
+   every typed command's output block re-prints the prompt and the
+   command, so a long scrollback still reads as a session with
+   boundaries rather than one undifferentiated wall of text. It is
+   aria-hidden — the command line above it is already in the
+   accessible tree, so a screen reader hears it exactly once.
+   RM: static, no motion involved. */
+.t-echo{
+  display:block;margin-top:10px;font-family:var(--mono);font-size:12px;
+  letter-spacing:.02em;color:var(--muted);opacity:.7;
+  white-space:pre-wrap;word-break:break-word
+}
+.t-echo::before{content:"nightfall@zim:~$ ";color:var(--red);opacity:.75}
+.t-echo b{font-weight:400;color:var(--silver)}
+.t-echo:first-child{margin-top:0}
+
+/* 86. Inline ghost suggestion. The completed command sits inside the
+   real input as a grey span after the caret — an actual element, not a
+   ::after, because it has to be measured against what the visitor has
+   typed and rebuilt on every keystroke. It is aria-hidden and
+   pointer-events:none: it is a hint about what TAB will do, never a
+   value that can be submitted. */
+.terminal-input-row .t-field{position:relative;flex:1;min-width:0;display:flex}
+.terminal-input-row .t-field input{width:100%}
+.t-ghost{
+  position:absolute;left:0;top:50%;transform:translateY(-50%);
+  pointer-events:none;font-family:var(--mono);font-size:13px;
+  white-space:pre;color:var(--muted);opacity:.45
+}
+.t-ghost b{font-weight:400;color:transparent} /* the typed part is invisible; only the tail shows */
+body.reduced .t-ghost,body.perf .t-ghost{display:none}
+/* On narrow rows the SEND button already crowds the input, and a ghost
+   that runs under it would look like a rendering fault rather than a
+   suggestion. */
+@media (max-width:560px){.t-ghost{display:none}}
+
+/* 87. Tab-completion menu. A real listbox under the input, so the
+   suggestion is a thing you can see, arrow through and click rather
+   than a wall of names printed into the scrollback. Keyboard handling
+   lives in initTerminal(); this only owns the look.
+   RM: it appears instantly instead of sliding in. */
+.t-complete{
+  position:absolute;left:0;right:0;bottom:calc(100% + 6px);z-index:6;
+  list-style:none;margin:0;padding:6px;
+  background:rgba(13,10,15,.97);border:1px solid var(--line);
+  border-radius:10px;box-shadow:0 18px 44px rgba(0,0,0,.6);
+  max-height:190px;overflow-y:auto;
+  animation:tCompIn .16s var(--ease-out) backwards
+}
+@keyframes tCompIn{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+.t-complete li{
+  font-family:var(--mono);font-size:12px;color:var(--muted);
+  padding:6px 10px;border-radius:6px;cursor:pointer;
+  display:flex;justify-content:space-between;gap:14px
+}
+.t-complete li span{color:rgba(213,208,214,.4);font-size:10.5px}
+.t-complete li[aria-selected="true"]{background:rgba(var(--accent-rgb),.14);color:var(--silver)}
+.t-complete li[aria-selected="true"] span{color:var(--candle)}
+.t-complete li:hover{background:rgba(var(--accent-rgb),.09)}
+body.reduced .t-complete{animation:none}
+
+/* 88. "last login" line. Every fresh terminal announces when the
+   previous session ended — a classic motd detail and, more usefully,
+   the only place the site admits that a session is a session. It is
+   printed, not stored anywhere: the timestamp is computed at load. */
+.t-motd{color:var(--muted)}
+.t-motd b{font-weight:400;color:var(--candle)}
+
+/* 89. The `exit` joke. `exit` is a command that cannot do what it says,
+   and the glitch says so: the whole panel tears sideways for a beat,
+   then the output admits there is nowhere to go. Purely a filter +
+   transform on the panel, so nothing inside it reflows.
+   RM: no tear. Perf: no tear. */
+@keyframes termExitGlitch{
+  0%{filter:none;transform:none}
+  18%{filter:hue-rotate(-28deg) saturate(1.5);transform:translateX(-3px) skewX(1.2deg)}
+  36%{filter:hue-rotate(24deg);transform:translateX(3px) skewX(-1.2deg)}
+  54%{filter:saturate(2);transform:translateX(-2px)}
+  72%{filter:hue-rotate(-12deg);transform:translateX(1px) skewX(.6deg)}
+  100%{filter:none;transform:none}
+}
+.terminal.term-exit{animation:termExitGlitch .62s steps(1,end)}
+body.reduced .terminal.term-exit,body.perf .terminal.term-exit{animation:none}
+
+/* 90. Terminal cast vignette. The section's panel sits in a pool of its
+   own light — a soft crimson bloom under the terminal that ties it to
+   the hero's glow. Decorative, sits behind the panel, never catches a
+   pointer.
+   RM: static, no motion. */
+.terminal-section{position:relative}
+.terminal-section::before{
+  content:'';position:absolute;left:50%;top:56%;width:min(760px,92vw);
+  height:min(420px,60vw);transform:translate(-50%,-50%);
+  pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at center,rgba(var(--accent-rgb),.10),transparent 68%)
+}
+.terminal-section > .container{position:relative;z-index:1}
+
+/* ============================================================
+   09 · GLOBAL ATMOSPHERE (items 91-100)
+   ============================================================ */
+
+/* 91. Scroll-velocity skew. The page leans very slightly into a fast
+   flick and settles back when it stops — the whole document behaving
+   like it has mass. --sk is written by initScrollVelocity() as a
+   clamped angle (±0.35deg; more than that and body text visibly
+   shears).
+   Two deliberate constraints, both load-bearing:
+   · Applied to <main>, never to <body> — a transform on the body
+     establishes a containing block for the fixed nav, the fixed scroll
+     strip and the fixed cursor layers, all of which are children of
+     <body> and would be re-parented out of the viewport.
+   · Gated on `html.vel`, a class that is only present while a scroll
+     is actually in flight. A bare `transform:skewY(0deg)` is not a
+     no-op: it still promotes the entire document to its own composited
+     layer and still makes <main> a containing block for everything
+     below it. Releasing the declaration at rest means the layer is
+     dropped the moment scrolling stops, so a visitor reading a
+     paragraph pays nothing for this.
+   RM: initScrollVelocity() never runs. Perf: same. */
+html.vel main#main{transform:skewY(var(--sk,0deg))}
+body.reduced main#main,body.perf main#main{transform:none}
+
+/* 92. Reading-position halo. A soft crimson bloom that follows the
+   visitor down the page, painted on the ground layer behind everything
+   (z-index:0, same plane as the cursor aura). It is the one piece of
+   ambience that is about *where you are* rather than what you are
+   pointing at. Position is written via CSSOM by initReadingHalo();
+   opacity is 0 until the first scroll, so a visitor who never scrolls
+   never sees it.
+   RM: never created. Perf: never created. */
+#readingHalo{
+  position:fixed;width:520px;height:520px;border-radius:50%;
+  pointer-events:none;z-index:0;opacity:0;
+  background:radial-gradient(circle,rgba(var(--accent-rgb),.055),transparent 66%);
+  transform:translate(-50%,-50%);transition:opacity .6s
+}
+
+/* 93. The moon phases itself. The disc in the contact window is masked
+   to tonight's real phase — the site already computes the phase name
+   from the local date (moonPhase() in main.js), and a site whose whole
+   motif is the moon should not show the same full disc on every night
+   of the month.
+   The mask is a second circle the same size as the disc, offset
+   horizontally. The lit fraction of two equal circles offset by d is
+   exact (lens area = 2r²cos⁻¹(d/2r) − (d/2)√(4r²−d²)), so main.js
+   bisects for the d that yields the target illumination and writes it
+   as --d01 in [0,1] where 1 = two radii = fully clear. --dir flips the
+   side for a waning moon. --glow scales the outer bloom with the
+   illumination, so a new moon is a dark disc with no halo rather than
+   a glowing hole.
+   RM: --d01 is set once with no transition, so the phase simply is
+   correct from the first frame. */
+.cw-moon{position:relative}
+.cw-moon::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  background:#080407;pointer-events:none;
+  transform:translateX(calc(var(--dir,1) * var(--d01,1) * 100%));
+  transition:transform 1.4s var(--ease-out)
+}
+.cw-moon{box-shadow:0 0 calc(46px * var(--glow,1)) rgba(230,57,88,calc(.45 * var(--glow,1)))}
+body.reduced .cw-moon::after{transition:none}
+body.perf .cw-moon::after{transition:none}
+
+/* 94. The atmosphere changes with the theme. Switching to Blood-Moon
+   used to repaint the palette and leave the ambience behind: --scanline
+   was a fixed near-black, so the new crimson sat under an unchanged
+   cold grey haze. Re-tinting it means the whole room changes, not just
+   the furniture — and because the three layers that read it are
+   already transitioned, the shift cross-fades instead of snapping.
+   (There is deliberately no second full-screen pulse here: the theme
+   button already fires the §4.1 crimson breath, and two overlays on
+   one click would read as a flash, not a fade.)
+   Note this is scoped to the scanline layers only. There is a
+   `.grain::before` rule earlier in this file, but no element in this
+   build ever carries a `.grain` class — it is inherited from the
+   original scaffold and currently paints nothing. Wiring --grain-op
+   into it would have been dead CSS, so it is not done here.
+   RM: the layers still swap tint; only the fade is dropped. */
+body.blood-moon{--scanline:rgba(24,0,6,.20)}
+.scanlines::after,.hero-scanlines,.scanline-overlay{transition:opacity .4s,background .5s}
+body.reduced .scanlines::after,body.reduced .hero-scanlines,
+body.reduced .scanline-overlay{transition:none}
+
+/* 95. Keyboard operability sweep. Three controls in the terminal opted
+   out of the focus ring with a bare `outline:none` and never put
+   anything back — which leaves a keyboard visitor with no idea where
+   they are. Each one now draws its own ring in the site's language: a
+   crimson outline for the input, a ring around the whole field box for
+   the contact form fields (whose border already turns red, so the ring
+   only has to carry the offset), and the constellation nodes keep the
+   SVG focus halo they already had.
+   The global :focus-visible rule at the top of this file still applies
+   everywhere else. */
+.terminal-input-row input:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:3px}
+.form-field input:focus-visible,.form-field select:focus-visible,.form-field textarea:focus-visible{
+  outline:2px solid var(--red);outline-offset:2px
+}
+.t-send:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+body.perf .terminal-input-row input:focus-visible,
+body.perf .form-field input:focus-visible,
+body.perf .form-field select:focus-visible,
+body.perf .form-field textarea:focus-visible{outline-color:var(--silver)}
+
+/* 96. Konami reward. The code has been in the site since round one but
+   it only flipped the theme. It now also leaves a visible mark: the
+   moon in the contact window runs hot for a beat, the dossier stamp
+   re-presses itself, and the bat field gets one extra flock (that last
+   part is spawnBatFrenzy(), unchanged). `body.konami` is a one-shot
+   class removed on a timer by initEasterEggs().
+   Note the stamp selector targets `.stamp-press.pressed`, which is the
+   class the existing IntersectionObserver already puts on it — there is
+   no `.dossier-stamp` element in this build, and a rule naming one
+   would have been dead CSS.
+   RM: the class is never applied. */
+@keyframes moonRun{0%{filter:none}50%{filter:hue-rotate(-40deg) brightness(1.5)}100%{filter:none}}
+body.konami .cw-moon{animation:moonRun 1.6s var(--ease-out)}
+body.konami .stamp-press.pressed{animation:stampThunk .5s cubic-bezier(.2,1.4,.4,1) forwards}
+body.reduced.konami .cw-moon,body.perf.konami .cw-moon{animation:none}
+
+/* 97. The Konami reward needs to be announced, not just seen. This is
+   the visible banner; initEasterEggs() also pushes a line into the
+   terminal so the joke lands where the visitor is already looking.
+   It is role="status" so it is announced politely rather than
+   interrupting. */
+.konami-toast{
+  position:fixed;left:50%;bottom:34px;transform:translateX(-50%);
+  z-index:2600;padding:12px 20px;border-radius:999px;
+  background:rgba(13,10,15,.96);border:1px solid var(--red);
+  box-shadow:0 18px 44px rgba(0,0,0,.6),0 0 30px rgba(230,57,88,.25);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--silver);
+  pointer-events:none;animation:toastIn .4s var(--ease-out) backwards
+}
+@keyframes toastIn{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}
+body.reduced .konami-toast{animation:none}
+
+/* 98. Perf audit. The performance switch promises to strip the
+   expensive layers, and this is the rule that keeps that promise for
+   everything this batch added: no halos, no flicker, no grain, no
+   backdrop blur beyond the nav. The canvases are handled in JS (the
+   particle field simply is not created). */
+body.perf #readingHalo{display:none}
+body.perf .terminal-section::before{display:none}
+
+/* 99. Reduced-motion audit. One rule per animated thing added in this
+   batch, gathered in one place so the contract is auditable rather than
+   scattered through twenty selectors. Every entry here has a matching
+   note at the feature it belongs to; this block is the summary.
+   The `*` rule at line 98 already collapses durations to .01ms, so the
+   work this does is the part that rule cannot: removing the layers
+   outright where a collapsed animation would still leave a visible
+   artifact (a lamp stuck mid-pulse, a vignette frozen at 55% opacity). */
+body.reduced .terminal-body::after,
+body.reduced .terminal-head::after,
+body.reduced .t-complete,
+body.reduced .konami-toast,
+body.reduced .terminal.term-exit{animation:none}
+body.reduced .terminal-head::after{opacity:.9}
+
+/* 100. Console banner, extended. The existing ASCII bat is the first
+   thing a curious visitor sees in devtools; it now carries the two
+   facts that actually matter about this build — that it has no
+   dependencies, and that the terminal is theatre. Styled with the
+   site's own crimson so the console looks like part of the product.
+   This is console-only output: it costs nothing on load and nothing
+   to anyone who never opens devtools. */
+
 /* ============ CONTRAST / PRINT ============ */
 @media (prefers-contrast:more){
   :root{--muted:#B9B2C0;--line:rgba(230,57,88,.4);--line-soft:rgba(213,208,214,.2)}

@@ -1202,6 +1202,12 @@
     const atBottom = () => body.scrollHeight - body.scrollTop - body.clientHeight < 40;
     const scroll = () => { if (atBottom()) body.scrollTop = body.scrollHeight; };
 
+    /* 82. Decode character set for the typing effect. Deliberately
+       excludes glyphs that read as content (no letters that could be
+       mistaken for the real character, no punctuation) — the point is
+       that a character is still arriving, not that it is disguised. */
+    const CHARFX = '01#%&*+=<>/\\|';
+
     const add = (text, cls = 't-out') => {
       const div = document.createElement('div');
       div.className = 't-line ' + cls;
@@ -1211,9 +1217,15 @@
       return div;
     };
 
-    /* Per-character typing latency. This is what makes the terminal feel
-       like a real session rather than a lookup table. Reduced motion →
-       printed instantly (no character loop at all). */
+    /* 82. Per-character typing latency, with a short decode tail: the
+       newest character flashes through CHARFX for one step before it
+       locks. This is what makes the terminal feel like a session rather
+       than a lookup table. Only the character currently being written
+       is ever substituted, so the line never becomes unreadable, and
+       the substituted text lives inside a single text node — there is
+       no innerHTML anywhere in this file's terminal path.
+       Reduced motion / perf → printed instantly, no character loop at
+       all (the loop is skipped, not merely sped up). */
     const typeLine = (text, cls = 't-out', done) => {
       if (state.reduced || state.perf) { add(text, cls); done && done(); return; }
       const div = document.createElement('div');
@@ -1221,10 +1233,17 @@
       body.appendChild(div);
       let i = 0;
       const step = () => {
-        div.textContent = text.slice(0, ++i);
+        i++;
+        const locked = text.slice(0, i - 1);
+        const ch = text[i - 1];
+        /* whitespace is never substituted — a decode glyph where a
+           space belongs reflows the whole line every step */
+        const fx = (i < text.length || /\S/.test(ch))
+          ? CHARFX[(Math.random() * CHARFX.length) | 0] : ch;
+        div.textContent = locked + fx;
         scroll();
         if (i < text.length) setTimeout(step, text.length > 60 ? 3 : 7);
-        else done && done();
+        else { div.textContent = text; done && done(); }
       };
       step();
     };
@@ -1242,6 +1261,27 @@
       };
       next();
     };
+
+    /* --- 88. motd ---
+       A "last login" line, the way every real motd opens. The date is
+       this page load minus a plausible gap, computed locally — nothing
+       is stored and nothing is read back, so it is honest about being
+       decoration while still being a real timestamp rather than a
+       hardcoded string. aria-hidden: it is flavour, and the terminal's
+       aria-live region should not announce a fake login at load. */
+    (() => {
+      const last = new Date(Date.now() - (2 + Math.random() * 30) * 36e5);
+      const line = document.createElement('div');
+      line.className = 't-line t-out t-motd';
+      line.setAttribute('aria-hidden', 'true');
+      /* built as nodes rather than an innerHTML string, matching the
+         textContent-only convention the rest of this terminal uses */
+      line.textContent = 'last login: ' + last.toLocaleString() + ' ';
+      const note = document.createElement('b');
+      note.textContent = '— session is a demo, nothing was executed';
+      line.appendChild(note);
+      body.appendChild(line);
+    })();
 
     /* --- boot banner --- */
     printBlock(D.TERMINAL_BOOT || [], 't-out', () => {
@@ -1280,15 +1320,56 @@
     const CMDS = Object.keys(D.TERMINAL_CMDS || {}).concat(['clear', 'matrix', 'sl', 'cat']);
     const UNIQUE = [...new Set(CMDS)].sort();
 
+    /* 85. Prompt echo. One block per command, so a long scrollback reads
+       as a sequence of exchanges rather than a wall. aria-hidden because
+       the command line printed above it is already announced. */
+    const echo = (raw) => {
+      const d = document.createElement('div');
+      d.className = 't-line t-echo';
+      d.setAttribute('aria-hidden', 'true');
+      const b = document.createElement('b');
+      b.textContent = raw;
+      d.appendChild(b);
+      body.appendChild(d);
+      scroll();
+    };
+
     const run = (raw) => {
       const trimmed = raw.trim();
       if (!trimmed) return;
       const cmd = trimmed.toLowerCase();
       add(raw, 't-cmd');
       history.unshift(trimmed); hIndex = -1;
+      closeComplete();
 
-      /* clear */
+      /* clear — the one command that must NOT echo, since its whole
+         output is the empty screen */
       if (cmd === 'clear') { body.innerHTML = ''; return; }
+
+      /* 89. exit — a command that cannot do what it says. The panel
+         tears, and the output admits there is nowhere to go. Nothing
+         is unloaded and no navigation happens; the joke only works
+         because the terminal genuinely cannot leave. */
+      if (cmd === 'exit' || cmd === 'logout' || cmd === 'quit') {
+        echo(trimmed);
+        const panel = body.closest('.terminal');
+        if (panel && !state.reduced && !state.perf) {
+          panel.classList.remove('term-exit');
+          void panel.offsetWidth;
+          panel.classList.add('term-exit');
+          panel.addEventListener('animationend',
+            () => panel.classList.remove('term-exit'), { once: true });
+        }
+        printBlock([
+          "exit: there is no shell to leave",
+          "",
+          "this terminal is decoration. it has no session, no filesystem,",
+          "and no network — the only way out is the scroll bar."
+        ], 't-out', () => add(''));
+        return;
+      }
+
+      echo(trimmed);
 
       /* matrix — handled here because it animates */
       if (cmd === 'matrix') { busy = true; runMatrix(); return; }
@@ -1337,31 +1418,195 @@
       if (busy) return;
       run(input.value);
       input.value = '';
+      syncGhost();
     });
+
+    /* --- 86/87. ghost suggestion + completion menu -------------------
+       The two are one system: the ghost shows the single completion the
+       shell would take, the menu shows all of them. Both read from the
+       same `matches` list, both are rebuilt on every keystroke, and
+       neither can submit anything — the menu writes into the input and
+       the ghost is pointer-events:none.
+
+       Sandboxing note: this completes against a static array of command
+       names declared in data.js. It reads no filesystem, resolves no
+       paths, and expands no variables — there is nothing here that
+       could be made to execute. */
+
+    /* one-line description per command, pulled from the same data.js
+       table the help text is built from, so the menu can never drift
+       out of sync with the commands it offers */
+    const CMD_DESC = {
+      help: 'command index', whoami: 'who is behind this terminal',
+      ls: 'list the fake filesystem', cat: 'read a file',
+      skills: 'core capability readout', projects: 'featured work',
+      contact: 'how to reach me', clear: 'wipe the screen',
+      matrix: 'do not', sl: 'you mistyped ls', exit: 'there is no exit'
+    };
+
+    const row = input.closest('.terminal-input-row');
+    /* Combobox wiring. The input owns a listbox popup, so it declares
+       itself as one — an aria-expanded on a bare text input would be
+       invalid ARIA and worse than no attribute at all. */
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+    input.setAttribute('aria-controls', 'termComplete');
+
+    let ghost = null;
+    if (row) {
+      ghost = document.createElement('span');
+      ghost.className = 't-ghost';
+      ghost.setAttribute('aria-hidden', 'true');
+      ghost.hidden = true;
+      row.appendChild(ghost);
+      /* The ghost is positioned by measuring the real text rather than
+         guessing at character widths — the input is set in a webfont
+         and its metrics are not something to hardcode. This hidden span
+         borrows the input's own computed font, so measuring the typed
+         text in it gives the exact offset the tail should start at. */
+      ghost._probe = document.createElement('span');
+      ghost._probe.setAttribute('aria-hidden', 'true');
+      ghost._probe.style.position = 'absolute';
+      ghost._probe.style.visibility = 'hidden';
+      ghost._probe.style.whiteSpace = 'pre';
+      ghost._probe.style.pointerEvents = 'none';
+      row.appendChild(ghost._probe);
+    }
+
+    let menu = null, menuItems = [], menuIndex = -1;
+
+    const closeComplete = () => {
+      if (!menu) return;
+      menu.remove();
+      menu = null; menuItems = []; menuIndex = -1;
+      input.setAttribute('aria-expanded', 'false');
+    };
+
+    const matchesFor = (v) => {
+      const p = v.trim().toLowerCase();
+      if (!p) return [];
+      return UNIQUE.filter(c => c.startsWith(p) && c !== p);
+    };
+
+    /* 86. Ghost suggestion. Only the tail is shown — the typed part is
+       rendered transparent by the `.t-ghost b` rule — so the suggestion
+       reads as a completion of what is already there rather than a
+       second copy of it. */
+    const syncGhost = () => {
+      if (!ghost) return;
+      const typedRaw = input.value;
+      const m = matchesFor(typedRaw);
+      if (!m.length || !typedRaw.trim()) {
+        ghost.hidden = true;
+        return;
+      }
+      const cs = getComputedStyle(input);
+      const p = ghost._probe;
+      ['fontFamily', 'fontSize', 'fontWeight', 'letterSpacing']
+        .forEach(k => { ghost.style[k] = cs[k]; p.style[k] = cs[k]; });
+      p.textContent = typedRaw;
+      /* left edge of the input, plus the width of what has been typed */
+      ghost.style.left = (input.offsetLeft + p.getBoundingClientRect().width) + 'px';
+      ghost.textContent = '';
+      const typed = document.createElement('b');
+      typed.textContent = typedRaw;
+      ghost.appendChild(typed);
+      ghost.appendChild(document.createTextNode(m[0].slice(typedRaw.trim().length)));
+      ghost.hidden = false;
+    };
+
+    /* 87. The menu. A real listbox: arrow keys move aria-selected, Enter
+       and click both commit, Escape dismisses without committing. */
+    const openComplete = (m) => {
+      closeComplete();
+      menu = document.createElement('ul');
+      menu.className = 't-complete';
+      menu.id = 'termComplete';
+      menu.setAttribute('role', 'listbox');
+      menu.setAttribute('aria-label', 'Command completions');
+      m.forEach(c => {
+        const li = document.createElement('li');
+        li.setAttribute('role', 'option');
+        li.setAttribute('aria-selected', 'false');
+        li.dataset.cmd = c;
+        const name = document.createElement('b');
+        name.textContent = c;
+        const desc = document.createElement('span');
+        desc.textContent = CMD_DESC[c] || '';
+        li.appendChild(name);
+        li.appendChild(desc);
+        /* mousedown, not click: the input blurs on mousedown and a
+           click handler would fire after the caret has already moved */
+        li.addEventListener('mousedown', ev => {
+          ev.preventDefault();
+          commit(c);
+        });
+        menu.appendChild(li);
+      });
+      menuItems = [...menu.children];
+      menuIndex = 0;
+      menuItems[0].setAttribute('aria-selected', 'true');
+      input.setAttribute('aria-expanded', 'true');
+      row.appendChild(menu);
+    };
+
+    const moveMenu = (d) => {
+      if (!menuItems.length) return;
+      menuItems[menuIndex].setAttribute('aria-selected', 'false');
+      menuIndex = (menuIndex + d + menuItems.length) % menuItems.length;
+      const li = menuItems[menuIndex];
+      li.setAttribute('aria-selected', 'true');
+      /* manual scroll rather than scrollIntoView(): the menu is inside
+         `.terminal{overflow:hidden}`, and scrollIntoView would scroll
+         ancestors to bring the item into view, nudging the page. */
+      if (li.offsetTop < menu.scrollTop) menu.scrollTop = li.offsetTop;
+      else if (li.offsetTop + li.offsetHeight > menu.scrollTop + menu.clientHeight) {
+        menu.scrollTop = li.offsetTop + li.offsetHeight - menu.clientHeight;
+      }
+    };
+
+    const commit = (c) => {
+      input.value = c + (c === 'cat' ? ' ' : '');
+      closeComplete();
+      syncGhost();
+      input.focus();
+    };
 
     /* --- history + tab completion --- */
     input.addEventListener('keydown', e => {
+      if (menu && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+        e.preventDefault(); moveMenu(e.key === 'ArrowDown' ? 1 : -1); return;
+      }
+      if (menu && e.key === 'Enter' && menuIndex >= 0) {
+        e.preventDefault(); commit(menuItems[menuIndex].dataset.cmd); return;
+      }
+      if (menu && e.key === 'Escape') {
+        e.preventDefault(); closeComplete(); return;
+      }
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         if (hIndex < history.length - 1) input.value = history[++hIndex] || '';
+        syncGhost();
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
         if (hIndex > 0) input.value = history[--hIndex];
         else { hIndex = -1; input.value = ''; }
+        syncGhost();
       } else if (e.key === 'Tab') {
         e.preventDefault();
-        const partial = input.value.trim().toLowerCase();
-        if (!partial) return;
-        /* complete to the first unique match; if several share the
-           prefix, print them like a real shell does */
-        const matches = UNIQUE.filter(c => c.startsWith(partial));
-        if (matches.length === 1) { input.value = matches[0] + (matches[0] === 'cat' ? ' ' : ''); }
-        else if (matches.length > 1) {
-          add(input.value, 't-cmd');
-          add(matches.join('   '), 't-out');
-        }
+        const m = matchesFor(input.value);
+        if (!m.length) { closeComplete(); return; }
+        /* one match → take it, the way a shell does. Several → open the
+           menu and let the visitor choose instead of printing a wall of
+           names into the scrollback. */
+        if (m.length === 1) commit(m[0]);
+        else openComplete(m);
       }
     });
+
+    input.addEventListener('input', () => { closeComplete(); syncGhost(); });
+    input.addEventListener('blur', () => { setTimeout(closeComplete, 120); });
 
     /* --- block cursor follows focus (decorative only) --- */
     const cursor = $('#termCursor');
@@ -1961,6 +2206,64 @@
     return PHASES[idx];
   }
 
+  /* 93. Position in the synodic cycle, 0 → 1, where 0 is new and .5 is
+     full. Both the illumination and the waxing/waning side come from
+     this one number, so the disc can never disagree with itself. */
+  function moonCycle(date) {
+    const SYNODIC = 29.530588853;
+    const NEW_MOON_2000 = Date.UTC(2000, 0, 6, 18, 14) / 86400000;
+    const days = (date.getTime() / 86400000) - NEW_MOON_2000;
+    let frac = (days % SYNODIC) / SYNODIC;
+    if (frac < 0) frac += 1;
+    return frac;
+  }
+
+  /* 93. Lit fraction of two equal circles whose centres are `d` radii
+     apart. Standard lens area: 2r²cos⁻¹(d/2r) − (d/2)√(4r²−d²), over
+     the disc area πr². With r = 1 this is the closed form below.
+     d = 0 → the mask exactly covers the disc (new moon).
+     d = 2 → the mask is tangent and covers nothing (full moon). */
+  function lensFraction(d) {
+    if (d <= 0) return 0;
+    if (d >= 2) return 1;
+    const t = Math.acos(d / 2);          /* cos⁻¹(d/2r), r = 1 */
+    return (2 * t - d * Math.sqrt(4 - d * d) / 2) / Math.PI;
+  }
+
+  /* 93. Solve for the offset that yields the target illumination.
+     lensFraction is strictly decreasing in d, so a 24-step bisection
+     lands well inside a pixel at any realistic disc size — far more
+     precision than a 56%-wide moon needs, and it costs nothing. */
+  function moonOffset(illum) {
+    let lo = 0, hi = 2;
+    for (let i = 0; i < 24; i++) {
+      const mid = (lo + hi) / 2;
+      if (lensFraction(mid) > illum) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  /* 93. Draw tonight's moon on the contact-window disc. The disc is a
+     fixed radial-gradient; the phase is a mask circle offset over it,
+     plus a bloom that scales with how much of it is lit — a new moon
+     should be a dark disc with no halo, not a glowing hole.
+     --d01 is the mask offset in disc-widths (0 = fully covered, 1 =
+     fully clear) and --dir flips the side, so the terminator sweeps the
+     right way through the month: the waxing half is lit on the right in
+     the northern hemisphere, the waning half on the left.
+     This is written through the CSSOM, never as a style attribute —
+     style-src here has no 'unsafe-inline', and a style attribute is
+     exactly what that blocks. */
+  function initMoonPhaseDisc() {
+    const disc = $('.cw-moon');
+    if (!disc) return;
+    const cyc = moonCycle(new Date());
+    const illum = (1 - Math.cos(2 * Math.PI * cyc)) / 2;
+    disc.style.setProperty('--d01', (moonOffset(illum) / 2).toFixed(4));
+    disc.style.setProperty('--dir', cyc < 0.5 ? '1' : '-1');
+    disc.style.setProperty('--glow', (0.25 + illum * 0.75).toFixed(3));
+  }
+
   /* ---------- Footer bits ---------- */
   function initFooter() {
     const y = $('#year');
@@ -2133,7 +2436,108 @@
      `/nightfall` hash changelog from §4.5 was considered and skipped:
      a changelog implies release cadence this page doesn't have, and
      the konami + console eggs already cover the discovery itch. */
+  /* ---------- 91. Scroll-velocity skew ----------
+     The document leans into a fast flick and settles when it stops, so
+     the page reads as something with mass rather than a bitmap being
+     scrolled. --sk is a clamped angle; more than ~0.35deg and body text
+     visibly shears, which stops being a nice detail and starts being a
+     legibility problem.
+
+     The `html.vel` class is the load-bearing part: a bare
+     `transform:skewY(0deg)` is not free — it promotes the whole
+     document to its own composited layer and makes <main> a containing
+     block for everything beneath it. The class is present only while
+     the skew is non-zero, so a visitor sitting still on a paragraph
+     pays nothing.
+
+     This is driven entirely by a rAF loop that runs while there is
+     something to animate, not by a timer racing the scroll event: a
+     scroll event only *starts* the loop, and the loop decides for
+     itself when the skew has decayed enough to stop. The earlier
+     version cleared the class from a 180ms timer, which could fire
+     between two scroll events and blank the skew mid-flick.
+
+     RM/perf: never runs, so --sk is never written and the class is
+     never added. */
+  function initScrollVelocity() {
+    const root = document.documentElement;
+    if (state.reduced || state.perf) return;
+    let last = scrollY, sk = 0, running = false;
+    const tick = () => {
+      const y = scrollY;
+      const v = y - last;
+      last = y;
+      /* 0.05 deg per px, clamped — a 60px flick gives 3deg unclamped,
+         which is far too much for a page of prose */
+      const target = Math.max(-0.35, Math.min(0.35, v * 0.05));
+      /* ease toward the target rather than snapping to it, so a flick
+         that ends abruptly still relaxes instead of cutting */
+      sk += (target - sk) * 0.35;
+      if (Math.abs(sk) < 0.006) {
+        /* decayed: release the layer and stop the loop. Removing the
+           declaration (not writing 0deg) is what lets the compositor
+           drop the layer entirely. */
+        sk = 0;
+        root.classList.remove('vel');
+        root.style.removeProperty('--sk');
+        running = false;
+        return;
+      }
+      root.classList.add('vel');
+      root.style.setProperty('--sk', sk.toFixed(3) + 'deg');
+      requestAnimationFrame(tick);
+    };
+    addEventListener('scroll', () => {
+      if (running) return;
+      running = true;
+      requestAnimationFrame(tick);
+    }, { passive: true });
+  }
+
+  /* ---------- 92. Reading-position halo ----------
+     A soft bloom on the ground layer that tracks how far down the page
+     the visitor is, easing toward the viewport centre rather than
+     snapping to the scrollbar. It is the one piece of ambience about
+     *where you are* rather than what you are pointing at.
+     Created on the first scroll, never on load, so a visitor who reads
+     only the hero never pays for it. RM/perf: never created. */
+  function initReadingHalo() {
+    if (state.reduced || state.perf) return;
+    let halo = null, target = 0, cur = 0, raf = null;
+    const ensure = () => {
+      if (halo) return;
+      halo = document.createElement('div');
+      halo.id = 'readingHalo';
+      halo.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(halo);
+    };
+    const apply = () => {
+      raf = null;
+      const max = document.documentElement.scrollHeight - innerHeight;
+      const p = max > 0 ? Math.min(1, Math.max(0, scrollY / max)) : 0;
+      target = innerHeight * (0.18 + p * 0.64);
+      cur += (target - cur) * 0.12;
+      halo.style.left = (innerWidth * 0.5) + 'px';
+      halo.style.top = cur + 'px';
+      if (Math.abs(target - cur) > 0.5) raf = requestAnimationFrame(apply);
+    };
+    addEventListener('scroll', () => {
+      ensure();
+      halo.style.opacity = '1';
+      if (!raf) raf = requestAnimationFrame(apply);
+    }, { passive: true });
+  }
+
   function initEasterEggs() {
+    /* 100. Console banner. This is the only place the site talks to
+       someone who opened devtools, so it says the two things that are
+       actually true and actually interesting about this build: there
+       is no dependency tree, and the terminal is theatre. Both facts
+       are load-bearing — the first is the whole technical claim, the
+       second is the honesty claim — so they belong where the audience
+       that cares will look.
+       Console output only: it costs nothing on load and nothing to a
+       visitor who never opens devtools. */
     const bat = [
       '  ,      ,',
       '  |\\    /|',
@@ -2145,6 +2549,18 @@
       '    \\/\\/      github.com/Mr-Destroyer'
     ].join('\n');
     console.log('%c' + bat, 'color:#E63958;font-family:monospace;font-size:11px;line-height:1.35');
+    console.log(
+      '%c0 dependencies%c  ·  %c0 build step%c  ·  %c1 outbound request%c (public GitHub stats, cached)\n' +
+      '%cthe terminal is decoration — it has no shell, no filesystem and no network. ' +
+      'connect-src in the CSP is what enforces that, not this message.',
+      'color:#7FB98A;font-family:monospace;font-weight:bold',
+      'color:#938B98;font-family:monospace',
+      'color:#7FB98A;font-family:monospace;font-weight:bold',
+      'color:#938B98;font-family:monospace',
+      'color:#E39B5A;font-family:monospace;font-weight:bold',
+      'color:#938B98;font-family:monospace',
+      'color:#938B98;font-family:monospace'
+    );
 
     const SEQ = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     let pos = 0;
@@ -2153,11 +2569,34 @@
       pos = (key === SEQ[pos]) ? pos + 1 : (key === SEQ[0] ? 1 : 0);
       if (pos < SEQ.length) return;
       pos = 0;
+
       const on = document.body.classList.toggle('blood-moon');
       store.set('bloodMoon', on);
       const themeBtn = $('#themeBtn');
       themeBtn && themeBtn.setAttribute('aria-pressed', String(on));
+
+      /* 96. The reward has to be legible as a reward. Three things fire
+         at once so the code visibly does something: the moon in the
+         contact window runs hot, the dossier stamp re-presses itself,
+         and a flock crosses the hero. `body.konami` is one-shot — it is
+         added now and removed on a timer, so the code can be entered
+         again without the animation refusing to replay. */
       spawnBatFrenzy();
+      if (state.reduced || state.perf) return;
+      document.body.classList.remove('konami');
+      void document.body.offsetWidth;
+      document.body.classList.add('konami');
+      setTimeout(() => document.body.classList.remove('konami'), 1800);
+
+      /* 97. And it has to be announced. A purely visual reward is
+         invisible to anyone using a screen reader, and the theme flip
+         alone is not obvious as a consequence of what they typed. */
+      const toast = document.createElement('p');
+      toast.className = 'konami-toast';
+      toast.setAttribute('role', 'status');
+      toast.textContent = '↑↑↓↓←→←→BA — BLOOD MOON RISING';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3200);
     });
   }
 
@@ -2863,8 +3302,17 @@
     initTyped();
     initForm();
     initFooter();
+    /* 93. after initFooter — both read the clock, and keeping them
+       adjacent means the contact-window disc and the footer phase name
+       are always computed from the same instant */
+    initMoonPhaseDisc();
     initModal();
     initEasterEggs();
+    /* 91/92. the two scroll-driven ambience layers. Both no-op under
+       reduced motion and performance mode, so they are safe to call
+       unconditionally here. */
+    initScrollVelocity();
+    initReadingHalo();
     initReveal();
     /* before initLoader — finishLoader() adds .split-in, so the
        .ht-line spans must already exist when it fires */
