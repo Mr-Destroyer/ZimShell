@@ -885,7 +885,81 @@
     cards.forEach((c, i) => {
       const show = state.filter === 'all' || c.dataset.cat === state.filter;
       c.style.display = show ? '' : 'none';
-      if (show) { c.classList.add('in'); shown++; }
+      if (show) {
+        /* 79. per-card entrance stagger — the index is written as a
+           custom property so CSS owns the timing, and it is re-derived
+           on every filter pass so the visible set always counts 0,1,2…
+           rather than inheriting gaps from hidden cards. */
+        c.style.setProperty('--pc-i', String(shown));
+        c.classList.remove('in');
+        /* re-trigger the animation: a class removed and re-added in the
+           same frame does not restart it, so force a reflow between. */
+        void c.offsetWidth;
+        c.classList.add('in');
+        /* 63. flash the survivors so a filter change is legible. The
+           class is added now and removed on a timer — the flash is a
+           transition (see the CSS note), so it needs the class to come
+           back off for the next filter change to replay it. */
+        if (state.filter !== 'all') {
+          c.classList.add('flash');
+          clearTimeout(c._flashTimer);
+          c._flashTimer = setTimeout(() => c.classList.remove('flash'), 620);
+        } else {
+          c.classList.remove('flash');
+        }
+        shown++;
+      }
+    });
+  }
+
+  /* ---------- 61/75 · Card tilt + glyph tear ----------
+     Pointer-driven 3D tilt, capped at ±4deg. Deliberately restrained:
+     this is a dossier, not a fairground, and a bigger angle makes the
+     body text swim.
+
+     Written to --rx/--ry rather than to transform, because the card's
+     transform also carries the hover lift and the scroll parallax uses
+     `translate` — three systems, three properties, no collisions.
+
+     The rAF is shared and only runs while a card is actually hovered, so
+     an idle page costs nothing. RM/perf: no listeners attached at all.
+     RM: no tilt. */
+  let tiltRaf = null, tiltCard = null, tiltTarget = null;
+  function initCardTilt() {
+    if (state.reduced || state.perf) return;
+    const cards = $$('#projectGrid .project-card');
+    if (!cards.length) return;
+    const MAX = 4;
+    const apply = () => {
+      tiltRaf = null;
+      if (!tiltCard || !tiltTarget) return;
+      const r = tiltCard.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const px = (tiltTarget.x - r.left) / r.width - 0.5;
+      const py = (tiltTarget.y - r.top) / r.height - 0.5;
+      /* rotateX follows vertical movement and is inverted so the corner
+         under the cursor tips toward the viewer. */
+      tiltCard.style.setProperty('--rx', (-py * MAX * 2).toFixed(2) + 'deg');
+      tiltCard.style.setProperty('--ry', (px * MAX * 2).toFixed(2) + 'deg');
+    };
+    const queue = () => { if (!tiltRaf) tiltRaf = requestAnimationFrame(apply); };
+    cards.forEach(card => {
+      card.addEventListener('pointermove', e => {
+        if (e.pointerType === 'touch') return;
+        tiltCard = card; tiltTarget = { x: e.clientX, y: e.clientY };
+        queue();
+      });
+      card.addEventListener('pointerleave', () => {
+        tiltCard = null; tiltTarget = null;
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+      /* 75. glyph tear — once per hover, not looping */
+      card.addEventListener('mouseenter', () => {
+        card.classList.remove('tear');
+        void card.offsetWidth;
+        card.classList.add('tear');
+      });
     });
   }
 
@@ -911,19 +985,64 @@
       ${cs.disclosure ? `<div class="ms-section ms-disclosure">🕊 ${esc(cs.disclosure)}</div>` : ''}
       <div class="ms-section"><h4>Tools &amp; Tags</h4><div class="ms-tools">${pr.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div></div>
       <div class="ms-links"><a class="btn btn-primary" href="${pr.url}" target="_blank" rel="noopener noreferrer">Open on GitHub ↗</a></div>`;
+    /* 67. index each direct child so CSS can stagger them in. Written as
+       a custom property (not an inline animation-delay) to stay inside
+       the CSP: style ATTRIBUTES are blocked by style-src without
+       'unsafe-inline', but CSSOM property writes are not. */
+    $$(':scope > *', scroll).forEach((el, i) => el.style.setProperty('--ms-i', String(i)));
     lastFocus = document.activeElement;
     overlay.hidden = false;
+    /* a close that was still animating must not hide the panel we are
+       about to show */
+    overlay.classList.remove('closing');
     requestAnimationFrame(() => overlay.classList.add('open'));
     document.body.classList.add('no-scroll');
     $('#modalClose').focus();
+    modalProgress();
   }
   function closeModal() {
     const overlay = $('#modalOverlay');
     if (!overlay || overlay.hidden) return;
+    /* 76. play the entrance in reverse before the overlay's 300ms hide
+       lands, so closing reads as deliberate rather than as a vanish.
+       RM: no transition is defined for .modal, so this is instant. */
     overlay.classList.remove('open');
+    overlay.classList.add('closing');
     document.body.classList.remove('no-scroll');
-    setTimeout(() => { overlay.hidden = true; }, 300);
+    setTimeout(() => {
+      overlay.hidden = true;
+      overlay.classList.remove('closing');
+    }, 300);
     if (lastFocus) lastFocus.focus();
+  }
+
+  /* ---------- 68 · Modal scroll progress ----------
+     A 2px rule across the top of the panel that fills as the case study
+     is read. scaleX only, so it composites. The bar is created once and
+     reused; it is a position indicator rather than decoration, so it
+     keeps working under reduced motion (it just snaps instead of
+     easing — see the CSS). RM: still tracks, no easing. */
+  function modalProgress() {
+    const modal = $('#projectModal'), scroll = $('#modalScroll');
+    if (!modal || !scroll) return;
+    let bar = modal.querySelector('.modal-progress');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'modal-progress';
+      bar.setAttribute('aria-hidden', 'true');
+      modal.appendChild(bar);
+      const track = () => {
+        const max = scroll.scrollHeight - scroll.clientHeight;
+        const p = max > 4 ? Math.min(1, Math.max(0, scroll.scrollTop / max)) : 0;
+        bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+      };
+      scroll.addEventListener('scroll', track, { passive: true });
+      scroll._nfTrack = track;
+    }
+    /* reset per open — a previous case study's scroll position must not
+       leave the bar pre-filled */
+    scroll.scrollTop = 0;
+    scroll._nfTrack && scroll._nfTrack();
   }
   function initModal() {
     const overlay = $('#modalOverlay');
@@ -2291,7 +2410,7 @@
       IssuesEvent: 'ISSUE', ReleaseEvent: 'RELEASE', WatchEvent: 'STAR',
       ForkEvent: 'FORK', PublicEvent: 'PUBLIC', DeleteEvent: 'DELETE'
     };
-    const rows = events.map(e => {
+    const rows = events.map((e, i) => {
       const short = e.repo.split('/').pop();
       const kind = label[e.type] || e.type.replace(/Event$/, '').toUpperCase();
       /* The detail cell is always emitted, even when empty. It is a grid
@@ -2300,7 +2419,14 @@
          left on every row without a message. An empty span holds the
          column open and keeps every row aligned. */
       const detail = e.detail || '';
-      return `<li class="rf-row">
+      /* 70/74. the newest row carries the glitch flash and the badge
+         pop; --rf-i staggers the whole list in (69). */
+      const newest = i === 0 ? ' is-newest' : '';
+      /* No style attribute here: style-src without 'unsafe-inline'
+         blocks style ATTRIBUTES outright. --rf-i is written below via
+         CSSOM setProperty, which is a different mechanism and is not
+         blocked. */
+      return `<li class="rf-row${newest}" data-repo="${esc(short.toLowerCase())}">
         <span class="rf-kind" data-k="${esc(kind)}">${esc(kind)}</span>
         <span class="rf-repo">${esc(short)}</span>
         <span class="rf-msg">${esc(detail)}</span>
@@ -2312,7 +2438,77 @@
         <span class="rf-src mono">via public GitHub activity</span>
       </div>
       <ul class="rf-list">${rows}</ul>`;
+    /* 69/74. stagger index per row, written through the CSSOM so the
+       CSP never sees a style attribute. */
+    $$('.rf-row', box).forEach((row, i) => row.style.setProperty('--rf-i', String(i)));
     box.hidden = false;
+    /* 80. last-sync line, counted up when the panel first scrolls in */
+    initFeedSync(box, events.length);
+    /* 73. hovering a row whose repo matches a featured card lights that
+       card. Bound here because the rows are rebuilt on every repaint. */
+    bindFeedCrossHighlight(box);
+  }
+
+  /* ---------- 73 · feed row → project card cross-highlight ----------
+     Ties the two widgets together: hovering a repo in the live feed
+     pings the matching card in the grid above. Only rows whose repo is
+     actually featured can match, so most hovers are inert by design.
+     RM: no ping. */
+  function bindFeedCrossHighlight(box) {
+    if (state.reduced || box._nfCross) return;
+    box._nfCross = true;
+    box.addEventListener('mouseover', e => {
+      const row = e.target.closest('.rf-row');
+      if (!row || !row.dataset.repo) return;
+      const card = $$('#projectGrid .project-card').find(c => {
+        const strip = c.querySelector('[data-repo]');
+        if (!strip) return false;
+        const slug = strip.dataset.repo.split('/').pop().toLowerCase();
+        return slug === row.dataset.repo;
+      });
+      if (!card) return;
+      /* same add/remove-over-time shape as the filter flash: the ping is
+         a transition, so the class has to come back off for a later
+         hover to replay it. */
+      card.classList.add('ping');
+      clearTimeout(card._pingTimer);
+      card._pingTimer = setTimeout(() => card.classList.remove('ping'), 900);
+    });
+  }
+
+  /* ---------- 80 · Recon feed last-sync count-up ----------
+     Counts 0 → N once, when the panel first becomes visible. Same
+     count-up language as the nav counter and the constellation readout,
+     so the site reads as one system rather than three.
+     RM: final value printed immediately, no rAF. */
+  function initFeedSync(box, count) {
+    if (box.querySelector('.rf-sync')) {
+      const old = box.querySelector('.rf-sync');
+      old.textContent = count + ' events synced';
+      return;
+    }
+    const line = document.createElement('p');
+    line.className = 'rf-sync';
+    line.textContent = '0 events synced';
+    box.appendChild(line);
+    if (state.reduced || state.perf) {
+      line.textContent = count + ' events synced';
+      return;
+    }
+    const io = new IntersectionObserver(es => {
+      if (!es[0].isIntersecting) return;
+      io.disconnect();
+      const dur = 700, t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / dur);
+        const v = Math.round(count * (1 - Math.pow(1 - p, 3)));
+        line.textContent = v + ' events synced';
+        if (p < 1) requestAnimationFrame(step);
+        else { line.textContent = count + ' events synced'; line.classList.add('is-live'); }
+      };
+      requestAnimationFrame(step);
+    }, { threshold: 0.3 });
+    io.observe(box);
   }
 
   /* Orchestrator: cache → paint → (maybe) refresh. */
@@ -2640,6 +2836,8 @@
     renderSkills();
     renderConstellation();
     renderProjects();
+    /* after renderProjects — it binds to the cards that renderer made */
+    initCardTilt();
     /* after renderProjects — it paints into the cards that renderer made */
     initGitHub();
     renderHunt();

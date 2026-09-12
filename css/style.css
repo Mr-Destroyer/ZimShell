@@ -1408,6 +1408,241 @@ body.reduced .redact.in::after{animation:none;opacity:0}
 .dossier-head.drawn .dossier-draw{transform:scaleX(1)}
 body.reduced .dossier-head .dossier-draw{transition:none;transform:scaleX(1)}
 
+/* ============================================================
+   07 · PROJECTS & RECON FEED (items 61-80)
+   ============================================================ */
+
+/* 61. Card 3D tilt. --rx/--ry are written by the pointer handler in
+   initCardTilt() as small angles (±4deg, deliberately restrained — this
+   is a dossier, not a fairground). `translate` carries the existing
+   hover lift and `transform` carries the tilt, so the two never fight
+   over one property. The tilt lives on the card, the lift stays in the
+   .project-card:hover rule above.
+   RM: no handler is attached, so --rx/--ry stay 0 and this is a no-op. */
+.project-card{
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transform-style:preserve-3d;
+  transition:transform .35s var(--ease-out),border-color .35s,box-shadow .35s
+}
+/* The lift must be repeated here. The base rule at line ~469 sets
+   `transform:translateY(-6px)` on hover, and this later rule has equal
+   specificity — so on its own it would silently win and delete the
+   lift. Folding translateY into the same transform keeps both. */
+.project-card:hover{
+  transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(-6px)
+}
+body.perf .project-card,body.perf .project-card:hover{transform:none}
+
+/* 62. Corner brackets. Four L-shaped rules that draw inward on hover,
+   in the dossier's own vocabulary. Drawn as two pseudo-elements so the
+   card keeps its single element and its overflow:hidden clip.
+   RM: static and visible — no transition. */
+.project-card::before,.project-card::after{
+  content:"";position:absolute;width:16px;height:16px;z-index:3;
+  border-color:var(--red);opacity:0;pointer-events:none;
+  transition:opacity .3s var(--ease-out),width .35s var(--ease-out),height .35s var(--ease-out)
+}
+.project-card::before{top:9px;left:9px;border-top:1.5px solid;border-left:1.5px solid;border-top-left-radius:4px}
+.project-card::after{bottom:9px;right:9px;border-bottom:1.5px solid;border-right:1.5px solid;border-bottom-right-radius:4px}
+.project-card:hover::before,.project-card:hover::after,
+.project-card:focus-visible::before,.project-card:focus-visible::after{
+  opacity:.9;width:24px;height:24px
+}
+body.reduced .project-card::before,body.reduced .project-card::after{
+  opacity:.55;transition:none
+}
+
+/* 63. Filter change → the cards that remain flash their border once, so
+   the eye can tell "this set changed" from "nothing happened".
+   Deliberately a TRANSITION, not an animation: `.project-card.in` (79)
+   already owns the `animation` shorthand for the entrance rise, and a
+   second rule setting `animation` on the same element does not compose —
+   the later declaration simply wins and the flash silently never ran.
+   Driving it from the border-color/box-shadow transitions the card
+   already declares sidesteps the collision entirely and needs no
+   keyframes. JS adds the class and removes it after 600ms, so the
+   transition plays in and back out.
+   RM: no flash class is applied. */
+.project-card.flash{
+  border-color:var(--red);
+  box-shadow:0 0 0 6px rgba(230,57,88,.12),0 0 26px rgba(230,57,88,.18)
+}
+body.reduced .project-card.flash{border-color:var(--line-soft);box-shadow:none}
+
+/* 64. Live GitHub values flash when they are upgraded from the hardcoded
+   fallback. This is the only cue that the numbers are now real rather
+   than shipped — without it the swap is invisible and the widget looks
+   broken when the API is rate-limited.
+   RM: values still swap; only the flash is skipped. */
+@keyframes ghFlash{0%{color:#fff;text-shadow:0 0 12px rgba(230,57,88,.8)}
+  100%{color:inherit;text-shadow:none}}
+.gh-strip.is-live .gh-stars,.gh-strip.is-live .gh-push,.ac-stars.is-live{
+  animation:ghFlash .7s var(--ease-out)
+}
+body.reduced .gh-strip.is-live .gh-stars,
+body.reduced .gh-strip.is-live .gh-push,
+body.reduced .ac-stars.is-live{animation:none}
+
+/* 65. Archive row hover bleed. A crimson wash that grows from the left
+   edge behind the row's own text.
+   RM: static wash on hover (no scale transition). */
+.archive-card{position:relative;overflow:hidden}
+.archive-card::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  background:linear-gradient(90deg,rgba(230,57,88,.14),transparent 70%);
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .45s var(--ease-out)
+}
+.archive-card:hover::before,.archive-card:focus-visible::before{transform:scaleX(1)}
+.archive-card > *{position:relative;z-index:1}
+body.reduced .archive-card::before{transition:none}
+
+/* 66. Modal open: the panel scales up out of a blur. The overlay already
+   fades; this adds depth so the panel reads as arriving rather than
+   appearing.
+   RM: no blur, panel at final transform. */
+.modal{filter:blur(6px);
+  transition:transform .35s cubic-bezier(.22,1,.36,1),filter .35s var(--ease-out)}
+.modal-overlay.open .modal{filter:blur(0)}
+body.reduced .modal{filter:none;transition:none}
+body.perf .modal,body.perf .modal-overlay{filter:none;backdrop-filter:none}
+
+/* 67. Modal content staggers in behind the panel. Each direct child of
+   .modal-scroll is delayed a further 40ms. Uses `translate` so the
+   panel's own `transform` is untouched.
+   RM: content at rest immediately. */
+.modal-overlay.open .modal-scroll > *{
+  animation:msIn .5s var(--ease-out) backwards;
+  animation-delay:calc(var(--ms-i,0) * 40ms)
+}
+@keyframes msIn{from{opacity:0;translate:0 14px}to{opacity:1;translate:0 0}}
+body.reduced .modal-overlay.open .modal-scroll > *{animation:none}
+
+/* 68. Modal scroll progress. A 2px rule pinned to the top of the panel
+   that fills as the case study is read. scaleX only.
+   RM: still tracks scroll (it is a position indicator, not decoration),
+   but snaps rather than eases. */
+.modal-progress{
+  position:absolute;top:0;left:0;right:0;height:2px;z-index:3;
+  background:linear-gradient(90deg,var(--crimson),var(--red));
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .12s linear;pointer-events:none
+}
+body.reduced .modal-progress{transition:none}
+
+/* 69. Feed rows slide down as they are painted, newest first, so the
+   list reads as arriving rather than popping.
+   RM: rows at rest. */
+@keyframes rfIn{from{opacity:0;translate:0 -8px}to{opacity:1;translate:0 0}}
+.rf-row{animation:rfIn .4s var(--ease-out) backwards;
+  animation-delay:calc(var(--rf-i,0) * 45ms)}
+body.reduced .rf-row{animation:none}
+
+/* 70. Newest feed row carries a one-shot glitch flash — the same
+   redaction-bar vocabulary used elsewhere, applied as an entrance.
+   RM: no glitch layer. */
+.rf-row.is-newest{position:relative}
+.rf-row.is-newest::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,
+    rgba(230,57,88,.22) 0 1px,transparent 1px 3px);
+  animation:rfGlitch .5s steps(2,end) 1 forwards
+}
+@keyframes rfGlitch{0%{opacity:.9;transform:translateX(-3px)}
+  50%{opacity:.5;transform:translateX(3px)}100%{opacity:0;transform:none}}
+body.reduced .rf-row.is-newest::after{display:none}
+
+/* 71. The LIVE dot double-blinks. Two quick pulses then a long rest, so
+   it reads as a heartbeat rather than a steady throb.
+   RM: steady dot, no animation. */
+.rf-title::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--red);margin-right:8px;vertical-align:middle;
+  box-shadow:0 0 8px rgba(230,57,88,.8);
+  animation:rfBlink 2.6s var(--ease-out) infinite
+}
+@keyframes rfBlink{0%,8%{opacity:1}16%{opacity:.25}24%{opacity:1}
+  32%{opacity:.25}40%,100%{opacity:1}}
+body.reduced .rf-title::before{animation:none}
+body.perf .rf-title::before{animation:none;box-shadow:none}
+
+/* 72. Feed scanline sweep — a single translucent band travelling down
+   the list, reinforcing that this is a live readout.
+   RM: not rendered. */
+.rf-list{position:relative;overflow:hidden}
+.rf-list::after{
+  content:"";position:absolute;left:0;right:0;height:38px;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(230,57,88,.07),transparent);
+  animation:rfSweep 5.5s linear infinite
+}
+@keyframes rfSweep{from{top:-40px}to{top:100%}}
+body.reduced .rf-list::after,body.perf .rf-list::after{display:none}
+
+/* 73. Feed row → project card cross-highlight. Hovering a feed row whose
+   repo matches a featured card lights that card's border, tying the two
+   widgets together. A transition for the same reason as 63: `.in` owns
+   the card's `animation` shorthand, and a second `animation` declaration
+   on the same element would be overridden rather than combined, so the
+   ping would never have rendered. RM: no ping class is applied. */
+.project-card.ping{
+  border-color:var(--red);
+  box-shadow:0 0 0 8px rgba(230,57,88,.14),0 0 30px rgba(230,57,88,.22)
+}
+body.reduced .project-card.ping{border-color:var(--line-soft);box-shadow:none}
+
+/* 74. Kind-badge pop-in on the newest rows.
+   RM: badges at rest. */
+@keyframes badgePop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}
+  100%{transform:scale(1);opacity:1}}
+.rf-row.is-newest .rf-kind{animation:badgePop .45s var(--ease-out) backwards;
+  animation-delay:calc(var(--rf-i,0) * 45ms + 120ms)}
+body.reduced .rf-row.is-newest .rf-kind{animation:none}
+
+/* 75. Icon glitch on card hover — the glyph tears briefly, reusing the
+   site's RGB-split vocabulary. Applied via a class the handler toggles
+   so it fires once per hover rather than looping.
+   RM: no tear. */
+@keyframes glyphTear{
+  0%{text-shadow:0 0 18px rgba(230,57,88,.5)}
+  30%{text-shadow:-2px 0 0 rgba(230,57,88,.9),2px 0 0 rgba(90,160,220,.9)}
+  60%{text-shadow:2px 0 0 rgba(230,57,88,.9),-2px 0 0 rgba(90,160,220,.9)}
+  100%{text-shadow:0 0 18px rgba(230,57,88,.5)}}
+.project-card.tear .pt-glyph{animation:glyphTear .42s steps(3,end) 1}
+body.reduced .project-card.tear .pt-glyph{animation:none}
+
+/* 76. Modal close runs the entrance in reverse — the panel shrinks and
+   re-blurs before the overlay's 300ms hide lands, so closing reads as
+   deliberate rather than as an element vanishing.
+   RM: handled by the reduced .modal rule above (no filter, no
+   transition), so the reverse is instantaneous. */
+.modal-overlay.closing .modal{transform:translateY(14px) scale(.985);filter:blur(4px)}
+
+/* 77. Archive row last-push age. Rows older than 90 days dim their star
+   readout — a quiet "this one is dormant" signal that needs no label.
+   RM: same dimming (it is information, not motion). */
+.archive-card[data-stale="1"] .ac-stars{opacity:.45}
+.archive-card[data-stale="1"] .ac-name{opacity:.72}
+
+/* 78. Feed row hover raises its own kind badge, matching the card
+   interaction language. RM: same, it is a hover affordance. */
+.rf-row:hover .rf-kind{border-color:var(--red);color:var(--red)}
+
+/* 79. Project grid entrance: cards rise on a per-column stagger. The
+   .reveal observer owns opacity; this only offsets the transform, so
+   the two systems do not both animate opacity.
+   RM: no offset. */
+.project-card.in{animation:cardRise .6s var(--ease-out) backwards;
+  animation-delay:calc(var(--pc-i,0) * 70ms)}
+@keyframes cardRise{from{translate:0 18px}to{translate:0 0}}
+body.reduced .project-card.in{animation:none}
+
+/* 80. The recon feed's "last sync" line counts up from 0 when the panel
+   first scrolls into view — the same count-up language as the nav
+   counter and the constellation readout, so the site feels of a piece.
+   RM: final value printed immediately. */
+.rf-sync{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted)}
+.rf-sync.is-live{color:var(--candle)}
+
 /* ============ CONTRAST / PRINT ============ */
 @media (prefers-contrast:more){
   :root{--muted:#B9B2C0;--line:rgba(230,57,88,.4);--line-soft:rgba(213,208,214,.2)}
