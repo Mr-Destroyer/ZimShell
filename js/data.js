@@ -279,7 +279,16 @@ const PROJECTS = [
   { name: "justavpnlogin", cat: "dev", lang: "Markdown", stars: 0, forks: 0, status: "Completed", url: "https://github.com/Mr-Destroyer/justavpnlogin", icon: "🛰", tagline: "TryHackMe walkthrough", desc: "Solution writeup for the 'Just a VPN Login' TryHackMe room, with the reasoning behind each step.", tags: ["tryhackme", "writeup", "walkthrough"] }
 ];
 
-/* TryHackMe achievement badges */
+/* ------------------------------------------------------------------
+   TRYHACKME BADGES — MANUALLY MAINTAINED
+   --------------------------------------------------------------
+   TryHackMe exposes no public CORS-enabled profile endpoint, so these
+   cannot be fetched client-side without a proxy (which would mean a
+   backend — explicitly out of scope). They are transcribed by hand from
+   tryhackme.com/p/MohammadZim and must be updated by hand when a new
+   badge is earned. The UI labels the row as manually maintained so the
+   provenance is never ambiguous.
+   ------------------------------------------------------------------ */
 const THM_BADGES = [
   { icon: "🛡", name: "Pre Security" },
   { icon: "🌱", name: "Complete Beginner" },
@@ -380,7 +389,12 @@ const CERTS = [
    client names, or paid engagements that cannot be verified.
    ------------------------------------------------------------------ */
 const ETHICS = {
-  eyebrow: "OATH // 09",
+  /* Section number must match the section's position in the page order.
+     renderEthics() writes this into the DOM, so a stale value here
+     silently overrides the correct one in index.html — which is exactly
+     what had happened: "OATH // 09" collided with SIGNAL // 09 in the
+     contact section. Ethics is the 7th numbered section. */
+  eyebrow: "OATH // 07",
   title: "Research Ethics & Scope",
   sub: "Some of what I publish is dual-use. Here is exactly how I draw the line.",
   stamp: "AUTHORIZED SCOPE ONLY",
@@ -409,6 +423,48 @@ const AVAILABILITY = {
   openLabel: "Open to selected projects",
   closedLabel: "Currently engaged",
   detail: "Security assessments, vulnerability research, and speaking. Authorized engagements only."
+};
+
+/* ------------------------------------------------------------------
+   GITHUB — live stats config (§3.6 / §4.2)
+   --------------------------------------------------------------
+   One indexed fetch to /users/<user>/repos powers BOTH the per-card
+   star + last-commit readout and the recon feed. The API returns every
+   repo in a single response, so the whole site costs exactly one
+   request per TTL window — not one per card.
+
+   Caching: results land in localStorage under `nf_gh_cache` with a
+   timestamp. Inside `ttlHours` the cached copy is used and no request
+   is made at all. Past it, the cache is still rendered immediately
+   (so the UI never waits on the network) and refreshed in the
+   background.
+
+   Failure policy: silent, always. Rate-limited, offline, CORS, 404 —
+   every path ends with the hardcoded values from PROJECTS[] still on
+   screen and no error shown to the visitor. A portfolio that breaks
+   when GitHub is down is a worse portfolio.
+   ------------------------------------------------------------------ */
+const GITHUB = {
+  user: "Mr-Destroyer",
+  ttlHours: 6,
+  /* Set false to disable every client-side API call entirely and run
+     purely on the hardcoded values in PROJECTS[]. Useful if the API
+     ever starts rate-limiting visitors by IP. */
+  enabled: true
+};
+
+/* ------------------------------------------------------------------
+   DOSSIER — About-section case-file framing (§3.4)
+   --------------------------------------------------------------
+   Copy for the CLASSIFIED stamp and the file header on the About
+   section. Kept here rather than in index.html so the dossier reads
+   as data like every other section.
+   ------------------------------------------------------------------ */
+const DOSSIER = {
+  stamp: "Classified — Dossier #001",
+  fileNo: "NF-001",
+  subject: "MOHAMMAD ZIM / MR_DESTROYER",
+  clearance: "PUBLIC RELEASE — REDACTIONS APPLIED"
 };
 
 /* Decorative boot sequence for the loading screen (no unauthorized-access wording) */
@@ -679,6 +735,7 @@ const TERMINAL_SL = [
 window.NF_DATA = {
   PROFILE, STATS, SKILLS, SKILL_LINKS, PROJECT_CATS, PROJECTS, THM_BADGES,
   HUNT_CYCLE, EXPERIENCE, CERTS, ETHICS, AVAILABILITY,
+  GITHUB, DOSSIER,
   BOOT_LINES, TERMINAL_BOOT, TERMINAL_CMDS, TERMINAL_FS,
   TERMINAL_MATRIX_CHARS, TERMINAL_SL
 };
