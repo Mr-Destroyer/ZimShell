@@ -3,6 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ================= CONTENT SECURITY POLICY =================
+     A security portfolio with a lazy CSP is a bad look, so this one is
+     actually enforced rather than decorative. Every directive is the
+     minimum this site needs:
+
+       default-src 'self'      nothing loads from anywhere by default
+       script-src  'self'      no inline JS anywhere — main.js sets the
+                               html.js class first thing, and the two
+                               inline onerror handlers that used to live
+                               on the portraits are now bound in
+                               initPortraitMedia() instead
+       style-src   'self' fonts.googleapis.com
+                               the only external stylesheet is the font
+                               import. No 'unsafe-inline' and no
+                               'unsafe-hashes' — verified by listening for
+                               securitypolicyviolation while scrolling the
+                               whole page, which is how the one remaining
+                               offender was found (a style="margin:0" on
+                               the constellation readout, now a class).
+                               NOTE: 'unsafe-inline' is what would be
+                               needed to permit style ATTRIBUTES. The
+                               el.style.x writes main.js does for
+                               animation are a different mechanism
+                               (style-src-attr / CSSOM) and are NOT
+                               blocked — only literal style attributes
+                               in markup or injected HTML are.
+       font-src    fonts.gstatic.com
+       img-src     'self' data:  data: covers the SVG favicon and the
+                               feTurbulence grain texture
+       connect-src 'self' api.github.com
+                               the ONLY outbound request the site can
+                               ever make is the public GitHub stats
+                               fetch. The decorative terminal cannot
+                               reach the network at all — that is
+                               enforced here, not just promised in a
+                               comment.
+       form-action 'none'      the contact form has no backend; this makes
+                               it structurally impossible for it to post
+                               anywhere, even if the JS were replaced
+       frame-ancestors 'none'  no clickjacking
+       base-uri    'self'      no injected <base>
+       object-src  'none'      no plugins
+     NOTE: meta-tag CSP cannot express frame-ancestors, report-uri, or
+     sandbox — those are ignored in this position and are listed only as
+     documentation of intent. To enforce them, mirror this policy into a
+     real Content-Security-Policy response header at the host. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.github.com; form-action 'none'; base-uri 'self'; object-src 'none'">
 <title>ZimShell — Hacker of the next gen & Security Researcher</title>
 <meta name="description" content="Mohammad Zim (Mr-Destroyer) — ethical hacker, security researcher, and cybersecurity engineer. Authorized penetration testing, vulnerability research, OSINT, and defensive engineering.">
 <meta name="author" content="Mohammad Zim">
@@ -116,7 +163,10 @@
     <div class="hero-visual reveal">
       <div class="profile-card" id="profileCard" data-depth="6">
         <div class="profile-ring" aria-hidden="true"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="none" stroke="#E63958" stroke-width="0.6" stroke-dasharray="4 3"/></svg></div>
-        <img id="heroPortrait" class="profile-img" src="assets/elias.gif?v=8" alt="Animated profile portrait of Mohammad Zim" width="800" height="450" decoding="async" onerror="this.onerror=null;this.src='assets/elias-poster.jpg'">
+        <!-- No inline onerror: the poster fallback is bound in
+             initPortraitMedia() (main.js) so this document needs no
+             'unsafe-inline' in its CSP. See the CSP meta below. -->
+        <img id="heroPortrait" class="profile-img" src="assets/elias.gif?v=8" alt="Animated profile portrait of Mohammad Zim" width="800" height="450" decoding="async">
         <span class="float-label fl-1 mono">WEB SECURITY</span>
         <span class="float-label fl-2 mono">NETWORK DEFENSE</span>
         <span class="float-label fl-3 mono">OSINT</span>
@@ -142,11 +192,20 @@
       <p class="section-eyebrow mono">DOSSIER // 01</p>
       <h2 class="section-title">About the Operator</h2>
       <p class="section-sub">An ancient vampire's dossier, written by a modern security engineer.</p>
+      <!-- §3.4 — the case-file header. Copy comes from DOSSIER in
+           js/data.js; the file number, subject, and clearance line are
+           filled by renderDossier(). Rendered as a document header
+           rather than a hero banner: it should read like the cover page
+           of a file someone pulled from an archive. -->
+      <div class="dossier-head" id="dossierHead">
+        <span class="stamp" id="dossierStamp">Classified — Dossier #001</span>
+        <dl class="dossier-meta mono" id="dossierMeta"></dl>
+      </div>
     </div>
     <div class="about-grid">
       <div class="about-visual reveal">
         <div class="about-frame">
-          <img id="aboutPortrait" class="about-img" src="assets/elias.gif?v=8" alt="Mohammad Zim — animated portrait" width="800" height="450" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='assets/elias-poster.jpg'">
+          <img id="aboutPortrait" class="about-img" src="assets/elias.gif?v=8" alt="Mohammad Zim — animated portrait" width="800" height="450" loading="lazy" decoding="async">
           <div class="about-frame-glow" aria-hidden="true"></div>
         </div>
         <ul class="facts-grid" id="factsGrid"></ul>
@@ -199,6 +258,10 @@
       <button type="button" class="filter-btn" data-filter="dev">Dev &amp; Learning</button>
     </div>
     <div class="project-grid" id="projectGrid"></div>
+    <!-- §4.2 — recon feed. Filled from public GitHub activity and hidden
+         entirely when the fetch fails or returns nothing, so a rate-limit
+         never leaves an empty box or an error state on the page. -->
+    <section class="recon-feed" id="reconFeed" aria-label="Recent public GitHub activity" hidden></section>
     <h3 class="archive-title mono">// FULL ARCHIVE</h3>
     <div class="archive-grid" id="archiveGrid"></div>
   </div>
@@ -346,6 +409,17 @@
         <p class="form-note mono">No backend attached — validates locally, sends nothing.</p>
         <p class="form-success" id="formSuccess" role="status" hidden>No signal left this terminal — this form has no backend and nothing was sent. Use a direct channel above.</p>
       </form>      <div class="contact-links reveal">
+        <!-- §4.3 — availability widget. Manually toggled via AVAILABILITY
+             in js/data.js (open: true/false), never automated. A status
+             widget that lies is worse than no widget, so this renders
+             exactly what the data says and nothing more. -->
+        <div class="avail-widget" id="availWidget">
+          <span class="avail-dot" aria-hidden="true"></span>
+          <span class="avail-text">
+            <b id="availLabel">Open to selected projects</b>
+            <i id="availDetail"></i>
+          </span>
+        </div>
         <h3 class="mono">DIRECT CHANNELS</h3>
         <!-- Rendered from PROFILE in js/data.js by renderContactChannels().
              The email and resume rows were REMOVED rather than stubbed —
