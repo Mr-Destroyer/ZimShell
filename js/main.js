@@ -432,13 +432,16 @@
     const bio = $('#aboutBio');
     if (!bio || state.reduced) return;
     bio.classList.add('redact');
+    /* 52. Three bars, wiped top-to-bottom 60ms apart. The delay is a
+       custom property rather than an inline transition-delay so the
+       stagger lives with the rest of the motion rules in the CSS. */
     [[0, 36], [32, 36], [64, 36]].forEach(([top, h], i) => {
       const bar = document.createElement('span');
       bar.className = 'redact-bar';
       bar.setAttribute('aria-hidden', 'true');
       bar.style.top = top + '%';
       bar.style.height = h + '%';
-      bar.style.transitionDelay = (i * 0.12) + 's';
+      bar.style.setProperty('--bar-delay', (i * 0.06) + 's');
       bio.appendChild(bar);
     });
     const io = new IntersectionObserver(es => {
@@ -447,6 +450,18 @@
       io.disconnect();
     }, { threshold: 0.35 });
     io.observe(bio);
+
+    /* 58. CLASSIFIED watermark behind the bio copy, parallaxed from the
+       scroll rAF (see initScrollFX). Decorative only — aria-hidden, so
+       it is never announced. RM: never created. Perf: hidden by CSS,
+       and not created either. */
+    const copy = bio.parentElement;
+    if (!copy || state.perf || copy.querySelector('.classified-mark')) return;
+    const mark = document.createElement('span');
+    mark.className = 'classified-mark';
+    mark.setAttribute('aria-hidden', 'true');
+    mark.textContent = 'CLASSIFIED';
+    copy.insertBefore(mark, copy.firstChild);
   }
 
   /* ---------- Skills ---------- */
@@ -537,6 +552,30 @@
     svg.setAttribute('aria-hidden', 'true');
     svg.setAttribute('focusable', 'false');
 
+    /* 49. Starfield backdrop. Deterministic (seeded by index, not
+       Math.random) so the field is identical on every load and a
+       returning visitor does not see the sky rearrange itself. */
+    const stars = document.createElementNS(NS, 'g');
+    stars.setAttribute('class', 'cg-stars');
+    for (let i = 0; i < 60; i++) {
+      const c = document.createElementNS(NS, 'circle');
+      /* a cheap hash of i — spread across 0-100 without clustering */
+      const hx = ((i * 37) % 97) + 1.5;
+      const hy = ((i * 61) % 97) + 1.5;
+      c.setAttribute('cx', hx.toFixed(2));
+      c.setAttribute('cy', hy.toFixed(2));
+      c.setAttribute('r', (i % 7 === 0 ? 0.42 : 0.22).toFixed(2));
+      c.style.opacity = (0.12 + ((i * 13) % 40) / 100).toFixed(2);
+      c.style.animationDelay = ((i * 170) % 5000) / 1000 + 's';
+      stars.appendChild(c);
+    }
+    svg.appendChild(stars);
+
+    /* 44. Idle drift wraps the edges+signal+nodes (NOT the starfield, so
+       the sky stays put while the constellation turns) in one <g>. */
+    const drift = document.createElementNS(NS, 'g');
+    drift.setAttribute('class', 'cg-drift');
+
     /* --- edges --- */
     const edgeEls = edges.map(([a, b]) => {
       const ln = document.createElementNS(NS, 'line');
@@ -544,14 +583,14 @@
       ln.setAttribute('x2', pts[b][0]); ln.setAttribute('y2', pts[b][1]);
       ln.setAttribute('class', 'cg-edge');
       ln.dataset.a = a; ln.dataset.b = b;
-      /* draw-in: dash the full length, then retract to zero.
+      /* 41. draw-in: dash the full length, then retract to zero.
          Reduced motion → skipped (handled in the reveal block). */
       if (!state.reduced) {
         const len = Math.hypot(pts[b][0] - pts[a][0], pts[b][1] - pts[a][1]);
         ln.style.strokeDasharray = len;
         ln.style.strokeDashoffset = len;
       }
-      svg.appendChild(ln);
+      drift.appendChild(ln);
       return ln;
     });
 
@@ -561,10 +600,11 @@
     signal.setAttribute('class', 'cg-signal');
     signal.setAttribute('cx', pts[0][0]);
     signal.setAttribute('cy', pts[0][1]);
-    if (!state.reduced) svg.appendChild(signal);
+    if (!state.reduced) drift.appendChild(signal);
 
     /* --- nodes --- */
     const nodeEls = [];
+    const arcEls = [];
     skills.forEach((s, i) => {
       const g = document.createElementNS(NS, 'g');
       g.setAttribute('class', 'cg-node');
@@ -576,6 +616,23 @@
       g.dataset.i = i;
 
       const r = rad(s.level);
+
+      /* 45. Level arc — one circle, dashed so only the level's fraction
+         is drawn. circumference = 2*pi*r; dasharray = "level, rest".
+         Cheaper and smoother than an arc path, and it animates by
+         opacity alone. */
+      const arc = document.createElementNS(NS, 'circle');
+      const arcR = r + 1.8;
+      const circ = 2 * Math.PI * arcR;
+      const frac = Math.max(0, Math.min(100, s.level)) / 100;
+      arc.setAttribute('cx', pts[i][0]); arc.setAttribute('cy', pts[i][1]);
+      arc.setAttribute('r', arcR.toFixed(2));
+      arc.setAttribute('class', 'cg-arc');
+      arc.setAttribute('stroke-dasharray',
+        (circ * frac).toFixed(2) + ' ' + (circ * (1 - frac)).toFixed(2));
+      g.appendChild(arc);
+      arcEls.push(arc);
+
       const ring = document.createElementNS(NS, 'circle');
       ring.setAttribute('cx', pts[i][0]); ring.setAttribute('cy', pts[i][1]);
       ring.setAttribute('r', r); ring.setAttribute('class', 'cg-node-ring');
@@ -592,15 +649,16 @@
       glyph.textContent = s.icon;
       g.appendChild(glyph);
 
-      /* fade-in, staggered — skipped under reduced motion */
-      if (!state.reduced) {
-        g.style.opacity = '0';
-        g.style.transition = 'opacity .4s ease';
-      }
-      svg.appendChild(g);
+      /* 47. boot stagger — the pop animation carries the entrance, so no
+         inline opacity is set here. Under reduced motion the class is
+         never added and the node is simply present. */
+      if (!state.reduced) g.classList.add('cg-pop');
+
+      drift.appendChild(g);
       nodeEls.push(g);
     });
 
+    svg.appendChild(drift);
     box.appendChild(svg);
 
     /* --- readout panel: the accessible face of the graph --- */
@@ -616,6 +674,28 @@
 
     /* --- selection logic --- */
     let current = -1;
+    /* Signal state lives here, above select(), because select() writes
+       to it (item 42 traces the signal down the selected node's edge).
+       Declared later it would sit in the temporal dead zone for any
+       call that ran before its `let` was reached. */
+    let signalRaf = null, running = false, seg = 0, t = 0;
+    /* 50. Readout level counts up to its value rather than appearing
+       whole. RM: written once, no counting. */
+    let countRaf = null;
+    function typeLevel(el, target) {
+      if (state.reduced || state.perf) { el.textContent = target + '%'; return; }
+      cancelAnimationFrame(countRaf);
+      const dur = 420, t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / dur);
+        /* ease-out so it decelerates into the final value */
+        const v = Math.round(target * (1 - Math.pow(1 - p, 3)));
+        el.textContent = v + '%';
+        if (p < 1) countRaf = requestAnimationFrame(step);
+        else el.textContent = target + '%';
+      };
+      countRaf = requestAnimationFrame(step);
+    }
     function select(i) {
       current = i;
       const s = skills[i];
@@ -624,11 +704,13 @@
         <div class="cg-readout-head">
           <span class="cg-readout-icon" aria-hidden="true">${s.icon}</span>
           <span class="cg-readout-name">${esc(s.name)}</span>
-          <span class="cg-readout-level">${s.level}%</span>
+          <span class="cg-readout-level">0%</span>
         </div>
         <p class="cg-readout-desc">${esc(s.desc)}</p>
         <div class="cg-readout-tools">${s.tools.map(t => `<span>${esc(t)}</span>`).join('')}</div>
         <p class="cg-readout-links">LINKED TO: <b>${conns.length ? esc(conns.join(' · ')) : 'no links'}</b></p>`;
+      const lvEl = readout.querySelector('.cg-readout-level');
+      if (lvEl) typeLevel(lvEl, s.level);
       /* highlight this node and its neighbours; dim everything else */
       nodeEls.forEach((el, j) => {
         const lit = j === i || adj[i].has(j);
@@ -641,6 +723,12 @@
         ln.classList.toggle('is-lit', on);
         ln.classList.toggle('is-dim', !on);
       });
+      /* 42. Send the signal down this node's first edge, so selecting a
+         node visibly propagates instead of only recolouring. */
+      if (!state.reduced && !state.perf) {
+        const ei = edges.findIndex(([a, b]) => a === i || b === i);
+        if (ei >= 0) { seg = ei; t = 0; signal.classList.add('is-traced'); }
+      }
     }
     function clear() {
       current = -1;
@@ -649,6 +737,10 @@
         el.setAttribute('aria-pressed', 'false');
       });
       edgeEls.forEach(ln => ln.classList.remove('is-lit', 'is-dim'));
+      /* 42. drop the trace emphasis and let the signal resume its walk
+         from the top of the edge list */
+      signal.classList.remove('is-traced');
+      seg = 0; t = 0;
       /* No inline style here: `style-src` without 'unsafe-inline' blocks
          style attributes, so the zero margin is a class instead. */
       readout.innerHTML = `<p class="cg-readout-desc cg-readout-idle">Select a node to inspect a discipline — its level, tooling, and what it connects to.</p>`;
@@ -677,10 +769,10 @@
       select(next);
     });
 
-    /* --- entrance: reveal when scrolled into view ---
-       Reduced motion → everything visible immediately, no transition. */
+    /* --- 41/47 entrance: reveal when scrolled into view ---
+       Reduced motion → the dash was never set and .cg-pop was never
+       added, so the graph is already fully drawn; nothing to do. */
     if (state.reduced) {
-      nodeEls.forEach(el => { el.style.opacity = '1'; });
       edgeEls.forEach(ln => { ln.style.strokeDashoffset = 0; });
     } else {
       const io = new IntersectionObserver(es => {
@@ -691,17 +783,19 @@
           ln.style.transition = `stroke-dashoffset .5s ease ${k * 0.04}s`;
           ln.style.strokeDashoffset = 0;
         });
-        /* …then nodes fade in */
+        /* …the nodes' pop is on a CSS animation-delay, set here so the
+           stagger starts when the graph is actually seen rather than at
+           parse time. */
         nodeEls.forEach((el, k) => {
-          setTimeout(() => { el.style.opacity = '1'; }, 180 + k * 60);
+          el.style.animationDelay = (180 + k * 60) + 'ms';
         });
         startSignal();
       }, { threshold: 0.25 });
       io.observe(box);
     }
 
-    /* --- signal dot: walks the edge list, pauses offscreen --- */
-    let signalRaf = null, running = false, seg = 0, t = 0;
+    /* --- signal dot: walks the edge list, pauses offscreen ---
+       (state declared above, next to select(), which writes to it) */
     function startSignal() {
       if (state.reduced || state.perf || !signal.parentNode || running) return;
       running = true;
@@ -1359,6 +1453,17 @@
           const off = ((r.top + r.height / 2) - innerHeight / 2) / innerHeight;
           c.style.setProperty('--py', (off * d * 3.5).toFixed(2) + 'px');
         }
+        /* 58. CLASSIFIED watermark drifts against the scroll. Capped to
+           ±18px so it can never wander out from behind the copy, and
+           skipped entirely when the element is offscreen. */
+        const wm = $('.classified-mark');
+        if (wm) {
+          const r = wm.parentElement.getBoundingClientRect();
+          if (r.bottom > -40 && r.top < innerHeight + 40) {
+            const off = ((r.top + r.height / 2) - innerHeight / 2) / innerHeight;
+            wm.style.setProperty('--wm', (off * -18).toFixed(2) + 'px');
+          }
+        }
       }
 
       /* Light the minimap ticks that have been scrolled past (§3.2).
@@ -1528,7 +1633,12 @@
      Fills the About section's case-file header from DOSSIER in data.js.
      The stamp itself is static text in the markup (so it is present
      without JS); this only adds the metadata rows and the file number.
-     No motion of its own — it rides the section's shared .reveal. */
+
+     54. The FILE value scramble-decodes instead of appearing: the final
+     string is fixed from the first frame, and only the characters
+     before it are randomised, so the row never changes width and the
+     value is correct the instant the animation is skipped.
+     60. The head's rule draws itself when the section is entered. */
   function renderDossier() {
     const Ds = D.DOSSIER;
     if (!Ds) return;
@@ -1543,6 +1653,49 @@
     ].filter(r => r[1]);
     meta.innerHTML = rows.map(([k, v]) =>
       `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('');
+
+    const head = $('#dossierHead');
+    if (!head || head.querySelector('.dossier-draw')) return;
+    /* 60. the self-drawing rule */
+    const draw = document.createElement('span');
+    draw.className = 'dossier-draw';
+    draw.setAttribute('aria-hidden', 'true');
+    head.appendChild(draw);
+
+    if (state.reduced) { head.classList.add('drawn', 'inked'); return; }
+
+    /* 54. scramble the FILE row only — the other two are prose and
+       scrambling them would read as a malfunction, not a decode. */
+    const fileDd = meta.querySelector('div:first-child dd');
+    const target = Ds.fileNo || '';
+    const GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789-#';
+    const scramble = () => {
+      const t0 = performance.now(), dur = 800;
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / dur);
+        /* reveal characters left-to-right as the clock runs out */
+        const locked = Math.floor(p * target.length);
+        let out = '';
+        for (let i = 0; i < target.length; i++) {
+          out += i < locked || target[i] === ' '
+            ? target[i]
+            : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+        fileDd.textContent = out;
+        if (p < 1) requestAnimationFrame(step);
+        else fileDd.textContent = target;
+      };
+      requestAnimationFrame(step);
+    };
+
+    /* 51/60. fire once, when the header is actually on screen */
+    const io = new IntersectionObserver(es => {
+      if (!es[0].isIntersecting) return;
+      io.disconnect();
+      head.classList.add('drawn', 'inked');
+      if (!state.perf) scramble();
+    }, { threshold: 0.4 });
+    io.observe(head);
   }
 
   /* ---------- Availability widget (§4.3) ----------

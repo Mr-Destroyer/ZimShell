@@ -1217,6 +1217,197 @@ html.js .stamp-press.pressed{animation:stampThunk .5s cubic-bezier(.2,1.4,.4,1) 
 html.js body.reduced .stamp-press{opacity:1;transform:scale(1) rotate(-3deg);filter:none}
 html.js body.reduced .stamp-press.pressed{animation:none}
 
+/* ---------- 05 · CONSTELLATION (signature piece) ----------
+   The graph itself is built in renderConstellation(); these are the
+   states it drives. Everything here is stroke/fill/opacity/transform —
+   no layout properties, so a hover costs no reflow. */
+
+/* 41. Edge draw-in is set up in JS (dasharray = length, offset =
+   length) and released on entry. RM: JS never sets the dash, so the
+   edges are simply drawn. */
+.cg-edge{will-change:stroke-dashoffset}
+
+/* 42. Signal travels the lit edge on select. RM: never created. */
+.cg-signal.is-traced{filter:drop-shadow(0 0 5px rgba(var(--accent-rgb),1))}
+
+/* 43. Node hover — scale + glow ring. transform on the <g>, so the
+   glyph and ring move together. RM: colour only. */
+.cg-node{transition:opacity .3s ease}
+.cg-node .cg-node-ring{transition:transform .25s var(--ease-out),stroke .3s,fill .3s,stroke-width .25s}
+.cg-node-ring{transform-box:fill-box;transform-origin:center}
+.cg-node:hover .cg-node-ring,.cg-node:focus-visible .cg-node-ring{transform:scale(1.35)}
+body.reduced .cg-node:hover .cg-node-ring,
+body.reduced .cg-node:focus-visible .cg-node-ring{transform:none}
+
+/* 44. Idle drift — the whole graph breathes very slowly. Kept under 1°
+   so it reads as "alive", not as a spinning graphic, and it is applied
+   to a wrapper <g> so node hit-testing is unaffected (SVG transforms
+   the pointer with the content).
+   RM: not applied. Perf: not applied. */
+@keyframes cgDrift{
+  0%{transform:rotate(-0.4deg)}
+  50%{transform:rotate(0.4deg)}
+  100%{transform:rotate(-0.4deg)}
+}
+.cg-drift{transform-origin:50px 50px;animation:cgDrift 22s ease-in-out infinite}
+body.reduced .cg-drift{animation:none}
+body.perf .cg-drift{animation:none}
+
+/* 45. Radial level arc around each node. --lv is the skill level as a
+   fraction of the circumference; the arc is drawn from 12 o'clock.
+   RM: drawn at full value, no transition. */
+.cg-arc{
+  fill:none;stroke:var(--red);stroke-width:.55;stroke-linecap:round;
+  opacity:0;transform-box:fill-box;transform-origin:center;
+  transform:rotate(-90deg);
+  transition:opacity .4s ease
+}
+.cg-node.is-lit .cg-arc{opacity:.85}
+body.reduced .cg-arc{transition:none}
+
+/* 46. Unconnected nodes dim. RM: same (it is a state, not motion). */
+.cg-node.is-dim{opacity:.25}
+.cg-node.is-lit{opacity:1}
+
+/* 47. Boot stagger — nodes pop in 60ms apart. The transition is set in
+   JS alongside the initial opacity:0, so with RM nothing is hidden.
+   RM: all shown immediately. */
+@keyframes cgPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.cg-node.cg-pop{animation:cgPop .34s var(--ease-out) both}
+body.reduced .cg-node.cg-pop{animation:none}
+
+/* 48. Focus-ring pulse for keyboard nav — a slow dash rotation, so a
+   tabbed-to node is obvious without moving the node itself.
+   RM: static ring. */
+.cg-focus{transform-box:fill-box;transform-origin:center}
+@keyframes cgFocusSpin{to{transform:rotate(360deg)}}
+.cg-node:focus-visible .cg-focus{animation:cgFocusSpin 6s linear infinite}
+body.reduced .cg-node:focus-visible .cg-focus{animation:none}
+
+/* 49. Starfield backdrop behind the graph. RM: static dots. */
+.cg-stars circle{fill:var(--silver)}
+@keyframes cgTwinkle{0%,100%{opacity:.15}50%{opacity:.6}}
+.cg-stars circle{animation:cgTwinkle 5s ease-in-out infinite}
+body.reduced .cg-stars circle{animation:none;opacity:.3}
+body.perf .cg-stars{display:none}
+
+/* 50. Readout values type in. RM: instant text (JS writes it whole). */
+.cg-readout-level{font-variant-numeric:tabular-nums}
+
+/* ---------- 06 · DOSSIER & REDACTION ---------- */
+
+/* 51. Stamp ink bleed — blur resolves to sharp. Reuses stampThunk's
+   shape but as a one-shot on the dossier head. RM: static. */
+@keyframes inkBleed{
+  0%{filter:blur(4px);opacity:0;transform:scale(1.08)}
+  100%{filter:blur(0);opacity:.9;transform:scale(1)}
+}
+.dossier-head.inked .stamp{animation:inkBleed .6s var(--ease-out) both}
+body.reduced .dossier-head.inked .stamp{animation:none}
+
+/* 52. Redaction bars wipe-reveal, 60ms apart top-to-bottom. The delay
+   is read from --bar-delay, which initBioRedaction() sets per bar, so
+   the stagger is defined once in JS rather than duplicated here by
+   :nth-of-type. Falls back to 0s if the variable is ever absent.
+   RM: bars are display:none (see .redact-bar). */
+.redact.in .redact-bar{transition-delay:var(--bar-delay,0s)}
+
+/* 53/54. Dossier metadata types in, file number scrambles. Both are
+   JS-driven char swaps; this is the monospace lock so the row cannot
+   reflow while the characters change.
+   RM: final value written at once. */
+.dossier-meta dd{font-variant-numeric:tabular-nums;min-width:8ch;display:inline-block}
+
+/* 55. Paper grain over the dossier card. RM: none (texture, not motion
+   — but it is killed under perf, which is about paint cost). */
+.dossier-head{position:relative}
+.dossier-head::after{
+  content:'';position:absolute;inset:-8px -10px;pointer-events:none;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;border-radius:4px
+}
+body.perf .dossier-head::after{display:none}
+
+/* 56. Light sweep passes over the bars on hover. A hover accent, so it
+   sits inside §5 rather than against it. RM: none. */
+.dossier-head .stamp{position:relative;overflow:hidden}
+.dossier-head .stamp::after{
+  content:'';position:absolute;top:0;bottom:0;width:38%;left:-45%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.16),transparent);
+  transform:skewX(-18deg);opacity:0;pointer-events:none
+}
+.dossier-head:hover .stamp::after{animation:barSweep .7s var(--ease-out)}
+@keyframes barSweep{0%{left:-45%;opacity:1}100%{left:105%;opacity:0}}
+body.reduced .dossier-head:hover .stamp::after{animation:none}
+
+/* 57. Corner fold on the top-right of the dossier card. A zero-size box
+   with a right+bottom border, which renders as the classic dog-ear.
+   `border-width` is animated here rather than transform because the
+   fold's whole read is the border thickness; it is a hover-only,
+   one-property change on a 30px box, so it costs no measurable layout.
+   RM: static. */
+.dossier-head::before{
+  content:'';position:absolute;top:-8px;right:-10px;width:0;height:0;
+  border-style:solid;border-width:0 18px 18px 0;
+  border-color:transparent rgba(var(--accent-rgb),.22) transparent transparent;
+  transition:border-width .3s var(--ease-out);pointer-events:none
+}
+.dossier-head:hover::before{border-width:0 24px 24px 0}
+body.reduced .dossier-head::before{transition:none}
+
+/* 58. CLASSIFIED watermark parallaxing behind the bio. --wm is written
+   from the scroll rAF; RM: static (never written, so it resolves to 0).
+   translate, not transform — nothing else animates this element. */
+.about-copy{position:relative}
+.classified-mark{
+  position:absolute;left:0;right:0;top:50%;
+  /* A definite width (left+right pinned) plus `overflow:hidden` is what
+     keeps this decorative oversized word from widening the document.
+     The earlier `left:50%` + `translate:-50%` version looked identical
+     but was not bounded: for an absolutely-positioned `white-space:nowrap`
+     box the shrink-to-fit width is floored at min-content, which for
+     nowrap text IS max-content — so the box stayed at its full text width
+     instead of shrinking to the available half, and the -50% translate
+     then shoved that over-wide box past the container edge. That produced
+     95px of horizontal scroll at 390px and 163px at 1440px. Pinning both
+     insets gives width = container width, and overflow:hidden clips the
+     bleed to that box, so the text still reads as an oversized centred
+     watermark but can no longer contribute to scrollable overflow. */
+  overflow:hidden;text-align:center;
+  font-family:var(--disp);font-weight:700;font-size:clamp(3rem,9vw,6rem);
+  letter-spacing:.18em;color:rgba(var(--accent-rgb),.05);
+  pointer-events:none;user-select:none;white-space:nowrap;
+  translate:0 calc(-50% + var(--wm,0px));
+  z-index:0
+}
+.about-copy > :not(.classified-mark){position:relative;z-index:1}
+body.perf .classified-mark{display:none}
+
+/* 59. Bio declassify mask wipe. The existing .redact handles the bars;
+   this adds the brief mask edge that makes it read as a reveal rather
+   than a fade. RM: no mask. */
+.redact{--mask:0%}
+.redact::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg,transparent var(--mask),transparent var(--mask));
+  opacity:0
+}
+@keyframes declassifyEdge{0%{opacity:.5}100%{opacity:0}}
+.redact.in::after{animation:declassifyEdge .8s var(--ease-out)}
+body.reduced .redact.in::after{animation:none;opacity:0}
+
+/* 60. Dossier border draws itself on entry. A single 1px rule that
+   scales in from the left, laid over the static border-top the head
+   already has, so the layout box never changes and there is no shift.
+   RM: drawn at full width, no transition. */
+.dossier-head .dossier-draw{
+  position:absolute;top:0;left:0;right:0;height:1px;background:var(--line-soft);
+  transform:scaleX(0);transform-origin:left center;
+  transition:transform .7s var(--ease-out);pointer-events:none
+}
+.dossier-head.drawn .dossier-draw{transform:scaleX(1)}
+body.reduced .dossier-head .dossier-draw{transition:none;transform:scaleX(1)}
+
 /* ============ CONTRAST / PRINT ============ */
 @media (prefers-contrast:more){
   :root{--muted:#B9B2C0;--line:rgba(230,57,88,.4);--line-soft:rgba(213,208,214,.2)}
