@@ -1047,6 +1047,176 @@ body.reduced #heroGlow.beating{animation:none}
 #emberField{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.75}
 body.reduced #emberField,body.perf #emberField{display:none}
 
+/* ---------- 03 · NAV & CHROME ---------- */
+
+/* 21. The active underline is a single shared element that slides
+   between links, rather than each link's own ::after snapping on. A
+   moving underline reads as one continuous indicator travelling the
+   bar; the per-link version reads as six unrelated toggles.
+   RM: it still moves, but with no transition — an instant jump. */
+.nav-ind{position:absolute;bottom:2px;height:2px;background:var(--red);
+  box-shadow:0 0 8px var(--red);border-radius:2px;pointer-events:none;
+  opacity:0;transition:transform .34s var(--ease-out),width .34s var(--ease-out),opacity .2s}
+.nav-ind.on{opacity:1}
+body.reduced .nav-ind{transition:opacity .2s}
+/* the per-link ::after is now only the HOVER cue */
+.nav-link.is-active::after{transform:scaleX(0)}
+
+/* 22. Nav shrink past 80px. Height and padding are animated via
+   transform-safe properties only — the bar keeps its box, the inner
+   content scales, so no layout pass runs per frame.
+   RM: instant (transition removed). */
+.nav-inner{transition:transform .3s var(--ease-out)}
+.nav.shrunk .nav-inner{transform:scale(.96)}
+.nav.shrunk{box-shadow:0 4px 30px rgba(0,0,0,.5)}
+body.reduced .nav-inner{transition:none}
+
+/* 23. Section counter in the nav. RM: static text. */
+.nav-counter{font-family:var(--mono);font-size:10px;letter-spacing:.14em;
+  color:var(--muted);opacity:0;transition:opacity .3s;margin-left:10px;white-space:nowrap}
+.nav-counter.on{opacity:1}
+.nav-counter b{color:var(--red);font-weight:400}
+
+/* 24/25. Minimap tick tooltip + active elongation. RM: tooltip still
+   appears (it is information), just without the transition. */
+.sp-tick{position:relative}
+.sp-tick::after{
+  content:attr(data-label);position:absolute;left:14px;top:50%;
+  transform:translateY(-50%) translateX(-4px);
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--silver);
+  background:rgba(7,7,9,.94);border:1px solid var(--line);border-radius:3px;
+  padding:2px 6px;white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s
+}
+.sp-tick:hover::after{opacity:1;transform:translateY(-50%) translateX(0)}
+.sp-tick.is-passed{background:var(--crimson)}
+.sp-tick.is-active{background:var(--red);box-shadow:0 0 8px var(--red);
+  transform:scaleY(2.2);transform-origin:center}
+body.reduced .sp-tick::after{transition:opacity .2s}
+body.reduced .sp-tick.is-active{transform:scaleY(1.6)}
+@media (max-width:860px){.sp-tick::after{display:none}}
+
+/* 26. Back-to-top progress ring. An SVG circle whose dashoffset tracks
+   scroll, drawn around the existing moon glyph. RM: static ring. */
+.back-top .bt-ring{position:absolute;inset:-4px;width:calc(100% + 8px);
+  height:calc(100% + 8px);transform:rotate(-90deg);pointer-events:none}
+.back-top .bt-ring circle{fill:none;stroke:var(--red);stroke-width:2;
+  stroke-linecap:round;opacity:.85;
+  transition:stroke-dashoffset .12s linear}
+body.reduced .back-top .bt-ring circle{transition:none}
+
+/* 27. Mobile menu item stagger. RM: instant, all items at once. */
+.mobile-menu.open .nav-link{animation:menuItem .34s var(--ease-out) both}
+.mobile-menu.open .nav-link:nth-child(1){animation-delay:0ms}
+.mobile-menu.open .nav-link:nth-child(2){animation-delay:40ms}
+.mobile-menu.open .nav-link:nth-child(3){animation-delay:80ms}
+.mobile-menu.open .nav-link:nth-child(4){animation-delay:120ms}
+.mobile-menu.open .nav-link:nth-child(5){animation-delay:160ms}
+.mobile-menu.open .nav-link:nth-child(6){animation-delay:200ms}
+.mobile-menu.open .nav-link:nth-child(7){animation-delay:240ms}
+.mobile-menu.open .nav-link:nth-child(8){animation-delay:280ms}
+@keyframes menuItem{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+body.reduced .mobile-menu.open .nav-link{animation:none}
+
+/* 28. Nav link hover RGB-split — a HOVER accent, never ambient, so this
+   is inside the §5 rule rather than against it. RM: colour only. */
+.nav-link:hover{text-shadow:-1.4px 0 var(--glitch-a),1.4px 0 var(--glitch-b)}
+body.reduced .nav-link:hover{text-shadow:none}
+
+/* 29. Status dot ping ring. RM: static dot, no ring. */
+.status-dot{position:relative}
+.status-dot::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:1px solid var(--ok);opacity:0;animation:ping 2.8s ease-out infinite
+}
+@keyframes ping{0%{opacity:.7;transform:scale(.7)}70%,100%{opacity:0;transform:scale(1.5)}}
+body.reduced .status-dot::after{display:none}
+/* `display:none` is what does the work here: a non-rendered element
+   generates no box, so the animation never runs and costs nothing.
+   `animation:none` is belt-and-braces only — it keeps the intent
+   legible to anyone reading getComputedStyle, which reports the
+   cascade's animation-name even for a display:none pseudo-element. */
+body.perf .status-dot::after{display:none;animation:none}
+
+/* 30. Hamburger → X. The existing rules rotate the bars; this adds the
+   mid-point squeeze so the two states connect instead of snapping.
+   RM: instant. */
+.hamburger span{transition:transform .32s var(--ease-out),opacity .2s}
+body.reduced .hamburger span{transition:none}
+
+/* ---------- 04 · SCROLL & TRANSITION ---------- */
+
+/* 31. Divider ember trail. Hosted on .section-title, pinned to the
+   crimson rule that .section-title::after draws (64px wide, 18px below
+   the text, 2px tall). --ex places each ember along that span; the
+   embers sit behind the title text (z-index:-1) so they can never
+   occlude a glyph. .section-title needs isolation so -1 stays inside
+   it instead of dropping behind the section background.
+   RM: not created (JS never makes them). Perf: same. */
+.section-title{isolation:isolate}
+.divider-ember{position:absolute;z-index:-1;left:var(--ex,12px);top:100%;
+  margin-top:18px;width:2px;height:2px;border-radius:50%;
+  background:var(--candle);pointer-events:none;opacity:0;
+  animation:divEmber 1.6s ease-out infinite}
+@keyframes divEmber{
+  0%{opacity:0;transform:translateY(0) scale(.6)}
+  20%{opacity:.9}
+  100%{opacity:0;transform:translateY(-22px) scale(.3)}
+}
+body.reduced .divider-ember{display:none}
+body.perf .divider-ember{display:none}
+
+/* 32. Scroll-velocity glitch. Fast scrolling briefly raises the page's
+   glitch intensity — the signal "tears" when you move through it
+   quickly. Applied as a class on <html>; the scanline overlay is what
+   visibly intensifies. RM: never applied. */
+html.scroll-tear .hero-scanlines{opacity:.85}
+html.scroll-tear .section-title{text-shadow:-2px 0 var(--glitch-a),2px 0 var(--glitch-b)}
+.hero-scanlines{transition:opacity .3s}
+.section-title{transition:text-shadow .25s}
+
+/* 33. Sticky section eyebrow. RM: static (no sticky). */
+@media (min-width:861px){
+  .section-eyebrow{position:sticky;top:calc(var(--nav-h) + 14px);z-index:2}
+}
+body.reduced .section-eyebrow{position:static}
+
+/* 35. Card parallax depth. Uses `translate` (the independent property),
+   NOT `transform` — the cards already animate transform on hover, and
+   writing to the same property from two places would make one cancel
+   the other. translate composes with transform instead.
+   RM: --py is never set, so this resolves to 0. */
+[data-scroll-depth]{translate:0 var(--py,0)}
+
+/* 36. Scanline density grows with page depth. RM: constant. */
+.scanline-overlay{position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 4px);
+  opacity:.35;transition:opacity .4s}
+body.reduced .scanline-overlay{opacity:.3}
+
+/* 38. Anchor landing flash. RM: instant jump, no flash. */
+@keyframes landFlash{0%{background:rgba(230,57,88,.10)}100%{background:transparent}}
+.section.landed{animation:landFlash .9s var(--ease-out)}
+body.reduced .section.landed{animation:none}
+
+/* 39. Moon icon rotates with scroll. RM: static. */
+.nav-moon-rot{display:inline-block;transition:transform .3s linear}
+body.reduced .nav-moon-rot{transition:none}
+
+/* 40. Section stamp presses in at 40% viewport. Gated on html.js so a
+   no-JS visitor is never shown an invisible stamp — same contract as
+   .reveal (see html:not(.js) above).
+   The resting state repeats .stamp's own rotate(-3deg) rather than
+   dropping it: stampThunk ends at rotate(-3deg) and animates with
+   `forwards`, so if the base said `none` the stamp would visibly snap
+   upright the instant the animation handed back.
+   RM: shown immediately, no press. Perf: press kept (it is one-shot,
+   not a loop). */
+html.js .stamp-press{opacity:0;transform:scale(1.35) rotate(-6deg);filter:blur(2px)}
+html.js .stamp-press.pressed{animation:stampThunk .5s cubic-bezier(.2,1.4,.4,1) forwards}
+html.js body.reduced .stamp-press{opacity:1;transform:scale(1) rotate(-3deg);filter:none}
+html.js body.reduced .stamp-press.pressed{animation:none}
+
 /* ============ CONTRAST / PRINT ============ */
 @media (prefers-contrast:more){
   :root{--muted:#B9B2C0;--line:rgba(230,57,88,.4);--line-soft:rgba(213,208,214,.2)}

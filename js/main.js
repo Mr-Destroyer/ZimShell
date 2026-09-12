@@ -297,10 +297,40 @@
     const spy = new IntersectionObserver(entries => {
       entries.forEach(e => {
         if (!e.isIntersecting) return;
-        links.forEach(l => l.classList.toggle('is-active', l.getAttribute('href') === '#' + e.target.id));
+        /* Every matching link gets the state, so the mobile menu's copy
+           highlights too. But the shared underline can only sit on a
+           link that is actually laid out: `.nav-links` is display:none
+           below 860px and `.mobile-menu` is display:none above it, so
+           picking the LAST match (which is what this did) always chose
+           the hidden mobile copy, whose offsetParent is null — and
+           moveInd then correctly hid the indicator, on every viewport.
+           Prefer the first *visible* match instead. */
+        let active = null;
+        links.forEach(l => {
+          const on = l.getAttribute('href') === '#' + e.target.id;
+          l.classList.toggle('is-active', on);
+          if (on && !active && l.offsetParent) active = l;
+        });
+        /* 21. slide the shared underline to whichever link won */
+        nav._moveInd && nav._moveInd(active);
       });
     }, { rootMargin: '-40% 0px -55% 0px' });
     sections.forEach(s => spy.observe(s));
+
+    /* 38. Anchor landing flash. The section briefly lifts its own
+       background so the eye can find where it arrived. RM: no flash. */
+    $$('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', () => {
+        const id = a.getAttribute('href').slice(1);
+        const sec = id && document.getElementById(id);
+        if (!sec || state.reduced) return;
+        sec.classList.remove('landed');
+        /* force a reflow so the animation restarts on repeat clicks */
+        void sec.offsetWidth;
+        sec.classList.add('landed');
+        setTimeout(() => sec.classList.remove('landed'), 950);
+      });
+    });
   }
 
   /* ---------- Theme / perf / motion toggles ---------- */
@@ -1280,6 +1310,14 @@
 
   function initScrollFX() {
     const bar = $('#scrollProgress'), top = $('#backTop');
+    const nav = $('#navbar');
+    const scan = initScanlineOverlay();
+    initDividerEmbers();
+    initSectionDepth();
+    initBackTopRing();
+    /* 32. Velocity tracker. Fast scrolling tears the signal; the class
+       clears itself once the wheel stops. RM: never applied. */
+    let lastY = scrollY, lastT = performance.now(), tearTimer = null;
     let raf = null;
     const track = () => {
       raf = null;
@@ -1287,15 +1325,60 @@
       const frac = max > 0 ? scrollY / max : 0;
       if (bar) bar.style.transform = `scaleY(${frac})`;
       if (top) top.classList.toggle('show', scrollY > 600);
+      /* 22. shrink the nav past 80px */
+      if (nav) nav.classList.toggle('shrunk', scrollY > 80);
+      /* 26. progress ring around back-to-top */
+      if (top && top._ring) top._ring(frac);
+      /* 23. section counter */
+      if (nav && nav._counter) nav._counter();
+      /* 39. moon glyph rotation */
+      if (nav && nav._moon) nav._moon(frac);
+      /* 36. scanline density grows with depth */
+      if (scan && !state.perf) scan.style.opacity = (0.28 + frac * 0.22).toFixed(3);
+      /* 32. tear on fast scroll (only when motion is allowed) */
+      if (!state.reduced && !state.perf) {
+        const now = performance.now();
+        const dt = now - lastT;
+        const v = dt > 0 ? Math.abs(scrollY - lastY) / dt : 0;   /* px/ms */
+        lastY = scrollY; lastT = now;
+        if (v > 2.2) {
+          document.documentElement.classList.add('scroll-tear');
+          clearTimeout(tearTimer);
+          tearTimer = setTimeout(() => document.documentElement.classList.remove('scroll-tear'), 180);
+        }
+      }
+      /* 35. card parallax — a small offset per card, capped so nothing
+         drifts more than a few px and text stays put. */
+      if (!state.reduced && !state.perf) {
+        const cards = $$('[data-scroll-depth]');
+        for (let i = 0; i < cards.length; i++) {
+          const c = cards[i];
+          const r = c.getBoundingClientRect();
+          if (r.bottom < -80 || r.top > innerHeight + 80) continue;
+          const d = +c.dataset.scrollDepth || 1;
+          const off = ((r.top + r.height / 2) - innerHeight / 2) / innerHeight;
+          c.style.setProperty('--py', (off * d * 3.5).toFixed(2) + 'px');
+        }
+      }
 
       /* Light the minimap ticks that have been scrolled past (§3.2).
          Compared by offsetTop rather than by index so it stays correct
          regardless of DOM order or how many sections exist. */
       const ticks = $$('.sp-tick');
+      let activeTick = null, bestDist = Infinity;
       for (let i = 0; i < ticks.length; i++) {
         const at = ticks[i].dataset.at;
         const sec = at && document.getElementById(at);
-        ticks[i].classList.toggle('is-passed', !!sec && sec.offsetTop <= scrollY + innerHeight * 0.4);
+        const passed = !!sec && sec.offsetTop <= scrollY + innerHeight * 0.4;
+        ticks[i].classList.toggle('is-passed', passed);
+        /* 25. The tick nearest the reading line is the active one. */
+        if (sec) {
+          const d = Math.abs(sec.offsetTop - (scrollY + innerHeight * 0.4));
+          if (d < bestDist) { bestDist = d; activeTick = ticks[i]; }
+        }
+      }
+      for (let i = 0; i < ticks.length; i++) {
+        ticks[i].classList.toggle('is-active', ticks[i] === activeTick);
       }
       /* §4.1 — heartbeat: when the visitor has scrolled past every
          section into the contact region, the last tick beats. CSS
@@ -1670,6 +1753,16 @@
       t.className = 'sp-tick';
       t.style.top = pct + '%';
       t.dataset.at = s.id;
+      /* 24. Label for the hover tooltip. Taken from the section's own
+         eyebrow (e.g. "ARSENAL // 02") minus the number, falling back
+         to the id. It is a CSS ::after reading data-label, so no extra
+         node per tick. */
+      const eyebrow = $('.section-eyebrow', s);
+      const label = eyebrow
+        ? eyebrow.textContent.replace(/\/\/.*$/, '').trim()
+        : s.id.toUpperCase();
+      t.dataset.label = label;
+      t.setAttribute('aria-hidden', 'true');   /* decorative; nav links carry the real targets */
       host.appendChild(t);
     });
   }
@@ -1725,7 +1818,19 @@
         v.muted = true; v.loop = true; v.autoplay = true;
         v.setAttribute('playsinline', '');
         v.className = old.className;
+        /* Carry the id across. Without this the swap silently removed
+           #heroPortrait / #aboutPortrait from the document, so anything
+           resolving the portrait by id — including the `imgs` lookup at
+           the top of this function on a later call — found nothing. The
+           class was copied but the id was not, which made the element
+           look correct while being unaddressable. */
+        if (old.id) v.id = old.id;
         v.setAttribute('aria-label', old.alt);
+        /* Keep the box identical to the <img> it replaces, so the swap
+           cannot shift layout or start cropping the artwork. */
+        v.style.objectFit = 'contain';
+        if (old.width) v.width = old.width;
+        if (old.height) v.height = old.height;
         ['assets/elias-motion.webm', 'assets/elias-motion.mp4'].forEach(src => {
           const s = document.createElement('source');
           s.src = src; s.type = src.endsWith('.webm') ? 'video/webm' : 'video/mp4';
@@ -2228,6 +2333,150 @@
     dripTimer = setTimeout(drop, 2200);
   }
 
+  /* ---------- 21/23/29 · Nav chrome ----------
+     A single sliding underline, a section counter, and the moon-phase
+     glyph rotation. All three read the same scroll-spy result, so they
+     are driven from one place rather than three observers. */
+  function initNavChrome() {
+    const nav = $('#navbar');
+    const links = $$('.nav-link');
+    const counter = $('#navCounter');
+    const moonGlyph = $('#navMoon');
+    if (!nav || !links.length) return;
+
+    /* 21. The indicator is one element moved to the active link's box.
+       transform+width only — no layout thrash. Hidden when the active
+       link is off-screen (mobile menu collapsed) so it cannot float
+       over unrelated chrome. */
+    let ind = $('.nav-ind', nav);
+    if (!ind) {
+      ind = document.createElement('span');
+      ind.className = 'nav-ind';
+      ind.setAttribute('aria-hidden', 'true');
+      nav.appendChild(ind);
+    }
+    const moveInd = (link) => {
+      if (!link || !link.offsetParent) { ind.classList.remove('on'); return; }
+      const r = link.getBoundingClientRect();
+      const nr = nav.getBoundingClientRect();
+      ind.style.width = r.width + 'px';
+      ind.style.transform = `translate(${r.left - nr.left}px,0)`;
+      ind.classList.add('on');
+    };
+    /* expose for the spy below */
+    nav._moveInd = moveInd;
+
+    /* 23. Section counter — "03/09". RM: static text, no transition. */
+    if (counter) {
+      const secs = $$('section[id]');
+      nav._counter = () => {
+        const mid = scrollY + innerHeight * 0.4;
+        let idx = 0;
+        secs.forEach((s, i) => { if (s.offsetTop <= mid) idx = i; });
+        const total = String(secs.length).padStart(2, '0');
+        counter.innerHTML = `<b>${String(idx + 1).padStart(2, '0')}</b>/${total}`;
+      };
+    }
+
+    /* 39. Moon glyph rotates a full turn across the page. RM: static. */
+    nav._moon = (frac) => {
+      if (!moonGlyph) return;
+      moonGlyph.style.transform = `rotate(${(frac * 360).toFixed(1)}deg)`;
+    };
+  }
+
+  /* ---------- 26 · Back-to-top progress ring ---------- */
+  function initBackTopRing() {
+    const btn = $('#backTop');
+    if (!btn || $('.bt-ring', btn)) return;
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'bt-ring');
+    svg.setAttribute('viewBox', '0 0 56 56');
+    svg.setAttribute('aria-hidden', 'true');
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', '28'); c.setAttribute('cy', '28'); c.setAttribute('r', '26');
+    /* circumference = 2πr; the dash offset is driven from scroll */
+    const CIRC = 2 * Math.PI * 26;
+    c.setAttribute('stroke-dasharray', CIRC.toFixed(2));
+    c.setAttribute('stroke-dashoffset', CIRC.toFixed(2));
+    svg.appendChild(c);
+    btn.appendChild(svg);
+    btn._ring = (frac) => {
+      c.setAttribute('stroke-dashoffset', (CIRC * (1 - frac)).toFixed(2));
+    };
+  }
+
+  /* ---------- 31 · Divider embers ----------
+     Embers drift up off the crimson rule that sits under every section
+     title (`.section-title::after`). That rule IS the page's divider
+     motif, so it is the honest anchor for this — an earlier version
+     queried `.section-divider`, an element that has never existed, and
+     silently did nothing.
+
+     The rule is a pseudo-element and cannot hold children, so the host
+     is the `.section-title` itself; `.divider-ember` is absolutely
+     positioned to sit on the rule (see the CSS). `.section-title`
+     already establishes no stacking context of its own, so the embers
+     are given a low z-index there rather than a wrapper element.
+
+     RM: not created. Perf: not created — this is pure decoration and
+     is the first thing that should go when the visitor asks for less. */
+  function initDividerEmbers() {
+    if (state.reduced || state.perf) return;
+    const hosts = $$('.section-title');
+    if (!hosts.length) return;
+    hosts.forEach(h => {
+      if (h.querySelector('.divider-ember')) return;
+      /* the rule is 64px wide and left-aligned, so the embers are
+         confined to that span via --ex */
+      for (let i = 0; i < 3; i++) {
+        const e = document.createElement('span');
+        e.className = 'divider-ember';
+        e.setAttribute('aria-hidden', 'true');
+        e.style.setProperty('--ex', (6 + Math.random() * 52).toFixed(1) + 'px');
+        e.style.animationDelay = (Math.random() * 2.2).toFixed(2) + 's';
+        e.style.animationDuration = (1.3 + Math.random() * 0.9).toFixed(2) + 's';
+        h.appendChild(e);
+      }
+    });
+  }
+
+  /* ---------- 36 · Scanline overlay ----------
+     One fixed overlay for the whole page, its density raised with depth.
+     RM: constant opacity, and it stays (it is texture, not motion). */
+  function initScanlineOverlay() {
+    if ($('.scanline-overlay')) return;
+    const el = document.createElement('div');
+    el.className = 'scanline-overlay';
+    el.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(el);
+    return el;
+  }
+
+  /* ---------- 33/35/40 · Section depth effects ----------
+     Sticky eyebrows are CSS. This handles the per-section parallax and
+     the stamp press, both driven from one rAF. RM: neither runs. */
+  function initSectionDepth() {
+    const secs = $$('section[id]');
+    secs.forEach(s => {
+      /* 35. opt cards into a small parallax */
+      $$('.project-card, .skill-card, .tl-item', s).forEach((c, i) => {
+        c.dataset.scrollDepth = String((i % 3) + 1);
+      });
+    });
+    /* 40. stamps press when their section reaches 40% of the viewport */
+    const stamps = $$('.stamp-press');
+    if (stamps.length) {
+      const io = new IntersectionObserver(es => {
+        es.forEach(e => {
+          if (e.isIntersecting) { e.target.classList.add('pressed'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -60% 0px' });
+      stamps.forEach(s => io.observe(s));
+    }
+  }
+
   /* ---------- Boot ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('no-scroll');
@@ -2250,6 +2499,15 @@
     initTerminal();
     spawnBats();
     initPointerFX();
+    /* 21/38. initNav() owns the hamburger, the scroll-spy that sets
+       .is-active, and the anchor landing flash. It had been defined but
+       never called since commit 3542ac0 — so the mobile menu never
+       opened and no link was ever marked active. It must run BEFORE
+       initNavChrome(), which publishes nav._moveInd for the spy to use;
+       the spy is guarded (`nav._moveInd && …`) so an order slip would
+       degrade silently rather than throw. */
+    initNav();
+    initNavChrome();
     initScrollFX();
     initTyped();
     initForm();

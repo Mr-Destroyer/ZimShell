@@ -97,8 +97,14 @@
 <header class="nav" id="navbar">
   <div class="nav-inner">
     <a href="#home" class="nav-brand" aria-label="Home — Nightfall Protocol">
-      <svg class="crescent" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 3.2A9.6 9.6 0 1 0 20.8 14 7.6 7.6 0 0 1 16.6 3.2Z" fill="currentColor"/></svg>
+      <!-- #39 — this crescent rotates one full turn across the page.
+           It is the moon; the page is the cycle. Decorative only. -->
+      <svg class="crescent nav-moon-rot" id="navMoon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.6 3.2A9.6 9.6 0 1 0 20.8 14 7.6 7.6 0 0 1 16.6 3.2Z" fill="currentColor"/></svg>
       <span class="brand-name">NIGHTFALL</span>
+      <!-- #23 — section counter, written by initNavChrome(). aria-hidden
+           because the same position is already conveyed by the active
+           nav link and the minimap; announcing it would be noise. -->
+      <span class="nav-counter" id="navCounter" aria-hidden="true"></span>
     </a>
     <nav class="nav-links" id="navLinks" aria-label="Primary">
       <a href="#home" class="nav-link is-active">Home</a>
@@ -198,7 +204,7 @@
            rather than a hero banner: it should read like the cover page
            of a file someone pulled from an archive. -->
       <div class="dossier-head" id="dossierHead">
-        <span class="stamp" id="dossierStamp">Classified — Dossier #001</span>
+        <span class="stamp stamp-press" id="dossierStamp">Classified — Dossier #001</span>
         <dl class="dossier-meta mono" id="dossierMeta"></dl>
       </div>
     </div>
@@ -322,7 +328,7 @@
     </div>
     <div class="ethics-grid">
       <div class="ethics-lead reveal">
-        <span class="stamp" id="ethicsStamp">AUTHORIZED SCOPE ONLY</span>
+        <span class="stamp stamp-press" id="ethicsStamp">AUTHORIZED SCOPE ONLY</span>
         <p class="ethics-lead-text" id="ethicsLead"></p>
         <p class="ethics-close mono" id="ethicsClose"></p>
       </div>
