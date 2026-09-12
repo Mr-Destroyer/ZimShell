@@ -68,32 +68,94 @@
     /* sessionStorage, not localStorage — full boot once per session */
     let seen = false;
     try { seen = sessionStorage.getItem('nf_booted') === '1'; } catch {}
-    if (seen) return finishLoader();
+    /* 10. Return-visitor fast path. A visitor reloading inside the same
+       session has already watched the boot, so they get a short glitch
+       flash instead of the full typewriter — well under 2s. Previously
+       this skipped the loader outright, which lost the transition beat
+       and made a reload feel like a hard cut. RM: reduced motion
+       returned above, so this path never runs for those visitors. */
+    if (seen) {
+      const flash = document.createElement('div');
+      flash.className = 'loader-flash';
+      loader.appendChild(flash);
+      requestAnimationFrame(() => flash.classList.add('go'));
+      return setTimeout(finishLoader, 400);
+    }
     try { sessionStorage.setItem('nf_booted', '1'); } catch {}
 
     const lines = $('#loaderLines'), bar = $('#loaderBar'), skip = $('#skipIntro');
     const seq = D.BOOT_LINES || [];
     let done = false, i = 0;
     const finish = () => { if (done) return; done = true; finishLoader(); };
+
+    /* 6. One bright scanline sweeps the loader. RM: CSS hides it. */
+    if (!state.reduced) {
+      const sweep = document.createElement('div');
+      sweep.className = 'loader-sweep';
+      sweep.setAttribute('aria-hidden', 'true');
+      loader.appendChild(sweep);
+      setTimeout(() => sweep.remove(), 2200);
+    }
+    /* 7 + 8 — the hex column and the checklist. */
+    initLoaderHex();
+    spawnBootChecks();
+
+    /* 2. Per-character typing with variable latency, replacing the old
+       fixed 380ms-per-line beat. Two things make it read as a real
+       terminal rather than a metronome:
+         · per-char delay jitters between 8 and 22ms
+         · punctuation adds a pause, because a shell does not print a
+           full stop any faster than a letter
+       RM: the whole line is written at once instead. */
+    const typeLine = (div, text, onDone) => {
+      if (state.reduced) { div.textContent = '> ' + text; onDone(); return; }
+      let k = 0;
+      const step = () => {
+        if (done) return;
+        div.textContent = '> ' + text.slice(0, ++k);
+        if (k >= text.length) return onDone();
+        const ch = text[k - 1];
+        const pause = /[.:!?]/.test(ch) ? 90 + Math.random() * 90
+          : /[,;]/.test(ch) ? 40 + Math.random() * 40
+            : 8 + Math.random() * 14;
+        setTimeout(step, pause);
+      };
+      step();
+    };
+
     const tick = () => {
       if (done) return;
       if (i < seq.length) {
+        const raw = seq[i];
         const div = document.createElement('div');
-        div.className = 'll' + (seq[i].includes('GRANTED') ? ' ok' : '');
-        div.textContent = '> ' + seq[i];
+        div.className = 'll' + (raw.includes('GRANTED') ? ' ok' : '');
         lines.appendChild(div);
         requestAnimationFrame(() => div.classList.add('on'));
-        if (bar) bar.style.width = Math.round(((i + 1) / seq.length) * 100) + '%';
-        /* occasional glitch-flash between lines, reusing the RGB-split
-           text-shadow trick from the motif vocabulary. Fires on roughly
-           one line in three so it reads as unstable signal, not as a
-           broken animation. */
-        if (i > 0 && Math.random() < 0.34) {
-          div.classList.add('glitch-once');
-          setTimeout(() => div.classList.remove('glitch-once'), 520);
-        }
         i++;
-        setTimeout(tick, 380);
+        typeLine(div, raw, () => {
+          if (done) return;
+          if (bar) bar.style.width = Math.round((i / seq.length) * 100) + '%';
+          /* 3. sparks trailing the fill edge */
+          spawnBarSparks(bar);
+          /* 4. The GRANTED line earns a stamp, not just a colour change. */
+          if (raw.includes('GRANTED') && !state.reduced && !$('.loader-stamp')) {
+            const st = document.createElement('div');
+            st.className = 'loader-stamp';
+            st.setAttribute('aria-hidden', 'true');
+            st.textContent = 'ACCESS GRANTED';
+            $('.loader-terminal').appendChild(st);
+          }
+          /* occasional glitch-flash between lines, reusing the RGB-split
+             text-shadow trick from the motif vocabulary. Fires on roughly
+             one line in three so it reads as unstable signal, not as a
+             broken animation. */
+          if (Math.random() < 0.34) {
+            div.classList.add('glitch-once');
+            setTimeout(() => div.classList.remove('glitch-once'), 520);
+          }
+          /* a short beat between lines, so they do not run together */
+          setTimeout(tick, 150 + Math.random() * 120);
+        });
       } else {
         /* final beat: crimson flash to black, then reveal the hero */
         const flash = document.createElement('div');
@@ -105,16 +167,28 @@
     };
     skip.addEventListener('click', finish);
     setTimeout(tick, 260);
-    /* Hard cap, derived from the actual line count rather than a magic
-       number: at 380ms/line a longer BOOT_LINES list would otherwise
-       outrun a fixed timeout and get cut off mid-sentence. The +900ms
-       covers the flash beat. Whichever comes first wins — the user is
-       never trapped behind the intro. */
-    setTimeout(finish, 260 + seq.length * 380 + 900);
+    /* Hard cap — a SAFETY NET, not the normal ending. The animation
+       decides when it finishes; this only exists so a stalled timer or
+       a throttled background tab can never trap a visitor behind the
+       loader. It is therefore deliberately generous: the worst-case
+       per-char delay is ~22ms plus a punctuation pause, so the budget
+       is computed at the slow end (45ms/char) with slack on top. An
+       earlier, tighter budget expired before the last line finished
+       typing, set `done`, and silently swallowed the ACCESS GRANTED
+       stamp with it. */
+    const chars = seq.reduce((n, s) => n + s.length, 0);
+    setTimeout(finish, 260 + chars * 45 + seq.length * 400 + 2500);
   }
   function finishLoader() {
     const loader = $('#loader');
-    if (loader) { loader.classList.add('done'); setTimeout(() => loader.remove(), 900); }
+    if (loader) {
+      /* 9. Curtain up — the clip-path wipe replaces the plain fade when
+         motion is allowed. RM: .curtain is never added, so the existing
+         opacity transition on .done does the whole job. */
+      if (!state.reduced) loader.classList.add('curtain');
+      loader.classList.add('done');
+      setTimeout(() => loader.remove(), 900);
+    }
     document.body.classList.remove('no-scroll');
     /* one-time hero glitch reveal — fires when the loader clears */
     const h1 = $('.hero-title');
@@ -122,6 +196,89 @@
       h1.classList.add('glitch-once');
       setTimeout(() => h1.classList.remove('glitch-once'), 560);
     }
+    /* 11. …and the RGB-split line reveal rides the same beat. */
+    if (h1 && !state.reduced) {
+      h1.classList.add('split-in');
+      setTimeout(() => h1.classList.remove('split-in'), 1100);
+    }
+    /* 12/16/20 — hero ambience starts only once the loader is gone, so
+       nothing animates behind a curtain the visitor cannot see. */
+    initEmberField();
+    initBloodDrip();
+    const glow = $('#heroGlow');
+    if (glow && !state.reduced && !state.perf) glow.classList.add('beating');
+  }
+
+  /* ---------- 7. Hex-dump column ----------
+     A rolling column of pseudo-random hex beside the boot log. It is
+     generated from Math.random(), NOT from any real data — decoration
+     that reads as a memory dump. RM: never created. */
+  function initLoaderHex() {
+    if (state.reduced) return;
+    const term = $('.loader-terminal');
+    if (!term || $('.loader-hex')) return;
+    const col = document.createElement('div');
+    col.className = 'loader-hex';
+    col.setAttribute('aria-hidden', 'true');
+    term.appendChild(col);
+    const hexRow = () => {
+      let s = '';
+      for (let i = 0; i < 4; i++) {
+        s += Math.floor(Math.random() * 0xffff).toString(16).padStart(4, '0') + ' ';
+      }
+      return s.trim() + '\n';
+    };
+    /* Fill past the mask, then drop the top line each beat so the column
+       appears to scroll. textContent, not innerHTML — no parse cost. */
+    let buf = '';
+    for (let i = 0; i < 14; i++) buf += hexRow();
+    col.textContent = buf;
+    const iv = setInterval(() => {
+      buf = buf.split('\n').slice(1).join('\n') + '\n' + hexRow();
+      col.textContent = buf;
+    }, 190);
+    /* The loader removes itself; stop the interval with it rather than
+       leaving a timer running for the life of the page. */
+    setTimeout(() => clearInterval(iv), 14000);
+  }
+
+  /* ---------- 3. Ember sparks on the boot bar ----------
+     Spawned at the fill edge as the bar advances. RM: not created. */
+  function spawnBarSparks(bar) {
+    if (state.reduced || !bar) return;
+    const fill = $('#loaderBar');
+    if (!fill) return;
+    const pct = parseFloat(fill.style.width) || 0;
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement('span');
+      s.className = 'bar-spark';
+      /* CSSOM custom property, not a style attribute — CSP permits this
+         (style-src-attr governs attributes; setProperty does not). */
+      s.style.setProperty('--sx', (Math.random() * 22 - 11).toFixed(1) + 'px');
+      s.style.left = pct + '%';
+      s.style.animationDelay = (i * 70) + 'ms';
+      bar.appendChild(s);
+      setTimeout(() => s.remove(), 900);
+    }
+  }
+
+  /* ---------- 8. Boot checklist ----------
+     A short fixed list appended under the boot log. RM: all ticks render
+     at once, no pop. */
+  function spawnBootChecks() {
+    const term = $('.loader-terminal');
+    if (!term || $('.loader-check')) return;
+    const items = ['KERNEL', 'INTERFACE', 'TELEMETRY'];
+    const box = document.createElement('div');
+    box.setAttribute('aria-hidden', 'true');
+    items.forEach((label, i) => {
+      const row = document.createElement('div');
+      row.className = 'loader-check';
+      row.style.animationDelay = state.reduced ? '0ms' : (i * 110 + 'ms');
+      row.innerHTML = '<b>✓</b><span>' + esc(label) + ' ONLINE</span>';
+      box.appendChild(row);
+    });
+    term.appendChild(box);
   }
 
   /* ---------- Navigation ---------- */
@@ -1046,7 +1203,11 @@
        already skips reduced motion and coarse pointers) and never
        applied to keyboard focus, which uses the normal focus ring. */
     if (!state.perf) {
+      /* 18. Magnetic nav links join the hero CTAs. Deliberately weaker
+         (4px vs 7px) — a nav bar that lunges at the cursor would fight
+         the reading, where a CTA leaning is an invitation. */
       const magnets = $$('.hero-cta .btn');
+      const navMagnets = $$('.nav-links a');
       magnets.forEach(btn => btn.classList.add('magnetic'));
       const pull = () => {
         magnets.forEach(btn => {
@@ -1065,6 +1226,27 @@
       };
       hero && hero.addEventListener('pointermove', () => { if (!magnetRaf) magnetRaf = requestAnimationFrame(() => { magnetRaf = null; pull(); }); }, { passive: true });
       hero && hero.addEventListener('pointerleave', () => { magnets.forEach(b => { b.style.translate = ''; }); });
+
+      /* 18. Nav links: same pull, tighter radius (70px) and smaller
+         throw (4px) so the bar stays legible while still feeling
+         physical. Bound to the nav element, not the document, so
+         pointer movement anywhere else costs nothing. */
+      const nav = $('#navbar');
+      let navRaf = null;
+      const navPull = () => {
+        navRaf = null;
+        navMagnets.forEach(a => {
+          const r = a.getBoundingClientRect();
+          const dx = px - (r.left + r.width / 2), dy = py - (r.top + r.height / 2);
+          const dist = Math.hypot(dx, dy);
+          if (dist < 70 && dist > 0) {
+            const f = (1 - dist / 70) * 4;
+            a.style.translate = (dx / dist) * f + 'px ' + (dy / dist) * f + 'px';
+          } else a.style.translate = '';
+        });
+      };
+      nav && nav.addEventListener('pointermove', () => { if (!navRaf) navRaf = requestAnimationFrame(navPull); }, { passive: true });
+      nav && nav.addEventListener('pointerleave', () => { navMagnets.forEach(a => { a.style.translate = ''; }); });
     }
 
     /* --- Cursor ring: a lagging outline that trails the pointer.
@@ -1903,6 +2085,149 @@
     });
   }
 
+  /* ---------- 16. Hero ember field ----------
+     Canvas embers rising with a sine sway. Canvas rather than DOM
+     because 24 independently-animated nodes is exactly the case where
+     the compositor stops helping and layout thrash starts.
+
+     Budget: 24 embers, one rAF loop, DPR-capped at 2. It is created
+     only after the loader clears, and destroyed outright under
+     reduced-motion or performance mode (checked here AND in CSS, so a
+     mode toggle mid-session is honoured — see initToggles' hook).
+     RM: never created; the existing CSS .loader-embers remain. */
+  let emberRaf = null;
+  function initEmberField() {
+    if (state.reduced || state.perf) return;
+    const hero = $('#home');
+    if (!hero || $('#emberField')) return;
+    const cv = document.createElement('canvas');
+    cv.id = 'emberField';
+    cv.setAttribute('aria-hidden', 'true');
+    const bg = $('.hero-bg', hero);
+    (bg || hero).appendChild(cv);
+
+    const cx = cv.getContext('2d');
+    if (!cx) { cv.remove(); return; }
+    const DPR = Math.min(2, devicePixelRatio || 1);
+    let w = 0, h = 0;
+    const resize = () => {
+      const r = hero.getBoundingClientRect();
+      w = r.width; h = r.height;
+      cv.width = Math.round(w * DPR);
+      cv.height = Math.round(h * DPR);
+      cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    };
+    resize();
+
+    const N = 24;
+    const mk = (initial) => ({
+      x: Math.random() * w,
+      /* start below the fold on first paint so they drift up into view */
+      y: initial ? h + Math.random() * h : h + Math.random() * 40,
+      r: 0.6 + Math.random() * 1.5,
+      vy: 0.18 + Math.random() * 0.42,
+      amp: 6 + Math.random() * 16,
+      ph: Math.random() * Math.PI * 2,
+      sp: 0.004 + Math.random() * 0.008,
+      a: 0.25 + Math.random() * 0.5
+    });
+    const ps = Array.from({ length: N }, () => mk(true));
+
+    const step = () => {
+      if (state.reduced || state.perf) { cv.remove(); emberRaf = null; return; }
+      cx.clearRect(0, 0, w, h);
+      for (let i = 0; i < ps.length; i++) {
+        const p = ps[i];
+        p.y -= p.vy;
+        p.ph += p.sp;
+        const x = p.x + Math.sin(p.ph) * p.amp;
+        /* recycle once past the top */
+        if (p.y < -12) { ps[i] = mk(false); continue; }
+        /* fade in near the bottom edge so nothing pops into existence */
+        const fade = Math.min(1, (h - p.y) / 120);
+        cx.globalAlpha = p.a * fade;
+        cx.fillStyle = '#E39B5A';
+        cx.beginPath();
+        cx.arc(x, p.y, p.r, 0, Math.PI * 2);
+        cx.fill();
+      }
+      cx.globalAlpha = 1;
+      emberRaf = requestAnimationFrame(step);
+    };
+    emberRaf = requestAnimationFrame(step);
+    addEventListener('resize', () => { if (emberRaf) resize(); }, { passive: true });
+  }
+
+  /* ---------- 11. Title line split ----------
+     Wraps the h1's two sentences in .ht-line spans so they can be
+     revealed on separate beats. Done in JS rather than markup so the
+     heading keeps its plain semantic text: a screen reader still gets
+     one uninterrupted sentence, and a no-JS visitor sees the h1 as
+     written. Idempotent — the guard stops a second call from wrapping
+     the wrappers. RM: the spans are inert without .split-in. */
+  function initHeroTitle() {
+    const h1 = $('.hero-title');
+    if (!h1 || $('.ht-line', h1)) return;
+    /* Split at the crimson word, not at a sentence boundary. An earlier
+       version looked for a capital letter starting a new sentence and
+       silently did nothing here, because the second sentence begins
+       "in the dark." — lowercase. Keying off the .blood element is
+       deterministic and matches the design intent: the crimson word
+       ends the first line. If that span is ever removed from the
+       markup the split simply does not happen, which is the correct
+       failure mode — no half-wrapped heading. */
+    const blood = $('.blood', h1);
+    if (!blood) return;
+    const nodes = [...h1.childNodes];
+    const cut = nodes.indexOf(blood);
+    if (cut < 0 || cut === nodes.length - 1) return;   /* nothing after it */
+    const first = nodes.slice(0, cut + 1);
+    const rest = nodes.slice(cut + 1);
+    /* The whitespace after the span is deliberately NOT stripped.
+       .ht-line is display:block, so CSS already collapses leading
+       whitespace at the start of the line box — rendering is identical
+       either way, but the underlying text keeps its space. An earlier
+       version trimmed it, which made textContent read
+       "vulnerabilitiesin the dark." and broke both copy-paste and what
+       a screen reader announces. */
+    h1.textContent = '';
+    [first, rest].forEach((group) => {
+      const line = document.createElement('span');
+      line.className = 'ht-line';
+      group.forEach(n => line.appendChild(n));
+      h1.appendChild(line);
+    });
+  }
+
+  /* ---------- 12. Blood drip ----------
+     One droplet forms at the title's baseline and falls. Rate-limited
+     to at most one per 30s so it stays an event, not a leak. RM: never
+     created. */
+  let dripTimer = null;
+  function initBloodDrip() {
+    if (state.reduced || state.perf) return;
+    const title = $('.hero-title');
+    if (!title) return;
+    const drop = () => {
+      if (state.reduced || state.perf) return;
+      /* Anchor under the crimson word, so the blood appears to come
+         from the word that means it. Falls back to the title itself. */
+      const blood = $('.blood', title) || title;
+      const tr = title.getBoundingClientRect();
+      const br = blood.getBoundingClientRect();
+      const el = document.createElement('span');
+      el.className = 'blood-drip';
+      el.setAttribute('aria-hidden', 'true');
+      el.style.left = (br.left - tr.left + br.width * (0.3 + Math.random() * 0.4)).toFixed(1) + 'px';
+      el.style.top = (br.bottom - tr.top - 2).toFixed(1) + 'px';
+      title.appendChild(el);
+      setTimeout(() => el.remove(), 1700);
+      dripTimer = setTimeout(drop, 30000);
+    };
+    /* First drip a beat after the loader clears, then every 30s. */
+    dripTimer = setTimeout(drop, 2200);
+  }
+
   /* ---------- Boot ---------- */
   document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('no-scroll');
@@ -1932,6 +2257,9 @@
     initModal();
     initEasterEggs();
     initReveal();
+    /* before initLoader — finishLoader() adds .split-in, so the
+       .ht-line spans must already exist when it fires */
+    initHeroTitle();
     initLoader();
   });
 })();

@@ -861,6 +861,192 @@ body.perf .hero-grid{background-size:112px 112px}
 body.perf .stars-low{display:none}
 body.perf .wavebars i{animation:none}
 
+/* ============================================================
+   ROUND TWO — MOTION REGISTER (docs/MOTION.md)
+   Every rule below states its reduced-motion fallback inline as `RM:`.
+   Nothing here animates layout properties; transform/opacity/
+   stroke-dashoffset/filter only, so the compositor does the work.
+   ============================================================ */
+
+/* ---------- 01 · BOOT & LOADER ---------- */
+
+/* 1. CRT power-on. The loader's whole content is revealed by a single
+   expanding band rather than per-element.
+   RM: the animations are killed below, so the loader simply appears. */
+#loader .loader-scene,#loader .loader-terminal,#loader .loader-skip{
+  animation:crtOn .5s var(--ease-out) both;
+}
+@keyframes crtOn{
+  0%{opacity:0;transform:scaleY(.02) scaleX(1.06)}
+  38%{opacity:1;transform:scaleY(.06) scaleX(1.02)}
+  100%{opacity:1;transform:none}
+}
+/* the white flash that rides the power-on */
+#loader::after{
+  content:'';position:absolute;inset:0;z-index:4;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.9),transparent 62%);
+  opacity:0;animation:crtFlash .5s ease-out both;
+}
+@keyframes crtFlash{0%{opacity:.75}22%{opacity:.28}100%{opacity:0}}
+/* RM: no power-on, no flash — both animations are killed and the
+   overlay is removed. */
+body.reduced #loader .loader-scene,body.reduced #loader .loader-terminal,
+body.reduced #loader .loader-skip{animation:none}
+body.reduced #loader::after{display:none}
+
+/* 3. Ember sparks trailing the boot bar's fill edge. Decorative children
+   appended by main.js. RM: not created at all. */
+.bar-spark{position:absolute;top:50%;width:2px;height:2px;border-radius:50%;
+  background:var(--candle);pointer-events:none;opacity:0;
+  animation:sparkFly .7s ease-out forwards}
+@keyframes sparkFly{
+  0%{opacity:.95;transform:translate(0,-50%) scale(1)}
+  100%{opacity:0;transform:translate(var(--sx,10px),calc(-50% - 16px)) scale(.4)}
+}
+/* the bar needs a positioning context for the sparks */
+.loader-bar{position:relative}
+
+/* 4. ACCESS GRANTED stamp thunk. RM: shown flat, no scale/rotate. */
+.loader-stamp{
+  font-family:var(--mono);font-size:11px;letter-spacing:.34em;color:var(--red);
+  border:1px solid var(--line);border-radius:4px;padding:6px 12px;
+  margin-top:14px;display:inline-block;opacity:0;
+  transform:scale(1.6) rotate(-8deg);
+  animation:stampThunk .42s cubic-bezier(.2,1.5,.4,1) .1s forwards;
+}
+@keyframes stampThunk{
+  0%{opacity:0;transform:scale(1.6) rotate(-8deg);filter:blur(3px)}
+  60%{opacity:1;transform:scale(.97) rotate(-3deg);filter:blur(0)}
+  100%{opacity:1;transform:scale(1) rotate(-3deg)}
+}
+body.reduced .loader-stamp{animation:none;opacity:1;transform:rotate(-3deg);filter:none}
+
+/* 6. One bright scanline sweeps the loader. RM: removed. */
+.loader-sweep{
+  position:absolute;left:0;right:0;height:2px;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(230,57,88,.85),transparent);
+  box-shadow:0 0 18px rgba(230,57,88,.6);opacity:0;
+  animation:sweepDown 1.5s var(--ease-in-out) .35s;
+}
+@keyframes sweepDown{
+  0%{opacity:0;transform:translateY(-10vh)}
+  12%{opacity:.9}
+  88%{opacity:.9}
+  100%{opacity:0;transform:translateY(110vh)}
+}
+body.reduced .loader-sweep{display:none}
+
+/* 7. Hex-dump column beside the boot log. RM: hidden (it is ambience). */
+.loader-hex{
+  position:absolute;top:0;bottom:0;right:-96px;width:84px;overflow:hidden;
+  font-family:var(--mono);font-size:9px;line-height:1.55;color:rgba(230,57,88,.28);
+  white-space:pre;pointer-events:none;text-align:right;
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 22%,#000 78%,transparent);
+}
+.loader-terminal{position:relative}
+body.reduced .loader-hex{display:none}
+@media (max-width:760px){.loader-hex{display:none}}
+
+/* 8. Boot checklist ticks. RM: all shown at once. */
+.loader-check{display:flex;gap:9px;align-items:center;margin-top:10px;
+  font-family:var(--mono);font-size:10px;color:var(--muted);opacity:0;
+  animation:checkPop .3s var(--ease-out) forwards}
+.loader-check b{color:var(--ok);font-weight:400}
+@keyframes checkPop{from{opacity:0;transform:translateX(-6px)}to{opacity:1;transform:none}}
+body.reduced .loader-check{animation:none;opacity:1}
+
+/* 9. Loader exit — clip-path curtain up. Replaces the plain fade when
+   motion is allowed. RM: the plain opacity fade (.done) still applies. */
+#loader.curtain{animation:curtainUp .72s var(--ease-in-out) forwards}
+@keyframes curtainUp{
+  0%{clip-path:inset(0 0 0 0)}
+  100%{clip-path:inset(0 0 100% 0)}
+}
+
+/* ---------- 02 · HERO ---------- */
+
+/* 11. Title one-time RGB-split reveal. Complements the existing
+   .glitch-once by animating the lines in rather than flashing them.
+   RM: plain fade-up (the .reveal path already in place). */
+.hero-title .ht-line{display:block}
+.hero-title.split-in .ht-line{
+  animation:htSplit .78s var(--ease-out) both;
+}
+.hero-title.split-in .ht-line:nth-child(2){animation-delay:.09s}
+@keyframes htSplit{
+  0%{opacity:0;transform:translateY(14px);
+     text-shadow:-6px 0 var(--glitch-a),6px 0 var(--glitch-b)}
+  55%{opacity:1;transform:none;
+     text-shadow:-2px 0 var(--glitch-a),2px 0 var(--glitch-b)}
+  100%{opacity:1;transform:none;text-shadow:none}
+}
+body.reduced .hero-title.split-in .ht-line{animation:none}
+
+/* 12. Blood drip from the title baseline. RM: not created. */
+.blood-drip{
+  position:absolute;width:3px;height:3px;border-radius:0 0 50% 50%;
+  background:var(--red);pointer-events:none;opacity:0;
+  box-shadow:0 0 6px rgba(230,57,88,.8);
+  animation:dripFall 1.5s cubic-bezier(.5,0,.9,.4) forwards;
+}
+@keyframes dripFall{
+  0%{opacity:0;transform:translateY(0) scaleY(.6)}
+  12%{opacity:1;transform:translateY(0) scaleY(1.4)}
+  100%{opacity:0;transform:translateY(46px) scaleY(2.6)}
+}
+/* the title needs a positioning context for drips */
+.hero-title{position:relative}
+body.reduced .blood-drip{display:none}
+
+/* 13. Portrait breathing. Very small — 0.8% reads as alive, 2% reads as
+   a bouncing image. RM: none. */
+.profile-card{animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.008)}}
+body.reduced .profile-card{animation:none}
+body.perf .profile-card{animation:none}
+
+/* 14. Portrait scanline drift. RM: static overlay. */
+.profile-card::after{
+  content:'';position:absolute;inset:0;border-radius:20px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);
+  opacity:.5;animation:scanDrift 7s linear infinite;
+}
+@keyframes scanDrift{to{transform:translateY(3px)}}
+body.reduced .profile-card::after{animation:none}
+body.perf .profile-card::after{display:none}
+
+/* 17. Vignette breathe. RM: static. */
+.hero-vignette{animation:vigBreathe 8s ease-in-out infinite}
+@keyframes vigBreathe{0%,100%{opacity:.55}50%{opacity:.75}}
+body.reduced .hero-vignette{animation:none;opacity:.65}
+body.perf .hero-vignette{animation:none}
+
+/* 19. Bat wing-flap. The existing spawnBats() positions them; this adds
+   the flap so a bat reads as a bat rather than a drifting triangle.
+   RM: bats are not spawned (existing behaviour). */
+.bat svg{transform-origin:50% 50%;animation:flap .32s ease-in-out infinite alternate}
+@keyframes flap{from{transform:scaleY(1)}to{transform:scaleY(.62)}}
+body.reduced .bat svg{animation:none}
+body.perf .bat svg{animation:none}
+
+/* 20. Hero glow heartbeat — a double beat, like a pulse, not a sine.
+   RM: static glow. */
+#heroGlow.beating{animation:heartbeat 4s ease-in-out infinite}
+@keyframes heartbeat{
+  0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(1)}
+  8%{opacity:.9;transform:translate(-50%,-50%) scale(1.05)}
+  16%{opacity:.6;transform:translate(-50%,-50%) scale(1)}
+  24%{opacity:.85;transform:translate(-50%,-50%) scale(1.03)}
+  32%{opacity:.55;transform:translate(-50%,-50%) scale(1)}
+}
+body.reduced #heroGlow.beating{animation:none}
+
+/* 16. Ember field canvas (hero). RM: not created; the CSS embers that
+   already exist keep working. */
+#emberField{position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.75}
+body.reduced #emberField,body.perf #emberField{display:none}
+
 /* ============ CONTRAST / PRINT ============ */
 @media (prefers-contrast:more){
   :root{--muted:#B9B2C0;--line:rgba(230,57,88,.4);--line-soft:rgba(213,208,214,.2)}
